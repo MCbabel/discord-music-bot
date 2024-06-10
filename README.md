@@ -2,6 +2,19 @@
 
 Welcome to the Discord Music Bot repository! This bot is a powerful, feature-rich music bot built with Python and `discord.py`, offering seamless integration with YouTube and Spotify. This project was created with the assistance of ChatGPT to demonstrate the capabilities of AI-driven development.
 
+## Table of Contents
+1. [Features](#features)
+2. [Commands](#commands)
+3. [Installation](#installation)
+    - [Option 1: Clone the repository](#option-1-clone-the-repository)
+    - [Option 2: Use the setup installer](#option-2-use-the-setup-installer)
+4. [Getting Spotify Credentials](#getting-spotify-credentials)
+5. [Discord Bot Permissions](#discord-bot-permissions)
+    - [Required Permissions](#required-permissions)
+6. [Contributing](#contributing)
+7. [License](#license)
+8. [Acknowledgements](#acknowledgements)
+
 ## Features
 
 - **YouTube Playback**: Play your favorite tracks directly from YouTube.
