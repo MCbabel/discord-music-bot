@@ -49,11 +49,15 @@ You have two options to set up the Discord Music Bot: cloning the repository or 
     cd discord-music-bot
     ```
 
+    ![Clone Repository](placeholder-image-url)
+
 2. **Install the required dependencies:**
 
     ```sh
     pip install -r requirements.txt
     ```
+
+    ![Install Dependencies](placeholder-image-url)
 
 3. **Set up your environment variables:**
 
@@ -65,11 +69,15 @@ You have two options to set up the Discord Music Bot: cloning the repository or 
     SPOTIFY_CLIENT_SECRET=your_spotify_client_secret
     ```
 
+    ![Environment Variables](placeholder-image-url)
+
 4. **Run the bot:**
 
     ```sh
     python bot.py
     ```
+
+    ![Run Bot](placeholder-image-url)
 
 ### Option 2: Use the setup installer
 
@@ -97,18 +105,26 @@ To integrate Spotify, you need to obtain a Client ID and Client Secret from the 
    - Go to the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard/login).
    - Log in with your Spotify account or create a new account.
 
+    ![Spotify Developer Account](placeholder-image-url)
+
 2. **Create an App:**
    - Click on "Create an App".
    - Fill in the required details like App name and description.
    - Agree to the terms and conditions and click "Create".
 
+    ![Create App](placeholder-image-url)
+
 3. **Retrieve Your Credentials:**
    - Once your app is created, you will be redirected to the app dashboard.
    - Here, you can find your Client ID and Client Secret. Copy these values.
 
+    ![Retrieve Credentials](placeholder-image-url)
+
 4. **Add Redirect URI:**
    - Click on "Edit Settings" in your app dashboard.
    - Under "Redirect URIs", add `http://localhost:8888/callback` and save.
+
+    ![Add Redirect URI](placeholder-image-url)
 
 5. **Add Credentials to .env File:**
    - Update your `.env` file with the obtained credentials.
@@ -118,6 +134,8 @@ To integrate Spotify, you need to obtain a Client ID and Client Secret from the 
     SPOTIFY_CLIENT_ID=your_spotify_client_id
     SPOTIFY_CLIENT_SECRET=your_spotify_client_secret
     ```
+
+    ![Add to .env](placeholder-image-url)
 
 ## Discord Bot Permissions
 
