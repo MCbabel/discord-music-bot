@@ -25,10 +25,14 @@ Welcome to the Discord Music Bot repository! This bot is a powerful, feature-ric
 
 ## Installation
 
+You have two options to set up the Discord Music Bot: cloning the repository or using the provided setup installer.
+
+### Option 1: Clone the repository
+
 1. **Clone the repository:**
 
     ```sh
-    git clone https://github.com/your-username/discord-music-bot.git
+    git clone https://github.com/MCbabel/discord-music-bot.git
     cd discord-music-bot
     ```
 
@@ -54,9 +58,28 @@ Welcome to the Discord Music Bot repository! This bot is a powerful, feature-ric
     python bot.py
     ```
 
+### Option 2: Use the setup installer
+
+1. **Download the setup file:**
+
+    - [Download setup.bat](https://github.com/MCbabel/discord-music-bot/releases/tag/v1.0.0)
+
+2. **Run the setup file:**
+
+    Double-click on the `setup.bat` file and follow the prompts to enter your Discord Bot Token, Spotify Client ID, and Spotify Client Secret. This will automatically set up your environment variables and install the required dependencies.
+
+3. **Run the bot:**
+
+    Once the setup is complete, simply run the `bot.py` file to start the bot.
+
+    ```sh
+    python bot.py
+    ```
+
 ## Discord Bot Permissions
 
 To ensure that your bot works correctly, you need to invite it to your server with the necessary permissions. Use the following OAuth2 URL to generate an invite link for your bot:
+
 https://discord.com/oauth2/authorize?client_id=YOUR_CLIENT_ID&permissions=3147776&scope=bot%20applications.commands
 
 Replace `YOUR_CLIENT_ID` with your bot's client ID.
