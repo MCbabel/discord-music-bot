@@ -95,7 +95,7 @@ def add_to_queue(source):
     queue.append(source)
  
 async def play_next(ctx):
-    if len(queue) 
+    if len(queue) :
         source = queue.pop(0)
         ctx.voice_client.play(source, after=lambda e: asyncio.run_coroutine_threadsafe(play_next(ctx), bot.loop).result())
         await ctx.send(embed=discord.Embed(title="Now playing", description=f"Playing: {source.title}", color=discord.Color.blue()))
