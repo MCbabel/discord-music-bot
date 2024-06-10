@@ -76,6 +76,36 @@ You have two options to set up the Discord Music Bot: cloning the repository or 
     python bot.py
     ```
 
+## Getting Spotify Credentials
+
+To integrate Spotify, you need to obtain a Client ID and Client Secret from the Spotify Developer Dashboard. Here are the steps:
+
+1. **Create a Spotify Developer Account:**
+   - Go to the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard/login).
+   - Log in with your Spotify account or create a new account.
+
+2. **Create an App:**
+   - Click on "Create an App".
+   - Fill in the required details like App name and description.
+   - Agree to the terms and conditions and click "Create".
+
+3. **Retrieve Your Credentials:**
+   - Once your app is created, you will be redirected to the app dashboard.
+   - Here, you can find your Client ID and Client Secret. Copy these values.
+
+4. **Add Redirect URI:**
+   - Click on "Edit Settings" in your app dashboard.
+   - Under "Redirect URIs", add `http://localhost:8888/callback` and save.
+
+5. **Add Credentials to .env File:**
+   - Update your `.env` file with the obtained credentials.
+
+    ```
+    DISCORD_TOKEN=your_discord_token
+    SPOTIFY_CLIENT_ID=your_spotify_client_id
+    SPOTIFY_CLIENT_SECRET=your_spotify_client_secret
+    ```
+
 ## Discord Bot Permissions
 
 To ensure that your bot works correctly, you need to invite it to your server with the necessary permissions. Use the following OAuth2 URL to generate an invite link for your bot:
