@@ -54,6 +54,21 @@ Welcome to the Discord Music Bot repository! This bot is a powerful, feature-ric
     python bot.py
     ```
 
+## Discord Bot Permissions
+
+To ensure that your bot works correctly, you need to invite it to your server with the necessary permissions. Use the following OAuth2 URL to generate an invite link for your bot:
+https://discord.com/oauth2/authorize?client_id=YOUR_CLIENT_ID&permissions=3147776&scope=bot%20applications.commands
+
+Replace `YOUR_CLIENT_ID` with your bot's client ID.
+
+### Required Permissions
+
+- `View Channels`: Allows the bot to see text channels and read messages.
+- `Send Messages`: Allows the bot to send messages in text channels.
+- `Connect`: Allows the bot to connect to voice channels.
+- `Speak`: Allows the bot to play audio in voice channels.
+- `Use Slash Commands`: Allows the bot to register and use slash commands.
+
 ## Contributing
 
 Contributions are welcome! Please fork this repository and submit a pull request for any changes you would like to make.
