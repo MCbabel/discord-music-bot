@@ -62,7 +62,7 @@ You have two options to set up the Discord Music Bot: cloning the repository or 
 
 1. **Download the setup file:**
 
-    - [Download setup.bat](https://github.com/MCbabel/discord-music-bot/releases/tag/v1.0.0)
+    - [Download setup.bat](https://github.com/MCbabel/discord-music-bot/releases/download/v1.0.0/setup.bat)
 
 2. **Run the setup file:**
 
