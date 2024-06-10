@@ -21,7 +21,7 @@ Welcome to the Discord Music Bot repository! This bot is a powerful, feature-ric
 | `/resume` | Resume the playback. |
 | `/skip` | Skip the current song. |
 | `/stop` | Stop the playback. |
-| `/help` | Show help information. |
+| `/help` | Show help information. (This command is currently not fully updated and still displays a message from an older version of the bot. It will be fixed in the next update.) |
 
 ## Installation
 
