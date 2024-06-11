@@ -3,7 +3,7 @@ from discord import app_commands
 from messages import Messages
 import asyncio
 
-def setup_commands(tree, bot, sp, genius, queue, add_to_queue, play_next):
+def setup_commands(tree, bot, sp, genius, queue, add_to_queue, play_next, YTDLSource, SpotifySource):
     @tree.command(name='join', description='Join a voice channel')
     async def join(interaction: discord.Interaction):
         if not interaction.user.voice:
