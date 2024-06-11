@@ -8,7 +8,7 @@ import os
 import asyncio
 from dotenv import load_dotenv
 import lyricsgenius
-from commands import setup_commands
+from messages import Messages
 
 # Load environment variables
 load_dotenv()
@@ -111,7 +111,8 @@ async def play_next(ctx):
         await ctx.voice_client.disconnect()
 
 # Import commands from separate file
-setup_commands(tree, bot, sp, genius, queue, add_to_queue, play_next)
+from commands import setup_commands
+setup_commands(tree, bot, sp, genius, queue, add_to_queue, play_next, YTDLSource, SpotifySource)
 
 @bot.event
 async def on_ready():
