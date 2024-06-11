@@ -14,6 +14,7 @@ Welcome to the Discord Music Bot repository! This bot is a powerful, feature-ric
 6. [Contributing](#contributing)
 7. [License](#license)
 8. [Acknowledgements](#acknowledgements)
+9. [Planned Features](#planned-features)
 
 ## Features
 
@@ -164,6 +165,21 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 ## Acknowledgements
 
 This project was created with the assistance of [ChatGPT](https://www.openai.com/chatgpt), demonstrating the power of AI in software development. Special thanks to the OpenAI team for providing such an incredible tool. 
+
+## Planned Features
+
+We have several exciting features planned for future releases of the Discord Music Bot:
+
+1. **Song Lyrics Integration**: Display lyrics of the currently playing song.
+2. **Advanced Playlist Management**: Create, save, and share playlists directly within Discord.
+3. **Cross-Platform Support**: Support for other music platforms like Apple Music, SoundCloud, etc.
+4. **User Vote Skipping**: Allow users to vote to skip the current song.
+5. **DJ Role**: Special permissions for users with the DJ role to control the bot.
+6. **Custom Commands**: Allow server admins to create custom bot commands.
+7. **Volume Control**: Commands to adjust the volume of the playback.
+8. **Automatic Updates**: Implement a feature to automatically update the bot to the latest version.
+9. **Enhanced Logging**: Detailed logging of bot activities for better debugging and monitoring.
+10. **Song Recommendations**: Recommend songs based on the current playlist or user preferences.
 
 ---
 
