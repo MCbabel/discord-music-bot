@@ -9,12 +9,13 @@ Welcome to the Discord Music Bot repository! This bot is a powerful, feature-ric
     - [Option 1: Clone the repository](#option-1-clone-the-repository)
     - [Option 2: Use the setup installer](#option-2-use-the-setup-installer)
 4. [Getting Spotify Credentials](#getting-spotify-credentials)
-5. [Discord Bot Permissions](#discord-bot-permissions)
+5. [Getting Genius API Key](#getting-genius-api-key)
+6. [Discord Bot Permissions](#discord-bot-permissions)
     - [Required Permissions](#required-permissions)
-6. [Contributing](#contributing)
-7. [License](#license)
-8. [Acknowledgements](#acknowledgements)
-9. [Planned Features](#planned-features)
+7. [Contributing](#contributing)
+8. [License](#license)
+9. [Acknowledgements](#acknowledgements)
+10. [Planned Features](#planned-features)
 
 ## Features
 
@@ -23,6 +24,7 @@ Welcome to the Discord Music Bot repository! This bot is a powerful, feature-ric
 - **Queue Management**: Add, skip, pause, resume, and stop songs with ease.
 - **Interactive Slash Commands**: Utilize modern slash commands for an enhanced user experience.
 - **Multilingual Help**: Get help in multiple languages.
+- **Lyrics Fetching**: Fetch lyrics for the currently playing song.
 
 ## Commands
 
@@ -35,7 +37,8 @@ Welcome to the Discord Music Bot repository! This bot is a powerful, feature-ric
 | `/resume` | Resume the playback. |
 | `/skip` | Skip the current song. |
 | `/stop` | Stop the playback. |
-| `/help` | Show help information. (This command is currently not fully updated and still displays a message from an older version of the bot. It will be fixed in the next update.) |
+| `/lyrics` | Fetch the lyrics for the current song. |
+| `/help` | Show help information. |
 
 ## Installation
 
@@ -68,6 +71,7 @@ You have two options to set up the Discord Music Bot: cloning the repository or 
     DISCORD_TOKEN=your_discord_token
     SPOTIFY_CLIENT_ID=your_spotify_client_id
     SPOTIFY_CLIENT_SECRET=your_spotify_client_secret
+    GENIUS_API_KEY=your_genius_api_key
     ```
 
     ![Environment Variables](placeholder-image-url)
@@ -84,7 +88,7 @@ You have two options to set up the Discord Music Bot: cloning the repository or 
 
 1. **Download the setup file:**
 
-    - [Download setup.bat](https://github.com/MCbabel/discord-music-bot/releases/download/v1.0.0/setup.bat)
+    - [Download setup.bat](https://github.com/MCbabel/discord-music-bot/releases/download/v1.1.0/setup.bat)
 
 2. **Run the setup file:**
 
@@ -138,6 +142,41 @@ To integrate Spotify, you need to obtain a Client ID and Client Secret from the 
 
     ![Add to .env](placeholder-image-url)
 
+## Getting Genius API Key
+
+To fetch lyrics, you need to obtain a Genius API Key. Here are the steps:
+
+1. **Create a Genius Account:**
+   - Go to the [Genius API](https://genius.com/api-clients) page.
+   - Log in with your Genius account or create a new account.
+
+    ![Genius API Account](placeholder-image-url)
+
+2. **Create an API Client:**
+   - Click on "Create an API Client".
+   - Fill in the required details like App name and description.
+   - Agree to the terms and conditions and click "Save".
+
+    ![Create API Client](placeholder-image-url)
+
+3. **Retrieve Your API Key:**
+   - Once your app is created, you will be redirected to the app dashboard.
+   - Here, you can find your API Key. Copy this value.
+
+    ![Retrieve API Key](placeholder-image-url)
+
+4. **Add API Key to .env File:**
+   - Update your `.env` file with the obtained API Key.
+
+    ```
+    DISCORD_TOKEN=your_discord_token
+    SPOTIFY_CLIENT_ID=your_spotify_client_id
+    SPOTIFY_CLIENT_SECRET=your_spotify_client_secret
+    GENIUS_API_KEY=your_genius_api_key
+    ```
+
+    ![Add to .env](placeholder-image-url)
+
 ## Discord Bot Permissions
 
 To ensure that your bot works correctly, you need to invite it to your server with the necessary permissions. Use the following OAuth2 URL to generate an invite link for your bot:
@@ -168,18 +207,17 @@ This project was created with the assistance of [ChatGPT](https://www.openai.com
 
 ## Planned Features
 
-We have several exciting features planned for future releases of the Discord Music Bot:
-
-1. **Song Lyrics Integration**: Display lyrics of the currently playing song.
-2. **Advanced Playlist Management**: Create, save, and share playlists directly within Discord.
-3. **Cross-Platform Support**: Support for other music platforms like Apple Music, SoundCloud, etc.
-4. **User Vote Skipping**: Allow users to vote to skip the current song.
-5. **DJ Role**: Special permissions for users with the DJ role to control the bot.
-6. **Custom Commands**: Allow server admins to create custom bot commands.
-7. **Volume Control**: Commands to adjust the volume of the playback.
-8. **Automatic Updates**: Implement a feature to automatically update the bot to the latest version.
-9. **Enhanced Logging**: Detailed logging of bot activities for better debugging and monitoring.
-10. **Song Recommendations**: Recommend songs based on the current playlist or user preferences.
+- [x] Lyrics fetching using Genius API
+- [ ] Music playback controls via reactions
+- [ ] Custom playlists
+- [ ] Voting to skip songs
+- [ ] Auto-disconnect after inactivity
+- [ ] Volume control
+- [ ] Now playing message with song progress
+- [ ] Integration with more streaming services
+- [ ] User-specific playlists
+- [ ] Song search functionality
+- [ ] Customizable bot settings
 
 ---
 
