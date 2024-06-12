@@ -102,13 +102,13 @@ queue = []
 def add_to_queue(source):
     queue.append(source)
 
-async def play_next(ctx):
+async def play_next(channel):
     if len(queue) > 0:
         source = queue.pop(0)
-        ctx.voice_client.play(source, after=lambda e: asyncio.run_coroutine_threadsafe(play_next(ctx), bot.loop).result())
-        await ctx.send(embed=discord.Embed(title="Now playing", description=f"Playing: {source.title}", color=discord.Color.blue()))
+        channel.guild.voice_client.play(source, after=lambda e: asyncio.run_coroutine_threadsafe(play_next(channel), bot.loop).result())
+        await channel.send(embed=discord.Embed(title="Now playing", description=f"Playing: {source.title}", color=discord.Color.blue()))
     else:
-        await ctx.voice_client.disconnect()
+        await channel.guild.voice_client.disconnect()
 
 # Import commands from separate file
 from commands import setup_commands
