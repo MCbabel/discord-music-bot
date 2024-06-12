@@ -49,7 +49,7 @@ def setup_commands(tree, bot, sp, genius, queue, add_to_queue, play_next, YTDLSo
                 embed = Messages.added_to_queue(player.title)
                 await interaction.followup.send(embed=embed)
             else:
-                interaction.guild.voice_client.play(player, after=lambda e: asyncio.run_coroutine_threadsafe(play_next(interaction.channel), bot.loop).result())
+                interaction.guild.voice_client.play(player, after=lambda e: asyncio.run_coroutine_threadsafe(play_next(interaction), bot.loop).result())
                 embed = Messages.now_playing(player.title)
                 await interaction.followup.send(embed=embed)
 
@@ -119,18 +119,15 @@ def setup_commands(tree, bot, sp, genius, queue, add_to_queue, play_next, YTDLSo
         embed.add_field(name="/skip", value="Skip the current song", inline=False)
         embed.add_field(name="/stop", value="Stop the playback", inline=False)
         embed.add_field(name="/lyrics", value="Fetch the lyrics for the current song", inline=False)
-        embed.add_field(name="/clear <number>", value="Clear a specified number of messages from the channel", inline=False)
         await interaction.response.send_message(embed=embed)
 
-    @tree.command(name='clear', description='Clear a specified number of messages from the channel')
-    @app_commands.describe(number='The number of messages to delete')
+    @tree.command(name='clear', description='Clear messages in a channel')
     async def clear(interaction: discord.Interaction, number: int):
-        await interaction.response.defer(ephemeral=True)
-        if not interaction.channel:
-            embed = Messages.error("This command can only be used in a text channel.")
-            await interaction.followup.send(embed=embed)
+        if not interaction.user.guild_permissions.manage_messages:
+            embed = Messages.error("You do not have permission to manage messages.")
+            await interaction.response.send_message(embed=embed, ephemeral=True)
             return
 
-        deleted = await interaction.channel.purge(limit=number + 1)  # +1 to include the command message itself
-        embed = discord.Embed(title="🧹 Messages Cleared", description=f"**{len(deleted) - 1}** messages have been cleared.", color=discord.Color.green())
-        await interaction.followup.send(embed=embed, ephemeral=True)
+        await interaction.channel.purge(limit=number)
+        embed = discord.Embed(title="Messages Cleared", description=f"Deleted {number} messages.", color=discord.Color.green())
+        await interaction.response.send_message(embed=embed, ephemeral=True)
