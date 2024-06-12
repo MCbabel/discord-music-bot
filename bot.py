@@ -8,18 +8,17 @@ import os
 import asyncio
 from dotenv import load_dotenv
 import lyricsgenius
-from messages import Messages
+from commands import setup_commands
 
 # Load environment variables
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 SPOTIFY_CLIENT_ID = os.getenv('SPOTIFY_CLIENT_ID')
 SPOTIFY_CLIENT_SECRET = os.getenv('SPOTIFY_CLIENT_SECRET')
-GENIUS_CLIENT_ID = os.getenv('GENIUS_CLIENT_ID')
-GENIUS_CLIENT_SECRET = os.getenv('GENIUS_CLIENT_SECRET')
+GENIUS_ACCESS_TOKEN = os.getenv('GENIUS_ACCESS_TOKEN')
 
 # Initialize Genius API client
-genius = lyricsgenius.Genius(GENIUS_CLIENT_SECRET)
+genius = lyricsgenius.Genius(GENIUS_ACCESS_TOKEN)
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -30,6 +29,9 @@ tree = bot.tree
 # Spotify client setup
 sp = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials(
     client_id=SPOTIFY_CLIENT_ID, client_secret=SPOTIFY_CLIENT_SECRET))
+
+# Ensure FFmpeg is installed
+ffmpeg_path = 'ffmpeg'  # Adjust this path if necessary
 
 # YouTube-DL options
 youtube_dl.utils.bug_reports_message = lambda: ''
@@ -102,20 +104,17 @@ queue = []
 def add_to_queue(source):
     queue.append(source)
 
-async def play_next(channel):
+async def play_next(ctx):
     if len(queue) > 0:
         source = queue.pop(0)
-        channel.guild.voice_client.play(source, after=lambda e: asyncio.run_coroutine_threadsafe(play_next(channel), bot.loop).result())
-        await channel.send(embed=discord.Embed(title="Now playing", description=f"Playing: {source.title}", color=discord.Color.blue()))
+        ctx.voice_client.play(source, after=lambda e: asyncio.run_coroutine_threadsafe(play_next(ctx), bot.loop).result())
+        await ctx.send(embed=discord.Embed(title="Now playing", description=f"Playing: {source.title}", color=discord.Color.blue()))
     else:
-        await channel.guild.voice_client.disconnect()
-
-# Import commands from separate file
-from commands import setup_commands
-setup_commands(tree, bot, sp, genius, queue, add_to_queue, play_next, YTDLSource, SpotifySource)
+        await ctx.voice_client.disconnect()
 
 @bot.event
 async def on_ready():
+    setup_commands(tree, bot, sp, genius, queue, add_to_queue, play_next, YTDLSource, SpotifySource)
     await tree.sync()
     print(f'Bot is logged in as {bot.user}')
 
