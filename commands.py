@@ -29,6 +29,11 @@ def setup_commands(tree, bot, sp, genius, queue, add_to_queue, play_next, YTDLSo
     async def play(interaction: discord.Interaction, url: str):
         await interaction.response.defer()
 
+        if not ('youtube.com' in url or 'youtu.be' in url or 'spotify.com' in url):
+            embed = Messages.error("Only YouTube and Spotify links are supported.")
+            await interaction.followup.send(embed=embed, ephemeral=True)
+            return
+
         if interaction.guild.voice_client is None:
             if interaction.user.voice:
                 channel = interaction.user.voice.channel
@@ -55,14 +60,18 @@ def setup_commands(tree, bot, sp, genius, queue, add_to_queue, play_next, YTDLSo
 
     @tree.command(name='skip', description='Skip the current song')
     async def skip(interaction: discord.Interaction):
-        if interaction.guild.voice_client.is_playing():
-            interaction.guild.voice_client.stop()
+        voice_client = interaction.guild.voice_client
+        if voice_client and voice_client.is_playing():
+            voice_client.stop()
             await interaction.response.send_message(embed=Messages.skipped())
+        else:
+            embed = Messages.error("Nothing is playing.")
+            await interaction.response.send_message(embed=embed)
 
     @tree.command(name='pause', description='Pause the playback')
     async def pause(interaction: discord.Interaction):
         voice_client = interaction.guild.voice_client
-        if voice_client.is_playing():
+        if voice_client and voice_client.is_playing():
             voice_client.pause()
             embed = Messages.paused()
             await interaction.response.send_message(embed=embed)
@@ -73,7 +82,7 @@ def setup_commands(tree, bot, sp, genius, queue, add_to_queue, play_next, YTDLSo
     @tree.command(name='resume', description='Resume the playback')
     async def resume(interaction: discord.Interaction):
         voice_client = interaction.guild.voice_client
-        if voice_client.is_paused():
+        if voice_client and voice_client.is_paused():
             voice_client.resume()
             embed = Messages.resumed()
             await interaction.response.send_message(embed=embed)
@@ -84,7 +93,7 @@ def setup_commands(tree, bot, sp, genius, queue, add_to_queue, play_next, YTDLSo
     @tree.command(name='stop', description='Stop the playback')
     async def stop(interaction: discord.Interaction):
         voice_client = interaction.guild.voice_client
-        if voice_client.is_playing():
+        if voice_client and voice_client.is_playing():
             voice_client.stop()
             embed = Messages.stopped()
             await interaction.response.send_message(embed=embed)
@@ -119,6 +128,7 @@ def setup_commands(tree, bot, sp, genius, queue, add_to_queue, play_next, YTDLSo
         embed.add_field(name="/skip", value="Skip the current song", inline=False)
         embed.add_field(name="/stop", value="Stop the playback", inline=False)
         embed.add_field(name="/lyrics", value="Fetch the lyrics for the current song", inline=False)
+        embed.add_field(name="/clear <number>", value="Clear the specified number of messages from the channel", inline=False)
         await interaction.response.send_message(embed=embed)
 
     @tree.command(name='clear', description='Clear messages in a channel')
