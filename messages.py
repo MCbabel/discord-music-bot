@@ -7,7 +7,7 @@ class Messages:
 
     @staticmethod
     def connected(channel):
-        return discord.Embed(title="🔗 Connected", description=f"Connected to {channel}.", color=discord.Color.green())
+        return discord.Embed(title="🔗 Connected", description=f"Connected to **{channel}**.", color=discord.Color.green())
 
     @staticmethod
     def disconnected():
@@ -23,7 +23,7 @@ class Messages:
 
     @staticmethod
     def skipped():
-        return discord.Embed(title="⏭️ Skipped", description="The current song has been skipped.", color=discord.Color.orange())
+        return discord.Embed(title="⏩ Skipped", description="The current song has been skipped.", color=discord.Color.orange())
 
     @staticmethod
     def paused():
