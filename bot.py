@@ -104,13 +104,13 @@ queue = []
 def add_to_queue(source):
     queue.append(source)
 
-async def play_next(ctx):
+async def play_next(interaction):
     if len(queue) > 0:
         source = queue.pop(0)
-        ctx.guild.voice_client.play(source, after=lambda e: asyncio.run_coroutine_threadsafe(play_next(ctx), bot.loop).result())
-        await ctx.send(embed=discord.Embed(title="Now playing", description=f"Playing: {source.title}", color=discord.Color.blue()))
+        interaction.guild.voice_client.play(source, after=lambda e: asyncio.run_coroutine_threadsafe(play_next(interaction), bot.loop).result())
+        await interaction.followup.send(embed=discord.Embed(title="Now playing", description=f"Playing: {source.title}", color=discord.Color.blue()))
     else:
-        await ctx.guild.voice_client.disconnect()
+        await interaction.guild.voice_client.disconnect()
 
 @bot.event
 async def on_ready():
