@@ -40,3 +40,31 @@ class Messages:
     @staticmethod
     def lyrics(title, lyrics):
         return discord.Embed(title=f"📜 Lyrics for {title}", description=lyrics[:2048], color=discord.Color.blue())
+
+    @staticmethod
+    def volume_set(percent):
+        return discord.Embed(title="🔊 Volume Set", description=f"The volume has been set to **{percent}%**.", color=discord.Color.green())
+
+    @staticmethod
+    def loop_on():
+        return discord.Embed(title="🔁 Loop On", description="The current song will now loop.", color=discord.Color.green())
+
+    @staticmethod
+    def loop_off():
+        return discord.Embed(title="🔁 Loop Off", description="The current song will no longer loop.", color=discord.Color.red())
+
+    @staticmethod
+    def added_to_playlist(name, url):
+        return discord.Embed(title="🎶 Added to Playlist", description=f"The song **{url}** has been added to the playlist **{name}**.", color=discord.Color.blue())
+
+    @staticmethod
+    def playlist_started(name):
+        return discord.Embed(title="🎵 Playlist Started", description=f"Playing songs from the playlist **{name}**.", color=discord.Color.blue())
+
+    @staticmethod
+    def vote_skip(user_name, num_votes, num_members):
+        return discord.Embed(title="🗳️ Vote to Skip", description=f"**{user_name}** has voted to skip the song.\nVotes: **{num_votes}/{num_members}**", color=discord.Color.blue())
+
+    @staticmethod
+    def messages_cleared(number):
+        return discord.Embed(title="🧹 Messages Cleared", description=f"Deleted {number} messages.", color=discord.Color.green())
