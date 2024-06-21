@@ -190,13 +190,13 @@ This project was created with the assistance of [ChatGPT](https://www.openai.com
 
 - [x] Lyrics fetching using Genius API
 - [ ] Music playback controls via reactions
-- [ ] Custom playlists
-- [ ] Voting to skip songs
-- [ ] Auto-disconnect after inactivity
-- [ ] Volume control
+- [x] Custom playlists
+- [x] Voting to skip songs
+- [x] Auto-disconnect after inactivity
+- [x] Volume control
 - [ ] Now playing message with song progress
 - [ ] Integration with more streaming services
-- [ ] User-specific playlists
+- [x] User-specific playlists
 - [ ] Song search functionality
 - [ ] Customizable bot settings
 
