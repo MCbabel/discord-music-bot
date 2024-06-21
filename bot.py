@@ -1,11 +1,12 @@
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 from discord import app_commands
 import yt_dlp as youtube_dl
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 import os
 import asyncio
+import json
 from dotenv import load_dotenv
 import lyricsgenius
 from commands import setup_commands
@@ -100,6 +101,19 @@ class SpotifySource(discord.PCMVolumeTransformer):
         return info['entries'][0]['webpage_url']
 
 queue = []
+playlists = {}
+
+def load_playlists():
+    global playlists
+    if os.path.exists('playlists.json'):
+        with open('playlists.json', 'r') as f:
+            playlists = json.load(f)
+
+def save_playlists():
+    with open('playlists.json', 'w') as f:
+        json.dump(playlists, f, indent=4)
+
+load_playlists()
 
 def add_to_queue(source):
     queue.append(source)
@@ -108,13 +122,20 @@ async def play_next(ctx):
     if len(queue) > 0:
         source = queue.pop(0)
         ctx.guild.voice_client.play(source, after=lambda e: asyncio.run_coroutine_threadsafe(play_next(ctx), bot.loop).result())
-        await ctx.send(embed=discord.Embed(title="Now playing", description=f"Playing: {source.title}", color=discord.Color.blue()))
+        await ctx.channel.send(embed=discord.Embed(title="Now playing", description=f"Playing: {source.title}", color=discord.Color.blue()))
     else:
-        await ctx.guild.voice_client.disconnect()
+        check_inactivity.start()
+
+@tasks.loop(minutes=5)
+async def check_inactivity():
+    for vc in bot.voice_clients:
+        if not vc.is_playing():
+            await vc.disconnect()
+    check_inactivity.cancel()
 
 @bot.event
 async def on_ready():
-    setup_commands(tree, bot, sp, genius, queue, add_to_queue, play_next, YTDLSource, SpotifySource)
+    setup_commands(tree, bot, sp, genius, queue, add_to_queue, play_next, YTDLSource, SpotifySource, playlists, save_playlists)
     await tree.sync()
     print(f'Bot is logged in as {bot.user}')
 
