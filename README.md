@@ -212,7 +212,7 @@ This project was created with the assistance of [ChatGPT](https://www.openai.com
 - [ ] Now playing message with song progress
 - [ ] Integration with more streaming services
 - [x] User-specific playlists
-- [ ] Song search functionality
+- [x] Song search functionality
 - [ ] Customizable bot settings
 
 ---
