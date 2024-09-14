@@ -1,10 +1,6 @@
 discord.py[voice]
-discord.py
 yt-dlp
 spotipy
 lyricsgenius
 python-dotenv
 youtube-search-python
-aiohttp
-aiofiles
-PyNaCl
