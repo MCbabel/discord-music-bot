@@ -1,3 +1,5 @@
+# messages.py
+
 import discord
 
 class Messages:
@@ -68,3 +70,8 @@ class Messages:
     @staticmethod
     def messages_cleared(number):
         return discord.Embed(title="🧹 Messages Cleared", description=f"Deleted {number} messages.", color=discord.Color.green())
+
+    @staticmethod
+    def success(message):
+        """Create a success embed."""
+        return discord.Embed(title="✅ Success", description=message, color=discord.Color.green())
