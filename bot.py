@@ -1,3 +1,5 @@
+# bot.py
+
 import discord
 from discord.ext import commands
 import yt_dlp as youtube_dl
@@ -7,9 +9,10 @@ import os
 import asyncio
 from dotenv import load_dotenv
 import lyricsgenius
-from commands import setup_commands
+from commands import setup_commands  # Ensure commands.py is in the same directory or properly imported
 import logging
 from messages import Messages  # Ensure Messages is imported
+import traceback
 
 # Logging configuration
 logging.basicConfig(level=logging.INFO)
@@ -24,10 +27,13 @@ GENIUS_ACCESS_TOKEN = os.getenv('GENIUS_ACCESS_TOKEN')
 # Initialize Genius API client
 genius = lyricsgenius.Genius(GENIUS_ACCESS_TOKEN)
 
+# Define intents
 intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
 intents.voice_states = True  # Ensure voice_states intent is enabled
+
+# Initialize the bot
 bot = commands.Bot(command_prefix='/', intents=intents)
 tree = bot.tree
 
@@ -35,7 +41,7 @@ tree = bot.tree
 sp = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials(
     client_id=SPOTIFY_CLIENT_ID, client_secret=SPOTIFY_CLIENT_SECRET))
 
-# Ensure FFmpeg is installed
+# Ensure FFmpeg is installed and accessible
 ffmpeg_path = 'ffmpeg'  # Adjust this path if necessary
 
 # yt-dlp options
@@ -72,10 +78,16 @@ class BaseSource(discord.PCMVolumeTransformer):
 class YTDLSource(BaseSource):
     @classmethod
     async def from_url(cls, url, *, loop=None, stream=True):
+        """Create a YTDLSource from a YouTube URL."""
         loop = loop or asyncio.get_event_loop()
-        data = await loop.run_in_executor(
-            None, lambda: ytdl.extract_info(url, download=not stream)
-        )
+        try:
+            data = await loop.run_in_executor(
+                None, lambda: ytdl.extract_info(url, download=not stream)
+            )
+        except Exception as e:
+            print(f"Error in YTDLSource.from_url: {e}")
+            data = None
+
         if data is None:
             raise Exception("Could not extract information from the URL.")
         if 'entries' in data:
@@ -92,8 +104,13 @@ class YTDLSource(BaseSource):
 class SpotifySource(BaseSource):
     @classmethod
     async def from_spotify_url(cls, url, *, loop=None):
+        """Create a SpotifySource from a Spotify URL."""
         loop = loop or asyncio.get_event_loop()
-        data = sp.track(url)
+        try:
+            data = sp.track(url)
+        except Exception as e:
+            print(f"Error fetching track from Spotify: {e}")
+            data = None
         if data is None:
             raise Exception("Could not retrieve track information from Spotify.")
         track_name = f"{data['name']} {data['artists'][0]['name']}"
@@ -102,6 +119,7 @@ class SpotifySource(BaseSource):
 
     @staticmethod
     async def search_youtube_url(query):
+        """Search YouTube for a track name and return the first result's URL."""
         ytdl_opts = {
             'format': 'bestaudio/best',
             'quiet': True,
@@ -116,10 +134,14 @@ class SpotifySource(BaseSource):
         }
         ytdl_search = youtube_dl.YoutubeDL(ytdl_opts)
         loop = asyncio.get_event_loop()
-        data = await loop.run_in_executor(
-            None, lambda: ytdl_search.extract_info(query, download=False)
-        )
-        if 'entries' in data and len(data['entries']) > 0:
+        try:
+            data = await loop.run_in_executor(
+                None, lambda: ytdl_search.extract_info(query, download=False)
+            )
+        except Exception as e:
+            print(f"Error in SpotifySource.search_youtube_url: {e}")
+            data = None
+        if data and 'entries' in data and len(data['entries']) > 0:
             return data['entries'][0]['webpage_url']
         else:
             raise Exception("No results found on YouTube.")
@@ -136,6 +158,7 @@ class Music:
         self.view = None  # Reference to the MusicControls view
 
     async def play_next(self, guild):
+        """Play the next song in the queue or handle looping."""
         # Cancel any existing inactivity timer
         if self.inactivity_timer:
             self.inactivity_timer.cancel()
@@ -193,13 +216,14 @@ class Music:
                 embed = Messages.now_playing(self.current.title)
                 self.view = MusicControls(None, self, guild.voice_client)
                 message = await self.channel.send(embed=embed, view=self.view)
-                self.view.message = message
+                self.view.message = message  # Reference to the message containing the view
             else:
                 # Optionally update the existing message or do nothing
                 pass  # No action needed when looping the same song
 
         except Exception as e:
             print(f"Exception in play_next: {e}")
+            traceback.print_exc()
             # Handle the exception gracefully
             if self.view:
                 await self.view.disable_all_items()
@@ -209,6 +233,7 @@ class Music:
             self.inactivity_timer = self.bot.loop.create_task(self.disconnect_after_delay(guild))
 
     async def stop(self, guild):
+        """Stop playback and clear the queue."""
         if guild.voice_client:
             await guild.voice_client.disconnect(force=True)
         self.queue.clear()
@@ -224,6 +249,7 @@ class Music:
             self.view = None
 
     async def disconnect_after_delay(self, guild):
+        """Disconnect the bot after a period of inactivity."""
         await asyncio.sleep(180)  # Wait for 3 minutes
         # Check if the voice client is still connected and not playing
         voice_client = guild.voice_client
@@ -247,7 +273,7 @@ class MusicControls(discord.ui.View):
         self.message = None  # Will be set when the message is sent
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
-        # Allow only users in the same voice channel to interact
+        """Ensure only users in the same voice channel can interact with the controls."""
         if interaction.user.voice and interaction.user.voice.channel == self.voice_client.channel:
             return True
         else:
@@ -293,6 +319,7 @@ class MusicControls(discord.ui.View):
         await interaction.response.send_message(f"Looping {status}.", ephemeral=True)
 
     async def disable_all_items(self):
+        """Disable all buttons in the view."""
         for item in self.children:
             item.disabled = True
         if self.message:
@@ -300,13 +327,9 @@ class MusicControls(discord.ui.View):
 
 music_instances = {}
 
-async def get_music_instance(guild):
-    if guild.id not in music_instances:
-        music_instances[guild.id] = Music(bot)
-    return music_instances[guild.id]
-
 @bot.event
 async def on_ready():
+    """Event handler when the bot is ready."""
     print("Bot is ready. Setting up commands...")
     try:
         setup_commands(tree, bot, sp, genius, music_instances, Music, YTDLSource, SpotifySource)
