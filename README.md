@@ -209,11 +209,20 @@ This project was created with the assistance of [ChatGPT](https://www.openai.com
 - [x] Voting to skip songs
 - [x] Auto-disconnect after inactivity
 - [x] Volume control
-- [ ] Now playing message with song progress
-- [ ] Integration with more streaming services
 - [x] User-specific playlists
 - [x] Song search functionality
+- [ ] Now playing message with song progress
+- [ ] Integration with more streaming services
 - [ ] Customizable bot settings
+- [ ] Song crossfade: Smoothly transition between songs with a configurable crossfade duration.
+- [ ] DJ Mode: Allow certain users to have elevated control over the bot, including song reordering and queue management.
+- [ ] Genre and Mood Playlists: Generate playlists based on specific genres or moods using AI recommendations.
+- [ ] Scheduled Playlists: Schedule specific playlists to play at designated times (e.g., morning playlists or weekend vibes).
+- [ ] Karaoke Mode: Display scrolling lyrics in sync with the song for a karaoke experience.
+- [ ] Advanced Equalizer: Allow users to adjust bass, treble, and other sound settings for a customized listening experience.
+- [ ] Real-time Voting for Upcoming Songs: Users can vote on which song in the queue should play next.
+- [ ] Music Trivia Game: Add a fun music quiz game that users can play in the server.
+- [ ] Save Favorite Tracks: Users can save their favorite tracks and easily access them for future playback.
 
 ---
 
