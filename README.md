@@ -211,11 +211,11 @@ This project was created with the assistance of [ChatGPT](https://www.openai.com
 - [x] Volume control
 - [x] User-specific playlists
 - [x] Song search functionality
-- [ ] Now playing message with song progress
+- [x] Now playing message with song progress
 - [ ] Integration with more streaming services
 - [ ] Customizable bot settings
-- [ ] Song crossfade: Smoothly transition between songs with a configurable crossfade duration.
-- [ ] DJ Mode: Allow certain users to have elevated control over the bot, including song reordering and queue management.
+- [x] Song crossfade: Smoothly transition between songs with a configurable crossfade duration.
+- [x] DJ Mode: Allow certain users to have elevated control over the bot, including song reordering and queue management.
 - [ ] Genre and Mood Playlists: Generate playlists based on specific genres or moods using AI recommendations.
 - [ ] Scheduled Playlists: Schedule specific playlists to play at designated times (e.g., morning playlists or weekend vibes).
 - [ ] Karaoke Mode: Display scrolling lyrics in sync with the song for a karaoke experience.
