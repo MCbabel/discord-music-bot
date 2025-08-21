@@ -1,0 +1,17 @@
+# Netscape HTTP Cookie File
+# This is a sample cookies.txt file for YouTube authentication
+# 
+# To use this file:
+# 1. Rename this file to 'cookies.txt' (remove .example)
+# 2. Replace the sample data below with actual YouTube cookies from your browser
+# 3. You can export cookies using browser extensions like "Get cookies.txt"
+#
+# Format: domain	flag	path	secure	expiration	name	value
+#
+# Example entries (these are fake - replace with real cookies):
+.youtube.com	TRUE	/	TRUE	1735689600	VISITOR_INFO1_LIVE	sample_visitor_info
+.youtube.com	TRUE	/	FALSE	1735689600	YSC	sample_ysc_value
+.youtube.com	TRUE	/	TRUE	1735689600	PREF	sample_pref_value
+#
+# For detailed instructions on exporting cookies, see:
+# https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp

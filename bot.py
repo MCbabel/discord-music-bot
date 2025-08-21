@@ -46,26 +46,58 @@ ffmpeg_path = 'ffmpeg'  # Adjust this path if necessary
 
 # yt-dlp options
 youtube_dl.utils.bug_reports_message = lambda: ''
-ytdl_format_options = {
-    'format': 'bestaudio/best',
-    'quiet': True,
-    'default_search': 'auto',
-    'nocheckcertificate': True,
-    'no_warnings': True,
-    'ignoreerrors': True,
-    'logtostderr': False,
-    'skip_download': True,
-    'source_address': '0.0.0.0',
-    'noplaylist': True,
-    'youtube_skip_dash_manifest': True,
-    'geo_bypass': True,
-    'geo_bypass_country': 'DE',  # Germany
-}
+# Create YTDL instance with fallback cookie options
+def create_ytdl_instance():
+    """Create a YouTube-DL instance with cookie authentication fallbacks."""
+    base_options = {
+        'format': 'bestaudio/best',
+        'quiet': True,
+        'default_search': 'auto',
+        'nocheckcertificate': True,
+        'no_warnings': True,
+        'ignoreerrors': True,
+        'logtostderr': False,
+        'skip_download': True,
+        'source_address': '0.0.0.0',
+        'noplaylist': True,
+        'youtube_skip_dash_manifest': True,
+        'geo_bypass': True,
+        'geo_bypass_country': 'DE',  # Germany
+    }
+    
+    # Try to use cookies from browser (Chrome first, then Firefox, then Edge)
+    browsers_to_try = ['chrome', 'firefox', 'edge', 'safari']
+    
+    for browser in browsers_to_try:
+        try:
+            options = base_options.copy()
+            options['cookiesfrombrowser'] = (browser,)
+            return youtube_dl.YoutubeDL(options)
+        except Exception:
+            continue
+    
+    # If no browser cookies work, try manual cookies file
+    try:
+        import os
+        cookies_file = 'cookies.txt'
+        if os.path.exists(cookies_file):
+            options = base_options.copy()
+            options['cookiefile'] = cookies_file
+            return youtube_dl.YoutubeDL(options)
+    except Exception:
+        pass
+    
+    # Fallback to no cookies (will likely fail for many YouTube videos)
+    print("WARNING: No YouTube cookies found. YouTube playback may fail due to bot detection.")
+    print("See README.md for instructions on setting up YouTube authentication.")
+    return youtube_dl.YoutubeDL(base_options)
+
 ffmpeg_options = {
     'options': '-vn -nostdin',
     'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
 }
-ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
+
+ytdl = create_ytdl_instance()
 
 class BaseSource(discord.PCMVolumeTransformer):
     def __init__(self, source, *, data, url, volume=0.5):
@@ -85,11 +117,20 @@ class YTDLSource(BaseSource):
                 None, lambda: ytdl.extract_info(url, download=not stream)
             )
         except Exception as e:
+            error_msg = str(e)
             print(f"Error in YTDLSource.from_url: {e}")
+            
+            # Check for YouTube bot detection error
+            if "Sign in to confirm you're not a bot" in error_msg or "Use --cookies-from-browser" in error_msg:
+                raise Exception(
+                    "YouTube bot detection encountered. Please check the README.md for YouTube authentication setup instructions. "
+                    "You may need to export YouTube cookies from your browser or sign into YouTube in your browser first."
+                )
+            
             data = None
 
         if data is None:
-            raise Exception("Could not extract information from the URL.")
+            raise Exception("Could not extract information from the URL. This may be due to YouTube bot detection - see README.md for setup instructions.")
         if 'entries' in data:
             data = data['entries'][0]
         if data is None:

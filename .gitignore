@@ -67,3 +67,6 @@ Thumbs.db
 logs/
 temp/
 *.log
+
+# YouTube cookies (keep private)
+cookies.txt

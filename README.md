@@ -54,6 +54,67 @@ Welcome to the Discord Music Bot repository! This bot is a powerful, feature-ric
 | `/clear <number>`                  | Clear a number of messages in a channel (admin only).   |
 | `/list_playlists`                  | List all custom playlists and their creators.           |
 
+## YouTube Authentication Setup
+
+Due to YouTube's bot detection mechanisms, you may encounter authentication errors when playing YouTube videos. This section provides solutions to resolve these issues.
+
+### Common YouTube Error
+
+If you see an error like this:
+```
+ERROR: [youtube] ODDRRXMi22E: Sign in to confirm you're not a bot. Use --cookies-from-browser or --cookies for authentication.
+```
+
+The bot has automatic fallback mechanisms but manual setup may be required.
+
+### Automatic Cookie Detection
+
+The bot automatically tries to use cookies from your browsers in this order:
+1. Chrome
+2. Firefox  
+3. Edge
+4. Safari
+
+### Manual Setup Options
+
+If automatic detection fails, you have several options:
+
+#### Option 1: Sign into YouTube in Your Browser (Easiest)
+1. Open your web browser (Chrome, Firefox, etc.)
+2. Go to [YouTube](https://youtube.com) and sign in to your account
+3. Watch a few videos to establish your session
+4. Restart the Discord bot
+
+#### Option 2: Export Cookies Manually
+1. Install a browser extension like "Get cookies.txt" for your browser
+2. Go to YouTube and sign in
+3. Use the extension to export cookies to a file named `cookies.txt`
+4. Place the `cookies.txt` file in the same directory as `bot.py`
+5. Restart the Discord bot
+
+*Note: A template file `cookies.txt.example` is provided to show the expected format.*
+
+#### Option 3: Use Browser Developer Tools
+1. Open YouTube in your browser and sign in
+2. Press F12 to open Developer Tools
+3. Go to the Network tab
+4. Refresh the page
+5. Look for any request to YouTube
+6. Right-click → Copy → Copy as cURL
+7. Extract the cookies from the cURL command and save to `cookies.txt`
+
+### Troubleshooting
+
+- **Bot still can't play YouTube videos**: Try clearing your browser cookies and signing in to YouTube again
+- **"No browser cookies found" warning**: The bot will still try to work but may fail on some videos
+- **Persistent issues**: Consider using Spotify URLs instead, which don't require cookies
+
+### Technical Details
+
+The bot uses [yt-dlp](https://github.com/yt-dlp/yt-dlp) for YouTube downloads. For more detailed information about cookie authentication, see:
+- [yt-dlp FAQ on authentication](https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp)
+- [YouTube cookie export guide](https://github.com/yt-dlp/yt-dlp/wiki/Extractors#exporting-youtube-cookies)
+
 ## Installation
 
 You have two options to set up the Discord Music Bot: cloning the repository or using the provided setup installer.
