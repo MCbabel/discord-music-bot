@@ -75,3 +75,52 @@ class Messages:
     def success(message):
         """Create a success embed."""
         return discord.Embed(title="✅ Success", description=message, color=discord.Color.green())
+
+    @staticmethod
+    def help():
+        """Create a help embed with bot commands."""
+        embed = discord.Embed(
+            title="🎵 Discord Music Bot - Commands", 
+            description="Here are all the available commands:",
+            color=discord.Color.blue()
+        )
+        
+        embed.add_field(
+            name="🎵 Music Commands",
+            value=(
+                "`/play <query>` - Play a song from YouTube or Spotify\n"
+                "`/pause` - Pause the current playback\n"
+                "`/resume` - Resume paused playback\n"
+                "`/skip` - Skip the current song\n"
+                "`/stop` - Stop playback and clear queue\n"
+                "`/queue` - Show the current queue\n"
+                "`/loop` - Toggle loop mode for current song\n"
+                "`/volume <0-100>` - Set playback volume"
+            ),
+            inline=False
+        )
+        
+        embed.add_field(
+            name="🎶 Playlist Commands",
+            value=(
+                "`/add_to_playlist <name> <url>` - Add song to custom playlist\n"
+                "`/play_playlist <name>` - Play songs from custom playlist\n"
+                "`/list_playlists` - List all custom playlists"
+            ),
+            inline=False
+        )
+        
+        embed.add_field(
+            name="🔧 Utility Commands",
+            value=(
+                "`/join` - Bot joins your voice channel\n"
+                "`/leave` - Bot leaves voice channel\n"
+                "`/lyrics` - Get lyrics for current song\n"
+                "`/vote_skip` - Vote to skip current song\n"
+                "`/clear <number>` - Clear messages (admin only)"
+            ),
+            inline=False
+        )
+        
+        embed.set_footer(text="🎵 Enjoy your music! Use the interactive buttons when playing songs.")
+        return embed

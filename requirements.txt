@@ -1,6 +1,6 @@
-discord.py[voice]
-yt-dlp
-spotipy
-lyricsgenius
-python-dotenv
-youtube-search-python
+discord.py[voice]==2.6.0
+yt-dlp==2025.8.20
+spotipy==2.25.1
+lyricsgenius==3.7.1
+python-dotenv==1.1.1
+youtube-search-python==1.6.6

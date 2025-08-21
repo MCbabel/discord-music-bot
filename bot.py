@@ -332,7 +332,7 @@ async def on_ready():
     """Event handler when the bot is ready."""
     print("Bot is ready. Setting up commands...")
     try:
-        setup_commands(tree, bot, sp, genius, music_instances, Music, YTDLSource, SpotifySource)
+        setup_commands(tree, bot, sp, genius, music_instances, Music, YTDLSource, SpotifySource, MusicControls)
         await tree.sync()
         print("All commands synced successfully.")
     except Exception as e:

@@ -13,7 +13,7 @@ import json
 # Assume that YTDLSource, SpotifySource, and other necessary classes are imported or defined elsewhere
 # If not, please include them accordingly
 
-def setup_commands(tree, bot, sp, genius, music_instances, Music, YTDLSource, SpotifySource):
+def setup_commands(tree, bot, sp, genius, music_instances, Music, YTDLSource, SpotifySource, MusicControls):
     async def get_music_instance(guild):
         """Retrieve or create a Music instance for the guild."""
         if guild.id not in music_instances:
@@ -400,65 +400,3 @@ def setup_commands(tree, bot, sp, genius, music_instances, Music, YTDLSource, Sp
             traceback.print_exc()
             embed = Messages.error(f"Failed to list playlists: {e}")
             await interaction.response.send_message(embed=embed, ephemeral=True)
-
-    # MusicControls View Class
-    class MusicControls(discord.ui.View):
-        def __init__(self, interaction, music, voice_client):
-            super().__init__(timeout=None)
-            self.interaction = interaction
-            self.music = music
-            self.voice_client = voice_client
-            self.message = None  # Will be set when the message is sent
-
-        async def interaction_check(self, interaction: discord.Interaction) -> bool:
-            """Ensure only users in the same voice channel can interact with the controls."""
-            if interaction.user.voice and interaction.user.voice.channel == self.voice_client.channel:
-                return True
-            else:
-                await interaction.response.send_message(
-                    "You must be in the same voice channel to use these controls.",
-                    ephemeral=True
-                )
-                return False
-
-        @discord.ui.button(label='Pause', style=discord.ButtonStyle.primary, emoji='⏸️')
-        async def pause_button(self, interaction: discord.Interaction, button: discord.ui.Button):
-            if self.voice_client.is_playing():
-                self.voice_client.pause()
-                await interaction.response.send_message("Playback paused.", ephemeral=True)
-            else:
-                await interaction.response.send_message("Nothing is playing.", ephemeral=True)
-
-        @discord.ui.button(label='Resume', style=discord.ButtonStyle.primary, emoji='▶️')
-        async def resume_button(self, interaction: discord.Interaction, button: discord.ui.Button):
-            if self.voice_client.is_paused():
-                self.voice_client.resume()
-                await interaction.response.send_message("Playback resumed.", ephemeral=True)
-            else:
-                await interaction.response.send_message("Playback is not paused.", ephemeral=True)
-
-        @discord.ui.button(label='Skip', style=discord.ButtonStyle.primary, emoji='⏭️')
-        async def skip_button(self, interaction: discord.Interaction, button: discord.ui.Button):
-            music = self.music
-            voice_client = self.voice_client
-            if voice_client.is_playing():
-                if music.queue or music.loop:
-                    voice_client.stop()
-                    await interaction.response.send_message("Skipped the current song.", ephemeral=True)
-                else:
-                    await interaction.response.send_message("No more songs in the queue to skip to.", ephemeral=True)
-            else:
-                await interaction.response.send_message("Nothing is playing.", ephemeral=True)
-
-        @discord.ui.button(label='Loop', style=discord.ButtonStyle.primary, emoji='🔁')
-        async def loop_button(self, interaction: discord.Interaction, button: discord.ui.Button):
-            self.music.loop = not self.music.loop
-            status = "enabled" if self.music.loop else "disabled"
-            await interaction.response.send_message(f"Looping {status}.", ephemeral=True)
-
-        async def disable_all_items(self):
-            """Disable all buttons in the view."""
-            for item in self.children:
-                item.disabled = True
-            if self.message:
-                await self.message.edit(view=self)
