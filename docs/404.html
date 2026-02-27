@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>404 — MelodyBot</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0d0221;--surface:#130330;--card:rgba(13,2,33,.85);--pink:#ff2d95;--cyan:#0ff;--orange:#ff6b2b;--yellow:#ffd319;--purple:#b24bf3;--text:#e8dff5;--muted:#8b7fa8}
+html{scroll-behavior:smooth}
+body{font-family:'Rajdhani',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;line-height:1.6;font-weight:400;min-height:100vh;display:flex;flex-direction:column}
+
+/* Scanline overlay */
+body::after{content:'';position:fixed;top:0;left:0;width:100%;height:100%;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.03) 2px,rgba(0,0,0,.03) 4px);pointer-events:none;z-index:9999}
+
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--pink);border-radius:3px}
+
+/* Main container */
+.error-page{flex:1;display:flex;align-items:center;justify-content:center;text-align:center;padding:2rem;position:relative;overflow:hidden}
+
+/* Sunset gradient */
+.hero-sunset{position:absolute;bottom:0;left:0;right:0;height:50%;background:linear-gradient(to top,rgba(255,211,25,.08) 0%,rgba(255,107,43,.1) 25%,rgba(255,45,149,.08) 50%,transparent 100%);pointer-events:none}
+
+/* Grid perspective */
+.hero-grid{position:absolute;bottom:0;left:0;right:0;height:45%;perspective:400px;overflow:hidden}
+.hero-grid-inner{position:absolute;bottom:0;left:-50%;right:-50%;height:200%;transform:rotateX(60deg);transform-origin:bottom;background-image:linear-gradient(var(--pink) 1px,transparent 1px),linear-gradient(90deg,var(--pink) 1px,transparent 1px);background-size:60px 60px;opacity:.12;animation:gridScroll 3s linear infinite}
+@keyframes gridScroll{0%{transform:rotateX(60deg) translateY(0)}100%{transform:rotateX(60deg) translateY(60px)}}
+
+/* Ambient glow orbs */
+.orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.15;pointer-events:none;animation:orbFloat 8s ease-in-out infinite}
+.orb-1{width:400px;height:400px;background:var(--pink);top:-100px;left:-100px;animation-delay:0s}
+.orb-2{width:350px;height:350px;background:var(--cyan);bottom:-80px;right:-80px;animation-delay:-4s}
+.orb-3{width:250px;height:250px;background:var(--purple);top:50%;left:50%;transform:translate(-50%,-50%);animation-delay:-2s}
+@keyframes orbFloat{0%,100%{transform:translate(0,0) scale(1)}25%{transform:translate(20px,-15px) scale(1.05)}50%{transform:translate(-10px,20px) scale(.95)}75%{transform:translate(-20px,-10px) scale(1.02)}}
+
+.error-content{position:relative;z-index:2}
+
+/* Giant 404 with neon glow */
+.error-code{font-family:'Orbitron',sans-serif;font-size:clamp(8rem,20vw,16rem);font-weight:900;line-height:1;letter-spacing:8px;color:var(--text);text-shadow:0 0 20px rgba(255,45,149,.8),0 0 40px rgba(255,45,149,.5),0 0 80px rgba(255,45,149,.3),0 0 120px rgba(0,255,255,.2);position:relative;cursor:default;margin-bottom:1rem;animation:neonPulse 3s ease-in-out infinite}
+@keyframes neonPulse{0%,100%{text-shadow:0 0 20px rgba(255,45,149,.8),0 0 40px rgba(255,45,149,.5),0 0 80px rgba(255,45,149,.3),0 0 120px rgba(0,255,255,.2)}50%{text-shadow:0 0 10px rgba(255,45,149,.6),0 0 25px rgba(255,45,149,.3),0 0 50px rgba(255,45,149,.2),0 0 80px rgba(0,255,255,.1)}}
+
+/* Glitch on the 404 */
+.error-code{position:relative}
+.error-code::before,.error-code::after{content:'404';position:absolute;top:0;left:0;width:100%;overflow:hidden}
+.error-code::before{left:3px;text-shadow:-3px 0 var(--pink);animation:glitch404a 4s infinite linear alternate-reverse;clip-path:inset(0 0 70% 0)}
+.error-code::after{left:-3px;text-shadow:3px 0 var(--cyan);animation:glitch404b 4s infinite linear alternate-reverse;clip-path:inset(70% 0 0 0)}
+@keyframes glitch404a{0%{clip-path:inset(15% 0 75% 0)}10%{clip-path:inset(5% 0 65% 0)}20%{clip-path:inset(25% 0 55% 0)}30%{clip-path:inset(10% 0 70% 0)}40%{clip-path:inset(30% 0 50% 0)}50%{clip-path:inset(0 0 80% 0)}60%{clip-path:inset(20% 0 60% 0)}70%{clip-path:inset(8% 0 72% 0)}80%{clip-path:inset(15% 0 65% 0)}90%{clip-path:inset(5% 0 75% 0)}100%{clip-path:inset(22% 0 58% 0)}}
+@keyframes glitch404b{0%{clip-path:inset(70% 0 5% 0)}10%{clip-path:inset(80% 0 0 0)}20%{clip-path:inset(65% 0 10% 0)}30%{clip-path:inset(75% 0 5% 0)}40%{clip-path:inset(60% 0 15% 0)}50%{clip-path:inset(85% 0 0 0)}60%{clip-path:inset(70% 0 10% 0)}70%{clip-path:inset(78% 0 2% 0)}80%{clip-path:inset(65% 0 12% 0)}90%{clip-path:inset(72% 0 8% 0)}100%{clip-path:inset(68% 0 7% 0)}}
+
+/* Subtitle */
+.error-title{font-family:'Orbitron',sans-serif;font-size:clamp(1rem,2.5vw,1.4rem);font-weight:600;text-transform:uppercase;letter-spacing:4px;color:var(--cyan);text-shadow:0 0 10px rgba(0,255,255,.5);margin-bottom:.8rem}
+
+.error-msg{font-size:clamp(1rem,2vw,1.2rem);color:var(--muted);max-width:500px;margin:0 auto 2.5rem;letter-spacing:.5px}
+
+/* Mini equalizer */
+.mini-eq{display:flex;align-items:end;gap:3px;height:30px;justify-content:center;margin-bottom:2.5rem}
+.mini-eq .eq-bar{width:4px;border-radius:2px;background:linear-gradient(to top,var(--pink),var(--cyan));animation:eqBounce 1s ease-in-out infinite}
+.mini-eq .eq-bar:nth-child(1){height:12px;animation-delay:0s}
+.mini-eq .eq-bar:nth-child(2){height:20px;animation-delay:.15s}
+.mini-eq .eq-bar:nth-child(3){height:15px;animation-delay:.3s}
+.mini-eq .eq-bar:nth-child(4){height:25px;animation-delay:.1s}
+.mini-eq .eq-bar:nth-child(5){height:18px;animation-delay:.25s}
+.mini-eq .eq-bar:nth-child(6){height:22px;animation-delay:.05s}
+.mini-eq .eq-bar:nth-child(7){height:14px;animation-delay:.2s}
+@keyframes eqBounce{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.25)}}
+
+/* CTA button */
+.error-cta{display:inline-flex;align-items:center;gap:.7rem;padding:.9rem 2.2rem;border-radius:4px;font-family:'Orbitron',sans-serif;font-size:.85rem;font-weight:600;text-decoration:none;color:var(--bg);background:linear-gradient(135deg,var(--pink),var(--orange));border:none;cursor:pointer;text-transform:uppercase;letter-spacing:2px;transition:all .3s;box-shadow:0 0 20px rgba(255,45,149,.4),inset 0 0 20px rgba(255,255,255,.1)}
+.error-cta:hover{transform:translateY(-2px);box-shadow:0 0 40px rgba(255,45,149,.6),inset 0 0 20px rgba(255,255,255,.15)}
+
+/* Vinyl record decoration */
+.vinyl{position:absolute;width:200px;height:200px;border-radius:50%;border:2px solid rgba(255,45,149,.08);opacity:.06;pointer-events:none;animation:vinylSpin 12s linear infinite}
+.vinyl::before{content:'';position:absolute;top:50%;left:50%;width:40px;height:40px;border-radius:50%;border:2px solid rgba(0,255,255,.15);transform:translate(-50%,-50%)}
+.vinyl-1{top:8%;right:5%}
+.vinyl-2{bottom:12%;left:3%;animation-direction:reverse;width:150px;height:150px}
+@keyframes vinylSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+
+@media(max-width:768px){
+.error-code{letter-spacing:2px}
+.vinyl{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="error-page">
+  <div class="hero-sunset"></div>
+  <div class="hero-grid"><div class="hero-grid-inner"></div></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <div class="vinyl vinyl-1"></div>
+  <div class="vinyl vinyl-2"></div>
+
+  <div class="error-content">
+    <div class="mini-eq">
+      <div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div>
+      <div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div>
+      <div class="eq-bar"></div>
+    </div>
+
+    <div class="error-code">404</div>
+
+    <div class="error-title">Track Not Found</div>
+    <p class="error-msg">This page got lost in the synthwave. The track you're looking for doesn't exist in our playlist.</p>
+
+    <a href="./" class="error-cta"><i class="fas fa-home"></i> Back to Home</a>
+  </div>
+</div>
+
+</body>
+</html>

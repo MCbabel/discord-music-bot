@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Changelog — MelodyBot</title>
+<link rel="canonical" href="https://mcbabel.github.io/discord-music-bot/changelog.html">
+<meta name="description" content="MelodyBot changelog — version history, new features, bug fixes, and breaking changes.">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0d0221;--surface:#130330;--card:rgba(13,2,33,.85);--pink:#ff2d95;--cyan:#0ff;--orange:#ff6b2b;--yellow:#ffd319;--purple:#b24bf3;--text:#e8dff5;--muted:#8b7fa8}
+html{scroll-behavior:smooth}
+body{font-family:'Rajdhani',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;line-height:1.6;font-weight:400}
+
+/* Scanline overlay */
+body::after{content:'';position:fixed;top:0;left:0;width:100%;height:100%;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.03) 2px,rgba(0,0,0,.03) 4px);pointer-events:none;z-index:9999}
+
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--pink);border-radius:3px}
+
+/* Nav */
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(16px);background:rgba(13,2,33,.7);border-bottom:1px solid rgba(255,45,149,.15);transition:all .3s}
+nav.scrolled{padding:.6rem 2rem;background:rgba(13,2,33,.95)}
+.nav-brand{display:flex;align-items:center;gap:.6rem;font-family:'Orbitron',sans-serif;font-weight:700;font-size:1.15rem;color:var(--pink);text-decoration:none;text-shadow:0 0 10px rgba(255,45,149,.5)}
+.nav-brand i{color:var(--cyan);text-shadow:0 0 10px rgba(0,255,255,.5)}
+.nav-links{display:flex;gap:2rem;list-style:none}
+.nav-links a{color:var(--muted);text-decoration:none;font-size:.9rem;font-weight:500;transition:all .3s;letter-spacing:.5px}
+.nav-links a:hover,.nav-links a.active{color:var(--cyan);text-shadow:0 0 8px rgba(0,255,255,.4)}
+.nav-toggle{display:none;background:none;border:none;color:var(--text);font-size:1.3rem;cursor:pointer}
+
+.container{max-width:1160px;margin:0 auto;padding:0 2rem}
+
+/* Hero header (shorter) */
+.page-hero{padding:8rem 2rem 4rem;position:relative;overflow:hidden;text-align:center}
+.hero-sunset{position:absolute;bottom:0;left:0;right:0;height:50%;background:linear-gradient(to top,rgba(255,211,25,.08) 0%,rgba(255,107,43,.1) 25%,rgba(255,45,149,.08) 50%,transparent 100%);pointer-events:none}
+.hero-grid{position:absolute;bottom:0;left:0;right:0;height:60%;perspective:400px;overflow:hidden}
+.hero-grid-inner{position:absolute;bottom:0;left:-50%;right:-50%;height:200%;transform:rotateX(60deg);transform-origin:bottom;background-image:linear-gradient(var(--pink) 1px,transparent 1px),linear-gradient(90deg,var(--pink) 1px,transparent 1px);background-size:60px 60px;opacity:.12;animation:gridScroll 3s linear infinite}
+@keyframes gridScroll{0%{transform:rotateX(60deg) translateY(0)}100%{transform:rotateX(60deg) translateY(60px)}}
+
+.page-hero-content{position:relative;z-index:2}
+.page-title{font-family:'Orbitron',sans-serif;font-size:clamp(2rem,5vw,3.5rem);font-weight:900;text-transform:uppercase;letter-spacing:4px;color:var(--text);text-shadow:0 0 15px rgba(255,45,149,.6),0 0 30px rgba(255,45,149,.3),0 0 60px rgba(0,255,255,.15);margin-bottom:.6rem}
+.page-subtitle{font-size:clamp(.95rem,1.8vw,1.15rem);color:var(--muted);max-width:500px;margin:0 auto;letter-spacing:.5px}
+
+/* Timeline */
+.changelog-section{padding:4rem 0 6rem;position:relative;z-index:1}
+
+.timeline{position:relative;max-width:900px;margin:0 auto}
+.timeline::before{content:'';position:absolute;left:24px;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,var(--pink),var(--cyan),var(--purple),transparent);opacity:.3}
+
+/* Version block */
+.version-block{position:relative;padding-left:64px;margin-bottom:3rem}
+.version-block:last-child{margin-bottom:0}
+
+/* Timeline dot */
+.version-block::before{content:'';position:absolute;left:17px;top:1.6rem;width:16px;height:16px;border-radius:50%;border:2px solid var(--pink);background:var(--bg);box-shadow:0 0 12px rgba(255,45,149,.5);z-index:2}
+.version-block.major::before{border-color:var(--cyan);box-shadow:0 0 16px rgba(0,255,255,.6);width:18px;height:18px;left:16px}
+
+/* Version heading */
+.version-header{margin-bottom:1.2rem}
+.version-tag{font-family:'Orbitron',sans-serif;font-size:clamp(1.2rem,2.5vw,1.6rem);font-weight:700;color:var(--text);text-shadow:0 0 10px rgba(0,255,255,.4);display:inline-block}
+.version-tag .v-num{color:var(--cyan)}
+.version-date{font-size:.85rem;color:var(--muted);margin-left:.5rem;letter-spacing:.5px}
+.version-subtitle{font-family:'Orbitron',sans-serif;font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:2px;color:var(--orange);text-shadow:0 0 8px rgba(255,107,43,.4);margin-top:.2rem}
+
+/* Change card */
+.change-card{background:var(--card);border:1px solid rgba(255,45,149,.1);border-radius:4px;padding:1.5rem 1.8rem;margin-bottom:.8rem;transition:all .3s}
+.change-card:hover{border-color:rgba(255,45,149,.25);box-shadow:0 0 20px rgba(255,45,149,.08)}
+
+.change-category{font-family:'Orbitron',sans-serif;font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:.8rem;display:flex;align-items:center;gap:.5rem}
+.change-category .cat-icon{font-size:.9rem}
+.cat-breaking{color:var(--pink);text-shadow:0 0 6px rgba(255,45,149,.4)}
+.cat-features{color:var(--cyan);text-shadow:0 0 6px rgba(0,255,255,.4)}
+.cat-fixes{color:var(--orange);text-shadow:0 0 6px rgba(255,107,43,.4)}
+.cat-docs{color:var(--purple);text-shadow:0 0 6px rgba(178,75,243,.4)}
+
+.change-list{list-style:none;padding:0}
+.change-list li{position:relative;padding-left:1.2rem;margin-bottom:.4rem;color:var(--muted);font-size:.9rem;line-height:1.7}
+.change-list li::before{content:'›';position:absolute;left:0;color:var(--pink);font-weight:700;font-size:1.1rem}
+.change-list li code{background:rgba(0,255,255,.08);border:1px solid rgba(0,255,255,.12);padding:.05rem .4rem;border-radius:2px;font-size:.8rem;color:var(--cyan)}
+
+/* Divider between major versions */
+.version-divider{height:1px;background:linear-gradient(90deg,transparent,var(--pink),var(--cyan),transparent);margin:2rem 0 2rem 64px;opacity:.2}
+
+/* Footer */
+footer{border-top:1px solid rgba(255,45,149,.12);padding:2rem 0;position:relative;z-index:1}
+.footer-inner{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+.footer-links{display:flex;gap:1.5rem;flex-wrap:wrap}
+footer a{color:var(--pink);text-decoration:none;display:inline-flex;align-items:center;gap:.4rem;font-size:.9rem;transition:all .3s;text-shadow:0 0 6px rgba(255,45,149,.3)}
+footer a:hover{color:var(--cyan);text-shadow:0 0 8px rgba(0,255,255,.4)}
+.footer-copy{color:var(--muted);font-size:.82rem}
+
+/* Reveal */
+.reveal{opacity:0;transform:translateY(25px);transition:all .7s cubic-bezier(.16,1,.3,1)}
+.reveal.visible{opacity:1;transform:translateY(0)}
+
+@media(max-width:768px){
+.nav-links{display:none;position:absolute;top:100%;left:0;right:0;background:rgba(13,2,33,.97);flex-direction:column;padding:1.5rem;gap:1rem;border-bottom:1px solid rgba(255,45,149,.15)}
+.nav-links.open{display:flex}
+.nav-toggle{display:block}
+.timeline::before{left:16px}
+.version-block{padding-left:48px}
+.version-block::before{left:9px;width:14px;height:14px}
+.version-block.major::before{left:8px;width:16px;height:16px}
+.version-divider{margin-left:48px}
+.change-card{padding:1.2rem}
+}
+</style>
+</head>
+<body>
+
+<nav id="navbar">
+  <a href="./" class="nav-brand"><i class="fas fa-bolt"></i> MELODYBOT</a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="./">Home</a></li>
+    <li><a href="./changelog.html" class="active">Changelog</a></li>
+    <li><a href="https://github.com/MCbabel/discord-music-bot" target="_blank">GitHub</a></li>
+  </ul>
+  <button class="nav-toggle" id="navToggle" aria-label="Menu"><i class="fas fa-bars"></i></button>
+</nav>
+
+<section class="page-hero">
+  <div class="hero-sunset"></div>
+  <div class="hero-grid"><div class="hero-grid-inner"></div></div>
+  <div class="page-hero-content">
+    <h1 class="page-title">Changelog</h1>
+    <p class="page-subtitle">Every update, feature, and fix — tracked through the synthwave timeline</p>
+  </div>
+</section>
+
+<section class="changelog-section">
+  <div class="container">
+    <div class="timeline">
+
+      <!-- v2.0.0 -->
+      <div class="version-block major reveal">
+        <div class="version-header">
+          <div class="version-tag"><span class="v-num">v2.0.0</span> <span class="version-date">— 2026-02-27</span></div>
+          <div class="version-subtitle">Complete Rewrite</div>
+        </div>
+
+        <div class="change-card">
+          <div class="change-category cat-breaking"><span class="cat-icon">🔄</span> Breaking Changes</div>
+          <ul class="change-list">
+            <li>Complete rewrite from Python / <code>discord.py</code> to JavaScript / <code>discord.js v14</code></li>
+            <li>All text commands replaced with slash commands</li>
+          </ul>
+        </div>
+
+        <div class="change-card">
+          <div class="change-category cat-features"><span class="cat-icon">✨</span> New Features</div>
+          <ul class="change-list">
+            <li>19 slash commands (was 16 text commands)</li>
+            <li><code>yt-dlp</code> for YouTube audio (replaces <code>youtube_dl</code>)</li>
+            <li>Spotify track support via <code>spotify-web-api-node</code></li>
+            <li>Genius lyrics integration</li>
+            <li>Guild-scoped playlists with file persistence</li>
+            <li>Interactive "Now Playing" embeds with buttons (⏸️/▶️, ⏭️, 🔁)</li>
+            <li>Auto-disconnect after 3 minutes of inactivity</li>
+            <li>Volume control with inline audio processing</li>
+            <li>Democratic <code>/vote_skip</code> system</li>
+            <li>YouTube cookie authentication support (<code>cookies.txt</code>)</li>
+            <li><code>/language</code> command — per-server localization (EN 🇬🇧, DE 🇩🇪, ES 🇪🇸)</li>
+            <li><code>/queue</code> and <code>/nowplaying</code> commands</li>
+            <li><code>/join</code> and <code>/leave</code> commands</li>
+            <li>Command reset utility (<code>npm run reset</code>)</li>
+            <li><code>ffmpeg-static</code> bundled — no manual FFmpeg install needed</li>
+          </ul>
+        </div>
+
+        <div class="change-card">
+          <div class="change-category cat-fixes"><span class="cat-icon">🐛</span> Bug Fixes</div>
+          <ul class="change-list">
+            <li>Fixed 39 bugs from the original Python codebase</li>
+            <li>Proper error handling for all commands (no more silent failures)</li>
+            <li>Skip votes clear on track change</li>
+            <li>Queue limit enforcement (max 100 tracks)</li>
+            <li>Playlist validation and size limits</li>
+            <li>Bot count excluded from vote skip threshold</li>
+          </ul>
+        </div>
+
+        <div class="change-card">
+          <div class="change-category cat-docs"><span class="cat-icon">📚</span> Documentation</div>
+          <ul class="change-list">
+            <li>Complete README rewrite for JavaScript version</li>
+            <li>shields.io badges (version, license, platform, i18n, stars, downloads)</li>
+            <li><code>cookies.txt.example</code> template</li>
+            <li>Updated GitHub repo description and topics</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="version-divider"></div>
+
+      <!-- v1.4.1 -->
+      <div class="version-block reveal">
+        <div class="version-header">
+          <div class="version-tag"><span class="v-num">v1.4.1</span> <span class="version-date">— 2024</span></div>
+          <div class="version-subtitle">Last Python Release</div>
+        </div>
+        <div class="change-card">
+          <div class="change-category cat-fixes"><span class="cat-icon">🐛</span> Bug Fixes</div>
+          <ul class="change-list">
+            <li>Bug fixes and stability improvements</li>
+            <li>Final release before JavaScript rewrite</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- v1.4.0 -->
+      <div class="version-block reveal">
+        <div class="version-header">
+          <div class="version-tag"><span class="v-num">v1.4.0</span> <span class="version-date">— 2024</span></div>
+        </div>
+        <div class="change-card">
+          <div class="change-category cat-features"><span class="cat-icon">✨</span> New Features</div>
+          <ul class="change-list">
+            <li>Added Spotify support</li>
+            <li>Added Genius lyrics support</li>
+            <li>Custom playlists feature</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- v1.0.0 -->
+      <div class="version-block reveal">
+        <div class="version-header">
+          <div class="version-tag"><span class="v-num">v1.0.0</span> <span class="version-date">— 2024</span></div>
+          <div class="version-subtitle">Initial Release</div>
+        </div>
+        <div class="change-card">
+          <div class="change-category cat-features"><span class="cat-icon">🚀</span> Initial Features</div>
+          <ul class="change-list">
+            <li>Basic music playback with <code>discord.py</code></li>
+            <li>YouTube support via <code>youtube_dl</code></li>
+            <li>Queue management</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="footer-inner">
+      <div class="footer-links">
+        <a href="https://github.com/MCbabel/discord-music-bot" target="_blank"><i class="fab fa-github"></i> GitHub Repository</a>
+        <a href="./"><i class="fas fa-home"></i> Home</a>
+      </div>
+      <span class="footer-copy">MelodyBot — MIT License — Synthwave Edition</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+// Scroll reveal
+const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target)}})},{threshold:.1,rootMargin:'0px 0px -30px 0px'});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+
+// Nav scroll
+window.addEventListener('scroll',()=>{document.getElementById('navbar').classList.toggle('scrolled',window.scrollY>50)});
+
+// Mobile nav
+document.getElementById('navToggle').addEventListener('click',()=>{document.getElementById('navLinks').classList.toggle('open')});
+document.querySelectorAll('.nav-links a').forEach(a=>a.addEventListener('click',()=>{document.getElementById('navLinks').classList.remove('open')}));
+</script>
+</body>
+</html>

@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MelodyBot — Discord Music Bot</title>
+<link rel="canonical" href="https://mcbabel.github.io/discord-music-bot/">
+<meta name="description" content="A feature-rich Discord music bot — YouTube, Spotify, lyrics, playlists & 19 slash commands. Retro vibes, modern sound.">
+<meta property="og:title" content="MelodyBot — Discord Music Bot">
+<meta property="og:description" content="A feature-rich Discord music bot — YouTube, Spotify, lyrics, playlists & 19 slash commands.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://mcbabel.github.io/discord-music-bot/">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0d0221;--surface:#130330;--card:rgba(13,2,33,.85);--pink:#ff2d95;--cyan:#0ff;--orange:#ff6b2b;--yellow:#ffd319;--purple:#b24bf3;--text:#e8dff5;--muted:#8b7fa8}
+html{scroll-behavior:smooth}
+body{font-family:'Rajdhani',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;line-height:1.6;font-weight:400}
+
+/* Scanline overlay */
+body::after{content:'';position:fixed;top:0;left:0;width:100%;height:100%;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.03) 2px,rgba(0,0,0,.03) 4px);pointer-events:none;z-index:9999}
+
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--pink);border-radius:3px}
+
+/* Nav */
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(16px);background:rgba(13,2,33,.7);border-bottom:1px solid rgba(255,45,149,.15);transition:all .3s}
+nav.scrolled{padding:.6rem 2rem;background:rgba(13,2,33,.95)}
+.nav-brand{display:flex;align-items:center;gap:.6rem;font-family:'Orbitron',sans-serif;font-weight:700;font-size:1.15rem;color:var(--pink);text-decoration:none;text-shadow:0 0 10px rgba(255,45,149,.5)}
+.nav-brand i{color:var(--cyan);text-shadow:0 0 10px rgba(0,255,255,.5)}
+.nav-links{display:flex;gap:2rem;list-style:none}
+.nav-links a{color:var(--muted);text-decoration:none;font-size:.9rem;font-weight:500;transition:all .3s;letter-spacing:.5px}
+.nav-links a:hover{color:var(--cyan);text-shadow:0 0 8px rgba(0,255,255,.4)}
+.nav-toggle{display:none;background:none;border:none;color:var(--text);font-size:1.3rem;cursor:pointer}
+
+section{position:relative;z-index:1}
+.container{max-width:1160px;margin:0 auto;padding:0 2rem}
+
+/* Hero */
+.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:6rem 2rem 4rem;position:relative;overflow:hidden}
+
+/* Sunset gradient */
+.hero-sunset{position:absolute;bottom:0;left:0;right:0;height:50%;background:linear-gradient(to top,rgba(255,211,25,.08) 0%,rgba(255,107,43,.1) 25%,rgba(255,45,149,.08) 50%,transparent 100%);pointer-events:none}
+
+/* Grid perspective */
+.hero-grid{position:absolute;bottom:0;left:0;right:0;height:45%;perspective:400px;overflow:hidden}
+.hero-grid-inner{position:absolute;bottom:0;left:-50%;right:-50%;height:200%;transform:rotateX(60deg);transform-origin:bottom;background-image:linear-gradient(var(--pink) 1px,transparent 1px),linear-gradient(90deg,var(--pink) 1px,transparent 1px);background-size:60px 60px;opacity:.12;animation:gridScroll 3s linear infinite}
+@keyframes gridScroll{0%{transform:rotateX(60deg) translateY(0)}100%{transform:rotateX(60deg) translateY(60px)}}
+
+.hero-content{position:relative;z-index:2}
+
+/* Equalizer */
+.equalizer{display:flex;align-items:end;gap:4px;height:50px;justify-content:center;margin-bottom:2rem}
+.eq-bar{width:6px;border-radius:3px;background:linear-gradient(to top,var(--pink),var(--cyan));animation:eqBounce 1s ease-in-out infinite}
+.eq-bar:nth-child(1){height:20px;animation-delay:0s}
+.eq-bar:nth-child(2){height:35px;animation-delay:.1s}
+.eq-bar:nth-child(3){height:25px;animation-delay:.2s}
+.eq-bar:nth-child(4){height:45px;animation-delay:.3s}
+.eq-bar:nth-child(5){height:30px;animation-delay:.4s}
+.eq-bar:nth-child(6){height:40px;animation-delay:.15s}
+.eq-bar:nth-child(7){height:20px;animation-delay:.25s}
+.eq-bar:nth-child(8){height:35px;animation-delay:.35s}
+.eq-bar:nth-child(9){height:28px;animation-delay:.45s}
+.eq-bar:nth-child(10){height:42px;animation-delay:.05s}
+.eq-bar:nth-child(11){height:18px;animation-delay:.2s}
+@keyframes eqBounce{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.25)}}
+
+/* Glitch effect */
+.glitch{position:relative;font-family:'Orbitron',sans-serif;font-size:clamp(2.5rem,7vw,5.5rem);font-weight:900;text-transform:uppercase;letter-spacing:4px;color:var(--text);margin-bottom:.8rem;cursor:default}
+.glitch:hover{animation:glitchAnim .3s linear infinite}
+.glitch::before,.glitch::after{content:attr(data-text);position:absolute;top:0;left:0;width:100%;overflow:hidden}
+.glitch:hover::before{left:2px;text-shadow:-2px 0 var(--pink);animation:glitch1 .4s infinite linear alternate-reverse;clip-path:inset(0 0 65% 0)}
+.glitch:hover::after{left:-2px;text-shadow:2px 0 var(--cyan);animation:glitch2 .4s infinite linear alternate-reverse;clip-path:inset(35% 0 0 0)}
+@keyframes glitch1{0%{clip-path:inset(20% 0 60% 0)}25%{clip-path:inset(10% 0 70% 0)}50%{clip-path:inset(40% 0 30% 0)}75%{clip-path:inset(5% 0 75% 0)}100%{clip-path:inset(30% 0 40% 0)}}
+@keyframes glitch2{0%{clip-path:inset(60% 0 5% 0)}25%{clip-path:inset(70% 0 10% 0)}50%{clip-path:inset(50% 0 20% 0)}75%{clip-path:inset(80% 0 0 0)}100%{clip-path:inset(55% 0 15% 0)}}
+@keyframes glitchAnim{0%{transform:translate(0)}20%{transform:translate(-2px,1px)}40%{transform:translate(1px,-1px)}60%{transform:translate(-1px,2px)}80%{transform:translate(2px,-1px)}100%{transform:translate(0)}}
+
+.hero-sub{font-size:clamp(1rem,2vw,1.25rem);color:var(--muted);max-width:580px;margin:0 auto 1.5rem;font-weight:400;letter-spacing:.5px}
+.hero-badges{display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap;margin-bottom:2rem}
+.hero-badges img{height:22px;border-radius:3px;opacity:.8;transition:opacity .3s}
+.hero-badges img:hover{opacity:1}
+.hero-cta{display:inline-flex;align-items:center;gap:.7rem;padding:.9rem 2.2rem;border-radius:4px;font-family:'Orbitron',sans-serif;font-size:.85rem;font-weight:600;text-decoration:none;color:var(--bg);background:linear-gradient(135deg,var(--pink),var(--orange));border:none;cursor:pointer;text-transform:uppercase;letter-spacing:2px;transition:all .3s;box-shadow:0 0 20px rgba(255,45,149,.4),inset 0 0 20px rgba(255,255,255,.1)}
+.hero-cta:hover{transform:translateY(-2px);box-shadow:0 0 40px rgba(255,45,149,.6),inset 0 0 20px rgba(255,255,255,.15)}
+
+/* Section Titles */
+.stitle{text-align:center;margin-bottom:3.5rem}
+.stitle h2{font-family:'Orbitron',sans-serif;font-size:clamp(1.5rem,3.5vw,2.2rem);font-weight:700;text-transform:uppercase;letter-spacing:3px;margin-bottom:.5rem;-webkit-text-stroke:1px var(--pink);color:transparent;text-shadow:0 0 15px rgba(255,45,149,.3)}
+.stitle .filled{-webkit-text-stroke:0;color:var(--text);text-shadow:0 0 20px rgba(0,255,255,.3)}
+.stitle p{color:var(--muted);max-width:480px;margin:0 auto;font-size:.95rem}
+
+/* Features */
+.features{padding:6rem 0}
+.feat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:1.5rem}
+.feat-card{background:var(--card);border:1px solid rgba(255,45,149,.12);border-radius:4px;padding:2rem;transition:all .4s;position:relative}
+.feat-card::before{content:'';position:absolute;inset:-1px;border-radius:4px;background:linear-gradient(135deg,var(--pink),var(--cyan));z-index:-1;opacity:0;transition:opacity .4s}
+.feat-card:hover::before{opacity:1}
+.feat-card:hover{background:rgba(13,2,33,.95);transform:translateY(-4px);box-shadow:0 0 30px rgba(255,45,149,.15)}
+.feat-icon{font-size:1.5rem;margin-bottom:1rem;display:inline-block}
+.feat-icon.pk{color:var(--pink);text-shadow:0 0 10px rgba(255,45,149,.5)}
+.feat-icon.cy{color:var(--cyan);text-shadow:0 0 10px rgba(0,255,255,.5)}
+.feat-icon.or{color:var(--orange);text-shadow:0 0 10px rgba(255,107,43,.5)}
+.feat-card h3{font-family:'Orbitron',sans-serif;font-size:.9rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:.4rem}
+.feat-card p{color:var(--muted);font-size:.88rem;line-height:1.7}
+
+/* Commands */
+.commands{padding:6rem 0}
+.cmd-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:.7rem}
+.cmd-item{display:flex;align-items:center;gap:.7rem;padding:.7rem 1rem;background:var(--card);border:1px solid rgba(255,45,149,.08);border-radius:3px;transition:all .3s}
+.cmd-item:hover{border-color:var(--pink);box-shadow:0 0 15px rgba(255,45,149,.1)}
+.cmd-name{font-family:'Orbitron',sans-serif;color:var(--cyan);font-size:.72rem;font-weight:600;letter-spacing:.5px;white-space:nowrap;text-shadow:0 0 6px rgba(0,255,255,.3)}
+.cmd-desc{color:var(--muted);font-size:.78rem}
+.cmd-line{width:1px;height:18px;background:rgba(255,45,149,.3);flex-shrink:0}
+
+/* Setup */
+.setup{padding:6rem 0}
+.steps-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem}
+.step-card{text-align:center;padding:2rem;background:var(--card);border:1px solid rgba(255,45,149,.12);border-radius:4px;transition:all .3s}
+.step-card:hover{border-color:var(--cyan);box-shadow:0 0 25px rgba(0,255,255,.1);transform:translateY(-3px)}
+.step-num{font-family:'Orbitron',sans-serif;font-size:2rem;font-weight:900;color:var(--pink);text-shadow:0 0 20px rgba(255,45,149,.4);margin-bottom:.8rem}
+.step-card h3{font-family:'Orbitron',sans-serif;font-size:.85rem;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:.5rem}
+.step-card p{color:var(--muted);font-size:.9rem}
+.step-card code{background:rgba(0,255,255,.08);border:1px solid rgba(0,255,255,.15);padding:.1rem .5rem;border-radius:2px;font-size:.8rem;color:var(--cyan)}
+.step-card a{color:var(--pink)}
+
+/* Footer */
+footer{border-top:1px solid rgba(255,45,149,.12);padding:2rem 0;position:relative;z-index:1}
+.footer-inner{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+.footer-links{display:flex;gap:1.5rem;flex-wrap:wrap}
+footer a{color:var(--pink);text-decoration:none;display:inline-flex;align-items:center;gap:.4rem;font-size:.9rem;transition:all .3s;text-shadow:0 0 6px rgba(255,45,149,.3)}
+footer a:hover{color:var(--cyan);text-shadow:0 0 8px rgba(0,255,255,.4)}
+.footer-copy{color:var(--muted);font-size:.82rem}
+
+/* Reveal */
+.reveal{opacity:0;transform:translateY(25px);transition:all .7s cubic-bezier(.16,1,.3,1)}
+.reveal.visible{opacity:1;transform:translateY(0)}
+
+/* Neon line separator */
+.neon-sep{height:1px;background:linear-gradient(90deg,transparent,var(--pink),var(--cyan),transparent);margin:0 auto;max-width:300px;margin-top:3rem;opacity:.4}
+
+@media(max-width:768px){
+.nav-links{display:none;position:absolute;top:100%;left:0;right:0;background:rgba(13,2,33,.97);flex-direction:column;padding:1.5rem;gap:1rem;border-bottom:1px solid rgba(255,45,149,.15)}
+.nav-links.open{display:flex}
+.nav-toggle{display:block}
+.feat-grid,.cmd-grid,.steps-row{grid-template-columns:1fr}
+.glitch{letter-spacing:1px}
+}
+</style>
+</head>
+<body>
+
+<nav id="navbar">
+  <a href="./" class="nav-brand"><i class="fas fa-bolt"></i> MELODYBOT</a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#commands">Commands</a></li>
+    <li><a href="#setup">Setup</a></li>
+    <li><a href="./changelog.html">Changelog</a></li>
+    <li><a href="https://github.com/MCbabel/discord-music-bot" target="_blank">GitHub</a></li>
+  </ul>
+  <button class="nav-toggle" id="navToggle" aria-label="Menu"><i class="fas fa-bars"></i></button>
+</nav>
+
+<section class="hero" id="hero">
+  <div class="hero-sunset"></div>
+  <div class="hero-grid"><div class="hero-grid-inner"></div></div>
+  <div class="hero-content">
+    <div class="equalizer">
+      <div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div>
+      <div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div>
+      <div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div>
+      <div class="eq-bar"></div><div class="eq-bar"></div>
+    </div>
+    <h1 class="glitch" data-text="MelodyBot">MelodyBot</h1>
+    <p class="hero-sub">A feature-rich Discord music bot — YouTube, Spotify, lyrics, playlists & 19 slash commands. Retro vibes, modern sound.</p>
+    <div class="hero-badges">
+      <img src="https://img.shields.io/badge/discord.js-v14-5865F2?logo=discord&logoColor=white" alt="discord.js">
+      <img src="https://img.shields.io/badge/node-18%2B-brightgreen?logo=node.js" alt="Node">
+      <img src="https://img.shields.io/badge/languages-EN%20%7C%20DE%20%7C%20ES-blueviolet" alt="i18n">
+      <img src="https://img.shields.io/badge/license-MIT-blue" alt="License">
+    </div>
+    <a href="https://github.com/MCbabel/discord-music-bot" class="hero-cta" target="_blank"><i class="fab fa-github"></i> Get Started</a>
+  </div>
+</section>
+
+<section class="features" id="features">
+  <div class="container">
+    <div class="stitle reveal">
+      <h2><span class="filled">Powerful</span> Features</h2>
+      <p>Everything your server needs for the ultimate audio experience</p>
+    </div>
+    <div class="feat-grid">
+      <div class="feat-card reveal">
+        <div class="feat-icon pk"><i class="fas fa-play-circle"></i></div>
+        <h3>Music Playback</h3>
+        <p>Play any song from YouTube via URL or search query. Crystal-clear audio streaming with full queue management.</p>
+      </div>
+      <div class="feat-card reveal">
+        <div class="feat-icon cy"><i class="fab fa-spotify"></i></div>
+        <h3>Spotify Integration</h3>
+        <p>Paste a Spotify link and MelodyBot resolves it to YouTube for seamless playback. Two platforms, one bot.</p>
+      </div>
+      <div class="feat-card reveal">
+        <div class="feat-icon or"><i class="fas fa-microphone-alt"></i></div>
+        <h3>Lyrics Fetching</h3>
+        <p>Retrieve real-time lyrics for any playing track via the Genius API. Never miss a single word again.</p>
+      </div>
+      <div class="feat-card reveal">
+        <div class="feat-icon pk"><i class="fas fa-compact-disc"></i></div>
+        <h3>Custom Playlists</h3>
+        <p>Create, save, and replay your own playlists. Build the perfect collection for any mood or moment.</p>
+      </div>
+      <div class="feat-card reveal">
+        <div class="feat-icon cy"><i class="fas fa-globe"></i></div>
+        <h3>Multi-Language</h3>
+        <p>Full support for English, German, and Spanish. Everyone can use MelodyBot in their preferred language.</p>
+      </div>
+      <div class="feat-card reveal">
+        <div class="feat-icon or"><i class="fas fa-vote-yea"></i></div>
+        <h3>Vote Skip</h3>
+        <p>Democratic skip voting for shared listening. Fair and fun — no more single-person queue domination.</p>
+      </div>
+    </div>
+    <div class="neon-sep"></div>
+  </div>
+</section>
+
+<section class="commands" id="commands">
+  <div class="container">
+    <div class="stitle reveal">
+      <h2>19 Slash <span class="filled">Commands</span></h2>
+      <p>Complete control through modern Discord slash commands</p>
+    </div>
+    <div class="cmd-grid">
+      <div class="cmd-item reveal"><span class="cmd-name">/play</span><span class="cmd-line"></span><span class="cmd-desc">Play by name, URL, or Spotify</span></div>
+      <div class="cmd-item reveal"><span class="cmd-name">/pause</span><span class="cmd-line"></span><span class="cmd-desc">Pause playback</span></div>
+      <div class="cmd-item reveal"><span class="cmd-name">/resume</span><span class="cmd-line"></span><span class="cmd-desc">Resume playback</span></div>
+      <div class="cmd-item reveal"><span class="cmd-name">/skip</span><span class="cmd-line"></span><span class="cmd-desc">Skip current track</span></div>
+      <div class="cmd-item reveal"><span class="cmd-name">/stop</span><span class="cmd-line"></span><span class="cmd-desc">Stop & clear queue</span></div>
+      <div class="cmd-item reveal"><span class="cmd-name">/queue</span><span class="cmd-line"></span><span class="cmd-desc">View the queue</span></div>
+      <div class="cmd-item reveal"><span class="cmd-name">/nowplaying</span><span class="cmd-line"></span><span class="cmd-desc">Now playing info</span></div>
+      <div class="cmd-item reveal"><span class="cmd-name">/volume</span><span class="cmd-line"></span><span class="cmd-desc">Set volume 0–100</span></div>
+      <div class="cmd-item reveal"><span class="cmd-name">/loop</span><span class="cmd-line"></span><span class="cmd-desc">Toggle loop</span></div>
+      <div class="cmd-item reveal"><span class="cmd-name">/vote_skip</span><span class="cmd-line"></span><span class="cmd-desc">Vote to skip</span></div>
+      <div class="cmd-item reveal"><span class="cmd-name">/lyrics</span><span class="cmd-line"></span><span class="cmd-desc">Fetch lyrics</span></div>
+      <div class="cmd-item reveal"><span class="cmd-name">/add_to_playlist</span><span class="cmd-line"></span><span class="cmd-desc">Add to playlist</span></div>
+      <div class="cmd-item reveal"><span class="cmd-name">/play_playlist</span><span class="cmd-line"></span><span class="cmd-desc">Play a playlist</span></div>
+      <div class="cmd-item reveal"><span class="cmd-name">/list_playlists</span><span class="cmd-line"></span><span class="cmd-desc">List playlists</span></div>
+      <div class="cmd-item reveal"><span class="cmd-name">/join</span><span class="cmd-line"></span><span class="cmd-desc">Join voice channel</span></div>
+      <div class="cmd-item reveal"><span class="cmd-name">/leave</span><span class="cmd-line"></span><span class="cmd-desc">Leave voice channel</span></div>
+      <div class="cmd-item reveal"><span class="cmd-name">/clear</span><span class="cmd-line"></span><span class="cmd-desc">Delete messages</span></div>
+      <div class="cmd-item reveal"><span class="cmd-name">/help</span><span class="cmd-line"></span><span class="cmd-desc">Show all commands</span></div>
+      <div class="cmd-item reveal"><span class="cmd-name">/language</span><span class="cmd-line"></span><span class="cmd-desc">Set language</span></div>
+    </div>
+    <div class="neon-sep"></div>
+  </div>
+</section>
+
+<section class="setup" id="setup">
+  <div class="container">
+    <div class="stitle reveal">
+      <h2>Get <span class="filled">Started</span></h2>
+      <p>Three steps to bring MelodyBot to your server</p>
+    </div>
+    <div class="steps-row">
+      <div class="step-card reveal">
+        <div class="step-num">01</div>
+        <h3>Create Your Bot</h3>
+        <p>Visit the <a href="https://discord.com/developers/applications" target="_blank">Discord Developer Portal</a> and create a new application with a bot user.</p>
+      </div>
+      <div class="step-card reveal">
+        <div class="step-num">02</div>
+        <h3>Configure</h3>
+        <p>Clone the repo, run <code>npm install</code>, and set up your <code>.env</code> with Discord, Spotify & Genius API keys.</p>
+      </div>
+      <div class="step-card reveal">
+        <div class="step-num">03</div>
+        <h3>Run & Enjoy</h3>
+        <p>Launch with <code>npm start</code>, invite the bot, and blast music with <code>/play</code>!</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="footer-inner">
+      <div class="footer-links">
+        <a href="https://github.com/MCbabel/discord-music-bot" target="_blank"><i class="fab fa-github"></i> GitHub Repository</a>
+        <a href="./changelog.html"><i class="fas fa-scroll"></i> Changelog</a>
+      </div>
+      <span class="footer-copy">MelodyBot — MIT License — Synthwave Edition</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+// Scroll reveal
+const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target)}})},{threshold:.1,rootMargin:'0px 0px -30px 0px'});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+
+// Nav scroll
+window.addEventListener('scroll',()=>{document.getElementById('navbar').classList.toggle('scrolled',window.scrollY>50)});
+
+// Mobile nav
+document.getElementById('navToggle').addEventListener('click',()=>{document.getElementById('navLinks').classList.toggle('open')});
+document.querySelectorAll('.nav-links a').forEach(a=>a.addEventListener('click',()=>{document.getElementById('navLinks').classList.remove('open')}));
+</script>
+</body>
+</html>
