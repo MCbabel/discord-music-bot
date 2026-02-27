@@ -2,6 +2,20 @@
 
 A feature-rich Discord music bot built with **discord.js v14** and **Node.js**. Supports YouTube and Spotify playback, lyrics fetching via Genius, custom playlists, queue management, and more — all through modern slash commands.
 
+<p align="center">
+  <img src="https://img.shields.io/badge/version-2.0.0-green" alt="Version" />
+  <img src="https://img.shields.io/badge/license-MelodyBot_License-blue" alt="License" />
+  <img src="https://img.shields.io/badge/node-18%2B-brightgreen?logo=node.js" alt="Node" />
+  <img src="https://img.shields.io/badge/discord.js-v14-5865F2?logo=discord&logoColor=white" alt="discord.js" />
+  <img src="https://img.shields.io/badge/audio-yt--dlp-red" alt="yt-dlp" />
+  <img src="https://img.shields.io/badge/FFmpeg-required-orange?logo=ffmpeg" alt="FFmpeg" />
+  <img src="https://img.shields.io/badge/languages-EN%20%7C%20DE%20%7C%20ES-blueviolet" alt="i18n" />
+  <img src="https://img.shields.io/github/stars/MCbabel/discord-music-bot?style=flat&label=stars&color=yellow" alt="GitHub Stars" />
+  <img src="https://img.shields.io/github/downloads/MCbabel/discord-music-bot/total?label=downloads&color=brightgreen" alt="GitHub Downloads" />
+</p>
+
+---
+
 ## Table of Contents
 
 - [Features](#features)
