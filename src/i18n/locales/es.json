@@ -1,0 +1,125 @@
+{
+    "locale.name": "Español",
+    "locale.flag": "🇪🇸",
+
+    "embed.error.title": "❌ Error",
+    "embed.success.title": "✅ Éxito",
+    "embed.info.title": "ℹ️ Info",
+    "embed.warning.title": "⚠️ Advertencia",
+
+    "now_playing.title": "🎵 Reproduciendo",
+    "now_playing.field.title": "Título",
+    "now_playing.field.artist": "Artista",
+    "now_playing.field.duration": "Duración",
+    "now_playing.unknown": "Desconocido",
+
+    "added_to_queue.title": "➕ Añadido a la Cola",
+    "added_to_queue.description": "**{trackTitle}**",
+    "added_to_queue.description_with_artist": "**{trackTitle}** de {artist}",
+    "added_to_queue.field.position": "Posición",
+
+    "queue.title": "📋 Cola",
+    "queue.now_playing": "🎵 Reproduciendo",
+    "queue.empty": "La cola está vacía.",
+    "queue.empty_nothing_playing": "No se está reproduciendo nada y la cola está vacía.",
+    "queue.footer.one": "{count} pista en la cola",
+    "queue.footer.other": "{count} pistas en la cola",
+
+    "lyrics.title": "📜 {title} — {artist}",
+    "lyrics.not_available": "No hay letras disponibles.",
+
+    "connected.title": "🔗 Conectado",
+    "connected.description": "Conectado a **{channel}**.",
+
+    "disconnected.title": "🔌 Desconectado",
+    "disconnected.description": "El bot ha salido del canal de voz.",
+
+    "skipped.title": "⏩ Saltado",
+    "skipped.description": "Se saltó **{title}**.",
+
+    "paused.title": "⏸️ Pausado",
+    "paused.description": "La reproducción ha sido pausada.",
+
+    "resumed.title": "▶️ Reanudado",
+    "resumed.description": "La reproducción ha sido reanudada.",
+
+    "stopped.title": "⏹️ Detenido",
+    "stopped.description": "La reproducción ha sido detenida y la cola ha sido vaciada.",
+
+    "volume.title": "🔊 Volumen Ajustado",
+    "volume.description": "Volumen ajustado a **{percent}%**.",
+
+    "loop_on.title": "🔁 Repetir Activado",
+    "loop_on.description": "La pista actual se repetirá.",
+
+    "loop_off.title": "🔁 Repetir Desactivado",
+    "loop_off.description": "La repetición ha sido desactivada.",
+
+    "vote_skip.title": "🗳️ Votación para Saltar",
+    "vote_skip.description": "¡Voto registrado! Se necesitan **{current}/{required}** votos para saltar.",
+
+    "vote_skip_passed.title": "⏩ Votación Aprobada",
+    "vote_skip_passed.description": "Suficientes votos recibidos — saltando **{title}**.",
+
+    "playlist_added.title": "🎶 Añadido a la Playlist",
+    "playlist_added.description": "**{url}** ha sido añadido a la playlist **{name}**.",
+
+    "playlist_list.title": "📂 Playlists",
+    "playlist_list.empty": "No se encontraron playlists. Crea una con `/add_to_playlist`.",
+    "playlist_list.entry.one": "• **{name}** — {count} pista",
+    "playlist_list.entry.other": "• **{name}** — {count} pistas",
+
+    "help.title": "📖 Ayuda del Bot de Música",
+    "help.description": "Aquí están todos los comandos disponibles:",
+    "help.playback.name": "🎵 Reproducción",
+    "help.playback.value": "`/play <búsqueda>` — Reproduce una canción o añádela a la cola\n`/skip` — Salta la pista actual\n`/stop` — Detén la reproducción y vacía la cola\n`/pause` — Pausa la reproducción\n`/resume` — Reanuda la reproducción",
+    "help.audio.name": "🔊 Audio",
+    "help.audio.value": "`/volume <0-100>` — Ajusta el volumen de reproducción\n`/loop` — Activa o desactiva la repetición de la pista actual",
+    "help.queue.name": "📋 Cola",
+    "help.queue.value": "`/queue` — Muestra la cola actual\n`/nowplaying` — Muestra info de la pista actual",
+    "help.voting.name": "🗳️ Votación",
+    "help.voting.value": "`/vote_skip` — Vota para saltar la pista actual",
+    "help.lyrics.name": "📜 Letras",
+    "help.lyrics.value": "`/lyrics` — Busca la letra de la canción actual",
+    "help.playlists.name": "🎶 Playlists",
+    "help.playlists.value": "`/add_to_playlist <nombre> <url>` — Añade una canción a una playlist\n`/play_playlist <nombre>` — Reproduce una playlist guardada\n`/list_playlists` — Lista todas las playlists",
+    "help.connection.name": "🔗 Conexión",
+    "help.connection.value": "`/join` — Únete a tu canal de voz\n`/leave` — Sal del canal de voz",
+    "help.utility.name": "🧹 Utilidades",
+    "help.utility.value": "`/clear [cantidad]` — Elimina mensajes recientes\n`/help` — Muestra este mensaje de ayuda\n`/language <idioma>` — Cambia el idioma del bot",
+
+    "cleared.title": "🧹 Mensajes Eliminados",
+    "cleared.description.one": "Se eliminó **{count}** mensaje.",
+    "cleared.description.other": "Se eliminaron **{count}** mensajes.",
+
+    "error.not_in_voice": "Debes estar en un canal de voz.",
+    "error.bot_not_in_voice": "No estoy en un canal de voz.",
+    "error.not_same_channel": "Debes estar en el mismo canal de voz que el bot.",
+    "error.not_playing": "No estoy reproduciendo nada.",
+    "error.nothing_playing": "No se está reproduciendo nada.",
+    "error.nothing_currently_playing": "No se está reproduciendo nada en este momento.",
+    "error.not_connected": "No estoy conectado a un canal de voz.",
+    "error.queue_empty_nothing_playing": "La cola está vacía y no se está reproduciendo nada.",
+    "error.spotify_non_track": "Las playlists y álbumes de Spotify no son compatibles. Por favor, proporciona un enlace de pista de Spotify.",
+    "error.unknown_command": "Comando desconocido: /{command}",
+    "error.unexpected": "Ocurrió un error inesperado.",
+    "error.queue_full": "La cola está llena (máximo {max} pistas).",
+    "error.no_results": "No se encontraron resultados para: {query}",
+    "error.no_lyrics": "No se encontraron letras para: {query}",
+    "error.playlist_not_found": "Playlist '{name}' no encontrada.",
+    "error.playlist_empty": "La playlist '{name}' está vacía.",
+    "error.playlist_full": "La playlist está llena (máximo {max} entradas).",
+    "error.invalid_url": "URL inválida: {url}",
+    "error.spotify_resolve_failed": "No se encontró resultado en YouTube para la pista de Spotify: {title} de {artist}",
+
+    "success.now_playing": "Reproduciendo **{title}**",
+    "success.playlist_loaded": "Se cargaron **{loaded}/{total}** pistas de la playlist **{name}**.",
+
+    "player.queue_finished": "Cola terminada. Desconectando en 3 minutos si no hay actividad.",
+    "player.button_not_same_channel": "Debes estar en el mismo canal de voz.",
+
+    "language.title": "🌐 Idioma",
+    "language.changed": "El idioma ha sido cambiado a **{language}**.",
+    "language.invalid": "Idioma inválido. Idiomas disponibles: {available}",
+    "language.current": "Idioma actual: **{language}**"
+}

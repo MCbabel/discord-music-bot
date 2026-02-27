@@ -9,6 +9,7 @@ import { initSpotify } from './audio/spotify.js';
 import { initLyrics } from './services/lyrics.js';
 import { loadPlaylists } from './services/playlist.js';
 import { logCookieStatus } from './audio/youtube.js';
+import { t, loadGuildSettings } from './i18n/index.js';
 
 /**
  * Resolve FFmpeg's full path and ensure its directory is in process.env.PATH.
@@ -117,6 +118,9 @@ async function main() {
     console.log('Loading playlists...');
     await loadPlaylists();
 
+    console.log('Loading guild language settings...');
+    loadGuildSettings();
+
     console.log('Checking YouTube cookie auth...');
     logCookieStatus();
 
@@ -143,8 +147,9 @@ async function main() {
         const command = client.commands.get(interaction.commandName);
         if (!command) {
             // Unknown command — reply with error instead of silently ignoring
+            const guildId = interaction.guildId;
             await interaction.reply({
-                embeds: [messages.error(`Unknown command: /${interaction.commandName}`)],
+                embeds: [messages.error(guildId, t(guildId, 'error.unknown_command', { command: interaction.commandName }))],
                 flags: MessageFlags.Ephemeral,
             }).catch(() => {});
             return;
@@ -154,7 +159,8 @@ async function main() {
             await command.execute(interaction);
         } catch (error) {
             console.error(`Error executing /${interaction.commandName}:`, error);
-            const embed = messages.error(error.message || 'An unexpected error occurred.');
+            const guildId = interaction.guildId;
+            const embed = messages.error(guildId, error.message || t(guildId, 'error.unexpected'));
             try {
                 if (interaction.deferred || interaction.replied) {
                     await interaction.followUp({ embeds: [embed], flags: MessageFlags.Ephemeral });

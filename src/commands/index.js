@@ -5,6 +5,7 @@ import { searchYouTube, getYouTubeInfo, isYouTubeUrl } from '../audio/youtube.js
 import { isSpotifyTrack, isSpotifyNonTrack, resolveSpotifyTrack } from '../audio/spotify.js';
 import { fetchLyrics } from '../services/lyrics.js';
 import { addToPlaylist, getPlaylist, listPlaylists } from '../services/playlist.js';
+import { t, getLocale, setLocale, getAvailableLocales } from '../i18n/index.js';
 import config from '../config.js';
 
 // ── Helpers ──────────────────────────────────────────────────────────
@@ -41,15 +42,16 @@ const join = {
         .setName('join')
         .setDescription('Join your voice channel'),
     async execute(interaction) {
+        const guildId = interaction.guildId;
         const channel = getUserVoiceChannel(interaction);
         if (!channel) {
-            return interaction.reply({ embeds: [messages.error('You must be in a voice channel.')], flags: MessageFlags.Ephemeral });
+            return interaction.reply({ embeds: [messages.error(guildId, t(guildId, 'error.not_in_voice'))], flags: MessageFlags.Ephemeral });
         }
 
-        const player = getOrCreateGuildPlayer(interaction.guildId);
+        const player = getOrCreateGuildPlayer(guildId);
         player.connect(channel, interaction.channel);
 
-        await interaction.reply({ embeds: [messages.connected(channel.name)] });
+        await interaction.reply({ embeds: [messages.connected(guildId, channel.name)] });
     },
 };
 
@@ -60,15 +62,16 @@ const leave = {
         .setName('leave')
         .setDescription('Leave the voice channel'),
     async execute(interaction) {
-        const player = getGuildPlayer(interaction.guildId);
+        const guildId = interaction.guildId;
+        const player = getGuildPlayer(guildId);
         if (!player || !player.connection) {
-            return interaction.reply({ embeds: [messages.error('I am not in a voice channel.')], flags: MessageFlags.Ephemeral });
+            return interaction.reply({ embeds: [messages.error(guildId, t(guildId, 'error.bot_not_in_voice'))], flags: MessageFlags.Ephemeral });
         }
 
         player.destroy();
-        deleteGuildPlayer(interaction.guildId);
+        deleteGuildPlayer(guildId);
 
-        await interaction.reply({ embeds: [messages.disconnected()] });
+        await interaction.reply({ embeds: [messages.disconnected(guildId)] });
     },
 };
 
@@ -84,12 +87,13 @@ const play = {
     async execute(interaction) {
         await interaction.deferReply(); // BUG-02: defer for long operations
 
+        const guildId = interaction.guildId;
         const channel = getUserVoiceChannel(interaction);
         if (!channel) {
-            return interaction.editReply({ embeds: [messages.error('You must be in a voice channel.')] });
+            return interaction.editReply({ embeds: [messages.error(guildId, t(guildId, 'error.not_in_voice'))] });
         }
 
-        const player = getOrCreateGuildPlayer(interaction.guildId);
+        const player = getOrCreateGuildPlayer(guildId);
 
         // Auto-join if not connected
         if (!player.connection) {
@@ -98,7 +102,7 @@ const play = {
 
         // BUG-12: check same channel
         if (!isSameChannel(interaction, player)) {
-            return interaction.editReply({ embeds: [messages.error('You must be in the same voice channel as the bot.')] });
+            return interaction.editReply({ embeds: [messages.error(guildId, t(guildId, 'error.not_same_channel'))] });
         }
 
         const query = interaction.options.getString('query');
@@ -107,7 +111,7 @@ const play = {
         if (isSpotifyNonTrack(query)) {
             // BUG-36: Spotify playlists/albums not supported
             return interaction.editReply({
-                embeds: [messages.error('Spotify playlists and albums are not supported. Please provide a Spotify track link.')],
+                embeds: [messages.error(guildId, t(guildId, 'error.spotify_non_track'))],
             });
         } else if (isSpotifyTrack(query)) {
             track = await resolveSpotifyTrack(query);
@@ -121,9 +125,9 @@ const play = {
 
         if (result === 'playing') {
             // Brief confirmation only — the player sends the rich "Now Playing" embed with buttons
-            await interaction.editReply({ embeds: [messages.success(`Now playing **${track.title}**`)] });
+            await interaction.editReply({ embeds: [messages.success(guildId, t(guildId, 'success.now_playing', { title: track.title }))] });
         } else {
-            await interaction.editReply({ embeds: [messages.addedToQueue(track, player.queue.length)] });
+            await interaction.editReply({ embeds: [messages.addedToQueue(guildId, track, player.queue.length)] });
         }
     },
 };
@@ -135,22 +139,23 @@ const pause = {
         .setName('pause')
         .setDescription('Pause playback'),
     async execute(interaction) {
+        const guildId = interaction.guildId;
         const channel = getUserVoiceChannel(interaction);
         if (!channel) {
-            return interaction.reply({ embeds: [messages.error('You must be in a voice channel.')], flags: MessageFlags.Ephemeral });
+            return interaction.reply({ embeds: [messages.error(guildId, t(guildId, 'error.not_in_voice'))], flags: MessageFlags.Ephemeral });
         }
 
-        const player = getGuildPlayer(interaction.guildId);
+        const player = getGuildPlayer(guildId);
         if (!player || !player.connection) {
-            return interaction.reply({ embeds: [messages.error('I am not playing anything.')], flags: MessageFlags.Ephemeral });
+            return interaction.reply({ embeds: [messages.error(guildId, t(guildId, 'error.not_playing'))], flags: MessageFlags.Ephemeral });
         }
 
         if (!isSameChannel(interaction, player)) {
-            return interaction.reply({ embeds: [messages.error('You must be in the same voice channel as the bot.')], flags: MessageFlags.Ephemeral });
+            return interaction.reply({ embeds: [messages.error(guildId, t(guildId, 'error.not_same_channel'))], flags: MessageFlags.Ephemeral });
         }
 
         player.pause();
-        await interaction.reply({ embeds: [messages.paused()] });
+        await interaction.reply({ embeds: [messages.paused(guildId)] });
     },
 };
 
@@ -161,22 +166,23 @@ const resume = {
         .setName('resume')
         .setDescription('Resume playback'),
     async execute(interaction) {
+        const guildId = interaction.guildId;
         const channel = getUserVoiceChannel(interaction);
         if (!channel) {
-            return interaction.reply({ embeds: [messages.error('You must be in a voice channel.')], flags: MessageFlags.Ephemeral });
+            return interaction.reply({ embeds: [messages.error(guildId, t(guildId, 'error.not_in_voice'))], flags: MessageFlags.Ephemeral });
         }
 
-        const player = getGuildPlayer(interaction.guildId);
+        const player = getGuildPlayer(guildId);
         if (!player || !player.connection) {
-            return interaction.reply({ embeds: [messages.error('I am not playing anything.')], flags: MessageFlags.Ephemeral });
+            return interaction.reply({ embeds: [messages.error(guildId, t(guildId, 'error.not_playing'))], flags: MessageFlags.Ephemeral });
         }
 
         if (!isSameChannel(interaction, player)) {
-            return interaction.reply({ embeds: [messages.error('You must be in the same voice channel as the bot.')], flags: MessageFlags.Ephemeral });
+            return interaction.reply({ embeds: [messages.error(guildId, t(guildId, 'error.not_same_channel'))], flags: MessageFlags.Ephemeral });
         }
 
         player.resume();
-        await interaction.reply({ embeds: [messages.resumed()] });
+        await interaction.reply({ embeds: [messages.resumed(guildId)] });
     },
 };
 
@@ -187,23 +193,24 @@ const skip = {
         .setName('skip')
         .setDescription('Skip the current track'),
     async execute(interaction) {
+        const guildId = interaction.guildId;
         const channel = getUserVoiceChannel(interaction);
         if (!channel) {
-            return interaction.reply({ embeds: [messages.error('You must be in a voice channel.')], flags: MessageFlags.Ephemeral });
+            return interaction.reply({ embeds: [messages.error(guildId, t(guildId, 'error.not_in_voice'))], flags: MessageFlags.Ephemeral });
         }
 
-        const player = getGuildPlayer(interaction.guildId);
+        const player = getGuildPlayer(guildId);
         if (!player || !player.currentTrack) {
-            return interaction.reply({ embeds: [messages.error('Nothing is playing.')], flags: MessageFlags.Ephemeral });
+            return interaction.reply({ embeds: [messages.error(guildId, t(guildId, 'error.nothing_playing'))], flags: MessageFlags.Ephemeral });
         }
 
         if (!isSameChannel(interaction, player)) {
-            return interaction.reply({ embeds: [messages.error('You must be in the same voice channel as the bot.')], flags: MessageFlags.Ephemeral });
+            return interaction.reply({ embeds: [messages.error(guildId, t(guildId, 'error.not_same_channel'))], flags: MessageFlags.Ephemeral });
         }
 
         const title = player.currentTrack.title;
         player.skip();
-        await interaction.reply({ embeds: [messages.skipped(title)] });
+        await interaction.reply({ embeds: [messages.skipped(guildId, title)] });
     },
 };
 
@@ -214,27 +221,28 @@ const stop = {
         .setName('stop')
         .setDescription('Stop playback and clear the queue'),
     async execute(interaction) {
+        const guildId = interaction.guildId;
         const channel = getUserVoiceChannel(interaction);
         if (!channel) {
-            return interaction.reply({ embeds: [messages.error('You must be in a voice channel.')], flags: MessageFlags.Ephemeral });
+            return interaction.reply({ embeds: [messages.error(guildId, t(guildId, 'error.not_in_voice'))], flags: MessageFlags.Ephemeral });
         }
 
-        const player = getGuildPlayer(interaction.guildId);
+        const player = getGuildPlayer(guildId);
 
         // BUG-37: check if connected first
         if (!player || !player.connection) {
-            return interaction.reply({ embeds: [messages.error('I am not connected to a voice channel.')], flags: MessageFlags.Ephemeral });
+            return interaction.reply({ embeds: [messages.error(guildId, t(guildId, 'error.not_connected'))], flags: MessageFlags.Ephemeral });
         }
 
         if (!isSameChannel(interaction, player)) {
-            return interaction.reply({ embeds: [messages.error('You must be in the same voice channel as the bot.')], flags: MessageFlags.Ephemeral });
+            return interaction.reply({ embeds: [messages.error(guildId, t(guildId, 'error.not_same_channel'))], flags: MessageFlags.Ephemeral });
         }
 
         player.stop();
         player.destroy();
-        deleteGuildPlayer(interaction.guildId);
+        deleteGuildPlayer(guildId);
 
-        await interaction.reply({ embeds: [messages.stopped()] });
+        await interaction.reply({ embeds: [messages.stopped(guildId)] });
     },
 };
 
@@ -247,16 +255,17 @@ const lyrics = {
     async execute(interaction) {
         await interaction.deferReply(); // BUG-06: must defer
 
-        const player = getGuildPlayer(interaction.guildId);
+        const guildId = interaction.guildId;
+        const player = getGuildPlayer(guildId);
         if (!player || !player.currentTrack) {
-            return interaction.editReply({ embeds: [messages.error('Nothing is currently playing.')] });
+            return interaction.editReply({ embeds: [messages.error(guildId, t(guildId, 'error.nothing_currently_playing'))] });
         }
 
         const track = player.currentTrack;
         const query = `${track.title} ${track.artist}`;
         const result = await fetchLyrics(query);
 
-        await interaction.editReply({ embeds: [messages.lyrics(result.title, result.artist, result.lyrics)] });
+        await interaction.editReply({ embeds: [messages.lyrics(guildId, result.title, result.artist, result.lyrics)] });
     },
 };
 
@@ -267,7 +276,8 @@ const help = {
         .setName('help')
         .setDescription('Show all available commands'),
     async execute(interaction) {
-        await interaction.reply({ embeds: [messages.helpEmbed()] });
+        const guildId = interaction.guildId;
+        await interaction.reply({ embeds: [messages.helpEmbed(guildId)] });
     },
 };
 
@@ -281,24 +291,25 @@ const volume = {
             option.setName('percent').setDescription('Volume level (0-100)').setRequired(true).setMinValue(0).setMaxValue(100),
         ),
     async execute(interaction) {
+        const guildId = interaction.guildId;
         const channel = getUserVoiceChannel(interaction);
         if (!channel) {
-            return interaction.reply({ embeds: [messages.error('You must be in a voice channel.')], flags: MessageFlags.Ephemeral });
+            return interaction.reply({ embeds: [messages.error(guildId, t(guildId, 'error.not_in_voice'))], flags: MessageFlags.Ephemeral });
         }
 
-        const player = getGuildPlayer(interaction.guildId);
+        const player = getGuildPlayer(guildId);
         if (!player || !player.connection) {
-            return interaction.reply({ embeds: [messages.error('I am not connected to a voice channel.')], flags: MessageFlags.Ephemeral });
+            return interaction.reply({ embeds: [messages.error(guildId, t(guildId, 'error.not_connected'))], flags: MessageFlags.Ephemeral });
         }
 
         if (!isSameChannel(interaction, player)) {
-            return interaction.reply({ embeds: [messages.error('You must be in the same voice channel as the bot.')], flags: MessageFlags.Ephemeral });
+            return interaction.reply({ embeds: [messages.error(guildId, t(guildId, 'error.not_same_channel'))], flags: MessageFlags.Ephemeral });
         }
 
         const percent = interaction.options.getInteger('percent');
         player.setVolume(percent); // BUG-14: persists across songs
 
-        await interaction.reply({ embeds: [messages.volumeSet(percent)] });
+        await interaction.reply({ embeds: [messages.volumeSet(guildId, percent)] });
     },
 };
 
@@ -312,24 +323,25 @@ const loop = {
             option.setName('enabled').setDescription('Enable or disable loop').setRequired(true),
         ),
     async execute(interaction) {
+        const guildId = interaction.guildId;
         const channel = getUserVoiceChannel(interaction);
         if (!channel) {
-            return interaction.reply({ embeds: [messages.error('You must be in a voice channel.')], flags: MessageFlags.Ephemeral });
+            return interaction.reply({ embeds: [messages.error(guildId, t(guildId, 'error.not_in_voice'))], flags: MessageFlags.Ephemeral });
         }
 
-        const player = getGuildPlayer(interaction.guildId);
+        const player = getGuildPlayer(guildId);
         if (!player || !player.connection) {
-            return interaction.reply({ embeds: [messages.error('I am not connected to a voice channel.')], flags: MessageFlags.Ephemeral });
+            return interaction.reply({ embeds: [messages.error(guildId, t(guildId, 'error.not_connected'))], flags: MessageFlags.Ephemeral });
         }
 
         if (!isSameChannel(interaction, player)) {
-            return interaction.reply({ embeds: [messages.error('You must be in the same voice channel as the bot.')], flags: MessageFlags.Ephemeral });
+            return interaction.reply({ embeds: [messages.error(guildId, t(guildId, 'error.not_same_channel'))], flags: MessageFlags.Ephemeral });
         }
 
         const enabled = interaction.options.getBoolean('enabled');
         player.isLooping = enabled;
 
-        await interaction.reply({ embeds: [enabled ? messages.loopOn() : messages.loopOff()] });
+        await interaction.reply({ embeds: [enabled ? messages.loopOn(guildId) : messages.loopOff(guildId)] });
     },
 };
 
@@ -346,17 +358,18 @@ const addToPlaylistCmd = {
             option.setName('url').setDescription('Song URL').setRequired(true),
         ),
     async execute(interaction) {
+        const guildId = interaction.guildId;
         const name = interaction.options.getString('name');
         const url = interaction.options.getString('url');
 
         try {
             // BUG-18: guild-scoped, BUG-29: URL validation, BUG-30: playlist size cap
-            await addToPlaylist(interaction.guildId, name, url);
+            await addToPlaylist(guildId, name, url);
         } catch (error) {
-            return interaction.reply({ embeds: [messages.error(error.message)], flags: MessageFlags.Ephemeral });
+            return interaction.reply({ embeds: [messages.error(guildId, error.message)], flags: MessageFlags.Ephemeral });
         }
 
-        await interaction.reply({ embeds: [messages.playlistAdded(name, url)] });
+        await interaction.reply({ embeds: [messages.playlistAdded(guildId, name, url)] });
     },
 };
 
@@ -372,12 +385,13 @@ const playPlaylist = {
     async execute(interaction) {
         await interaction.deferReply(); // BUG-02: defer for long operations
 
+        const guildId = interaction.guildId;
         const channel = getUserVoiceChannel(interaction);
         if (!channel) {
-            return interaction.editReply({ embeds: [messages.error('You must be in a voice channel.')] });
+            return interaction.editReply({ embeds: [messages.error(guildId, t(guildId, 'error.not_in_voice'))] });
         }
 
-        const player = getOrCreateGuildPlayer(interaction.guildId);
+        const player = getOrCreateGuildPlayer(guildId);
 
         // BUG-03: auto-join voice channel
         if (!player.connection) {
@@ -385,11 +399,11 @@ const playPlaylist = {
         }
 
         if (!isSameChannel(interaction, player)) {
-            return interaction.editReply({ embeds: [messages.error('You must be in the same voice channel as the bot.')] });
+            return interaction.editReply({ embeds: [messages.error(guildId, t(guildId, 'error.not_same_channel'))] });
         }
 
         const name = interaction.options.getString('name');
-        const entries = getPlaylist(interaction.guildId, name); // BUG-23: throws if not found
+        const entries = getPlaylist(guildId, name); // BUG-23: throws if not found
 
         let successCount = 0; // BUG-28: track success count
 
@@ -411,7 +425,7 @@ const playPlaylist = {
         }
 
         await interaction.editReply({
-            embeds: [messages.success(`Loaded **${successCount}/${entries.length}** tracks from playlist **${name}**.`)],
+            embeds: [messages.success(guildId, t(guildId, 'success.playlist_loaded', { loaded: successCount, total: entries.length, name }))],
         });
     },
 };
@@ -423,18 +437,19 @@ const voteSkip = {
         .setName('vote_skip')
         .setDescription('Vote to skip the current track'),
     async execute(interaction) {
+        const guildId = interaction.guildId;
         const channel = getUserVoiceChannel(interaction);
         if (!channel) {
-            return interaction.reply({ embeds: [messages.error('You must be in a voice channel.')], flags: MessageFlags.Ephemeral });
+            return interaction.reply({ embeds: [messages.error(guildId, t(guildId, 'error.not_in_voice'))], flags: MessageFlags.Ephemeral });
         }
 
-        const player = getGuildPlayer(interaction.guildId);
+        const player = getGuildPlayer(guildId);
         if (!player || !player.currentTrack) {
-            return interaction.reply({ embeds: [messages.error('Nothing is playing.')], flags: MessageFlags.Ephemeral });
+            return interaction.reply({ embeds: [messages.error(guildId, t(guildId, 'error.nothing_playing'))], flags: MessageFlags.Ephemeral });
         }
 
         if (!isSameChannel(interaction, player)) {
-            return interaction.reply({ embeds: [messages.error('You must be in the same voice channel as the bot.')], flags: MessageFlags.Ephemeral });
+            return interaction.reply({ embeds: [messages.error(guildId, t(guildId, 'error.not_same_channel'))], flags: MessageFlags.Ephemeral });
         }
 
         // BUG-17: exclude bots from member count
@@ -448,10 +463,10 @@ const voteSkip = {
             const title = player.currentTrack.title;
             player.skipVotes.clear();
             player.skip();
-            await interaction.reply({ embeds: [messages.voteSkipPassed(title)] });
+            await interaction.reply({ embeds: [messages.voteSkipPassed(guildId, title)] });
         } else {
             // BUG-01: uses info-style embed (voteSkipRegistered), not a missing method
-            await interaction.reply({ embeds: [messages.voteSkipRegistered(player.skipVotes.size, required)] });
+            await interaction.reply({ embeds: [messages.voteSkipRegistered(guildId, player.skipVotes.size, required)] });
         }
     },
 };
@@ -469,12 +484,13 @@ const clear = {
     async execute(interaction) {
         await interaction.deferReply({ flags: MessageFlags.Ephemeral }); // BUG-04: ephemeral defer
 
+        const guildId = interaction.guildId;
         const number = interaction.options.getInteger('number');
 
         // BUG-16: delete exactly `number` messages, NOT number+1
         const deleted = await interaction.channel.bulkDelete(number, true);
 
-        await interaction.editReply({ embeds: [messages.messagesCleared(deleted.size)] });
+        await interaction.editReply({ embeds: [messages.messagesCleared(guildId, deleted.size)] });
     },
 };
 
@@ -485,8 +501,9 @@ const listPlaylistsCmd = {
         .setName('list_playlists')
         .setDescription('List all saved playlists'),
     async execute(interaction) {
-        const playlists = listPlaylists(interaction.guildId);
-        await interaction.reply({ embeds: [messages.playlistList(playlists)] });
+        const guildId = interaction.guildId;
+        const playlists = listPlaylists(guildId);
+        await interaction.reply({ embeds: [messages.playlistList(guildId, playlists)] });
     },
 };
 
@@ -497,17 +514,18 @@ const queue = {
         .setName('queue')
         .setDescription('Show the current queue'),
     async execute(interaction) {
+        const guildId = interaction.guildId;
         const channel = getUserVoiceChannel(interaction);
         if (!channel) {
-            return interaction.reply({ embeds: [messages.error('You must be in a voice channel.')], flags: MessageFlags.Ephemeral });
+            return interaction.reply({ embeds: [messages.error(guildId, t(guildId, 'error.not_in_voice'))], flags: MessageFlags.Ephemeral });
         }
 
-        const player = getGuildPlayer(interaction.guildId);
+        const player = getGuildPlayer(guildId);
         if (!player || (!player.currentTrack && player.queue.length === 0)) {
-            return interaction.reply({ embeds: [messages.error('The queue is empty and nothing is playing.')], flags: MessageFlags.Ephemeral });
+            return interaction.reply({ embeds: [messages.error(guildId, t(guildId, 'error.queue_empty_nothing_playing'))], flags: MessageFlags.Ephemeral });
         }
 
-        await interaction.reply({ embeds: [messages.queueList(player.queue, player.currentTrack)] });
+        await interaction.reply({ embeds: [messages.queueList(guildId, player.queue, player.currentTrack)] });
     },
 };
 
@@ -518,17 +536,57 @@ const nowPlayingCmd = {
         .setName('nowplaying')
         .setDescription('Show the currently playing track'),
     async execute(interaction) {
+        const guildId = interaction.guildId;
         const channel = getUserVoiceChannel(interaction);
         if (!channel) {
-            return interaction.reply({ embeds: [messages.error('You must be in a voice channel.')], flags: MessageFlags.Ephemeral });
+            return interaction.reply({ embeds: [messages.error(guildId, t(guildId, 'error.not_in_voice'))], flags: MessageFlags.Ephemeral });
         }
 
-        const player = getGuildPlayer(interaction.guildId);
+        const player = getGuildPlayer(guildId);
         if (!player || !player.currentTrack) {
-            return interaction.reply({ embeds: [messages.error('Nothing is currently playing.')], flags: MessageFlags.Ephemeral });
+            return interaction.reply({ embeds: [messages.error(guildId, t(guildId, 'error.nothing_currently_playing'))], flags: MessageFlags.Ephemeral });
         }
 
-        await interaction.reply({ embeds: [messages.nowPlaying(player.currentTrack)] });
+        await interaction.reply({ embeds: [messages.nowPlaying(guildId, player.currentTrack)] });
+    },
+};
+
+// ── 19. /language ────────────────────────────────────────────────────
+
+const language = {
+    data: new SlashCommandBuilder()
+        .setName('language')
+        .setDescription('Change the bot language for this server')
+        .addStringOption(opt =>
+            opt.setName('lang')
+                .setDescription('Language to use')
+                .setRequired(false)
+                .addChoices(
+                    { name: '🇬🇧 English', value: 'en' },
+                    { name: '🇩🇪 Deutsch', value: 'de' },
+                    { name: '🇪🇸 Español', value: 'es' },
+                ),
+        ),
+    async execute(interaction) {
+        const lang = interaction.options.getString('lang');
+        const guildId = interaction.guildId;
+
+        if (!lang) {
+            // Show current language
+            const current = getLocale(guildId);
+            const locales = getAvailableLocales();
+            const currentInfo = locales.find(l => l.code === current);
+            return interaction.reply({
+                embeds: [messages.info(guildId, t(guildId, 'language.current', { language: `${currentInfo.flag} ${currentInfo.name}` }))],
+                flags: MessageFlags.Ephemeral,
+            });
+        }
+
+        setLocale(guildId, lang);
+        // Reply in the NEW language
+        return interaction.reply({
+            embeds: [messages.success(guildId, t(guildId, 'language.changed', { language: t(guildId, 'locale.name') }))],
+        });
     },
 };
 
@@ -538,4 +596,5 @@ export default [
     join, leave, play, pause, resume, skip, stop, lyrics,
     help, volume, loop, addToPlaylistCmd, playPlaylist,
     voteSkip, clear, listPlaylistsCmd, queue, nowPlayingCmd,
+    language,
 ];

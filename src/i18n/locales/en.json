@@ -1,0 +1,125 @@
+{
+    "locale.name": "English",
+    "locale.flag": "🇬🇧",
+
+    "embed.error.title": "❌ Error",
+    "embed.success.title": "✅ Success",
+    "embed.info.title": "ℹ️ Info",
+    "embed.warning.title": "⚠️ Warning",
+
+    "now_playing.title": "🎵 Now Playing",
+    "now_playing.field.title": "Title",
+    "now_playing.field.artist": "Artist",
+    "now_playing.field.duration": "Duration",
+    "now_playing.unknown": "Unknown",
+
+    "added_to_queue.title": "➕ Added to Queue",
+    "added_to_queue.description": "**{trackTitle}**",
+    "added_to_queue.description_with_artist": "**{trackTitle}** by {artist}",
+    "added_to_queue.field.position": "Position",
+
+    "queue.title": "📋 Queue",
+    "queue.now_playing": "🎵 Now Playing",
+    "queue.empty": "The queue is empty.",
+    "queue.empty_nothing_playing": "Nothing is playing and the queue is empty.",
+    "queue.footer.one": "{count} track in queue",
+    "queue.footer.other": "{count} tracks in queue",
+
+    "lyrics.title": "📜 {title} — {artist}",
+    "lyrics.not_available": "No lyrics available.",
+
+    "connected.title": "🔗 Connected",
+    "connected.description": "Connected to **{channel}**.",
+
+    "disconnected.title": "🔌 Disconnected",
+    "disconnected.description": "The bot has left the voice channel.",
+
+    "skipped.title": "⏩ Skipped",
+    "skipped.description": "Skipped **{title}**.",
+
+    "paused.title": "⏸️ Paused",
+    "paused.description": "Playback has been paused.",
+
+    "resumed.title": "▶️ Resumed",
+    "resumed.description": "Playback has been resumed.",
+
+    "stopped.title": "⏹️ Stopped",
+    "stopped.description": "Playback has been stopped and the queue has been cleared.",
+
+    "volume.title": "🔊 Volume Set",
+    "volume.description": "Volume set to **{percent}%**.",
+
+    "loop_on.title": "🔁 Loop On",
+    "loop_on.description": "The current track will now loop.",
+
+    "loop_off.title": "🔁 Loop Off",
+    "loop_off.description": "Looping has been disabled.",
+
+    "vote_skip.title": "🗳️ Vote Skip",
+    "vote_skip.description": "Vote registered! **{current}/{required}** votes needed to skip.",
+
+    "vote_skip_passed.title": "⏩ Vote Skip Passed",
+    "vote_skip_passed.description": "Enough votes received — skipping **{title}**.",
+
+    "playlist_added.title": "🎶 Added to Playlist",
+    "playlist_added.description": "**{url}** has been added to playlist **{name}**.",
+
+    "playlist_list.title": "📂 Playlists",
+    "playlist_list.empty": "No playlists found. Create one with `/add_to_playlist`.",
+    "playlist_list.entry.one": "• **{name}** — {count} track",
+    "playlist_list.entry.other": "• **{name}** — {count} tracks",
+
+    "help.title": "📖 Music Bot Help",
+    "help.description": "Here are all available commands:",
+    "help.playback.name": "🎵 Playback",
+    "help.playback.value": "`/play <query>` — Play a song or add to queue\n`/skip` — Skip the current track\n`/stop` — Stop playback and clear queue\n`/pause` — Pause playback\n`/resume` — Resume playback",
+    "help.audio.name": "🔊 Audio",
+    "help.audio.value": "`/volume <0-100>` — Set playback volume\n`/loop` — Toggle loop for current track",
+    "help.queue.name": "📋 Queue",
+    "help.queue.value": "`/queue` — Show the current queue\n`/nowplaying` — Show current track info",
+    "help.voting.name": "🗳️ Voting",
+    "help.voting.value": "`/vote_skip` — Vote to skip the current track",
+    "help.lyrics.name": "📜 Lyrics",
+    "help.lyrics.value": "`/lyrics` — Fetch lyrics for the current song",
+    "help.playlists.name": "🎶 Playlists",
+    "help.playlists.value": "`/add_to_playlist <name> <url>` — Add a song to a playlist\n`/play_playlist <name>` — Play a saved playlist\n`/list_playlists` — List all playlists",
+    "help.connection.name": "🔗 Connection",
+    "help.connection.value": "`/join` — Join your voice channel\n`/leave` — Leave the voice channel",
+    "help.utility.name": "🧹 Utility",
+    "help.utility.value": "`/clear [count]` — Delete recent messages\n`/help` — Show this help message\n`/language <lang>` — Set bot language",
+
+    "cleared.title": "🧹 Messages Cleared",
+    "cleared.description.one": "Deleted **{count}** message.",
+    "cleared.description.other": "Deleted **{count}** messages.",
+
+    "error.not_in_voice": "You must be in a voice channel.",
+    "error.bot_not_in_voice": "I am not in a voice channel.",
+    "error.not_same_channel": "You must be in the same voice channel as the bot.",
+    "error.not_playing": "I am not playing anything.",
+    "error.nothing_playing": "Nothing is playing.",
+    "error.nothing_currently_playing": "Nothing is currently playing.",
+    "error.not_connected": "I am not connected to a voice channel.",
+    "error.queue_empty_nothing_playing": "The queue is empty and nothing is playing.",
+    "error.spotify_non_track": "Spotify playlists and albums are not supported. Please provide a Spotify track link.",
+    "error.unknown_command": "Unknown command: /{command}",
+    "error.unexpected": "An unexpected error occurred.",
+    "error.queue_full": "Queue is full (max {max} tracks).",
+    "error.no_results": "No results found for: {query}",
+    "error.no_lyrics": "No lyrics found for: {query}",
+    "error.playlist_not_found": "Playlist '{name}' not found.",
+    "error.playlist_empty": "Playlist '{name}' is empty.",
+    "error.playlist_full": "Playlist is full (max {max} entries).",
+    "error.invalid_url": "Invalid URL: {url}",
+    "error.spotify_resolve_failed": "No YouTube result found for Spotify track: {title} by {artist}",
+
+    "success.now_playing": "Now playing **{title}**",
+    "success.playlist_loaded": "Loaded **{loaded}/{total}** tracks from playlist **{name}**.",
+
+    "player.queue_finished": "Queue finished. Disconnecting in 3 minutes if idle.",
+    "player.button_not_same_channel": "You must be in the same voice channel.",
+
+    "language.title": "🌐 Language",
+    "language.changed": "Language has been set to **{language}**.",
+    "language.invalid": "Invalid language. Available languages: {available}",
+    "language.current": "Current language: **{language}**"
+}

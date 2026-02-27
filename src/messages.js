@@ -1,4 +1,5 @@
 import { EmbedBuilder } from 'discord.js';
+import { t, tp } from './i18n/index.js';
 
 // ── Color constants ──────────────────────────────────────────────────
 const COLORS = {
@@ -26,33 +27,33 @@ export function formatDuration(seconds) {
 // ── Basic status embeds ──────────────────────────────────────────────
 
 /** Red error embed. */
-export function error(description) {
+export function error(guildId, description) {
     return new EmbedBuilder()
-        .setTitle('❌ Error')
+        .setTitle(t(guildId, 'embed.error.title'))
         .setDescription(description)
         .setColor(COLORS.ERROR);
 }
 
 /** Green success embed. */
-export function success(description) {
+export function success(guildId, description) {
     return new EmbedBuilder()
-        .setTitle('✅ Success')
+        .setTitle(t(guildId, 'embed.success.title'))
         .setDescription(description)
         .setColor(COLORS.SUCCESS);
 }
 
 /** Blurple info embed. (BUG-01 fix — was missing in Python version) */
-export function info(description) {
+export function info(guildId, description) {
     return new EmbedBuilder()
-        .setTitle('ℹ️ Info')
+        .setTitle(t(guildId, 'embed.info.title'))
         .setDescription(description)
         .setColor(COLORS.INFO);
 }
 
 /** Yellow warning embed. */
-export function warning(description) {
+export function warning(guildId, description) {
     return new EmbedBuilder()
-        .setTitle('⚠️ Warning')
+        .setTitle(t(guildId, 'embed.warning.title'))
         .setDescription(description)
         .setColor(COLORS.WARNING);
 }
@@ -61,16 +62,18 @@ export function warning(description) {
 
 /**
  * Now-playing embed with track metadata.
+ * @param {string} guildId
  * @param {{ title: string, artist: string, duration: number, thumbnailUrl?: string, url?: string }} track
  */
-export function nowPlaying(track) {
+export function nowPlaying(guildId, track) {
+    const unknown = t(guildId, 'now_playing.unknown');
     const embed = new EmbedBuilder()
-        .setTitle('🎵 Now Playing')
+        .setTitle(t(guildId, 'now_playing.title'))
         .setColor(COLORS.NOW_PLAYING)
         .addFields(
-            { name: 'Title', value: track.title || 'Unknown', inline: true },
-            { name: 'Artist', value: track.artist || 'Unknown', inline: true },
-            { name: 'Duration', value: formatDuration(track.duration), inline: true },
+            { name: t(guildId, 'now_playing.field.title'), value: track.title || unknown, inline: true },
+            { name: t(guildId, 'now_playing.field.artist'), value: track.artist || unknown, inline: true },
+            { name: t(guildId, 'now_playing.field.duration'), value: formatDuration(track.duration), inline: true },
         );
 
     if (track.url) embed.setURL(track.url);
@@ -81,39 +84,45 @@ export function nowPlaying(track) {
 
 /**
  * Added-to-queue embed.
+ * @param {string} guildId
  * @param {{ title: string, artist?: string }} track
  * @param {number} position - 1-based queue position
  */
-export function addedToQueue(track, position) {
+export function addedToQueue(guildId, track, position) {
+    const description = track.artist
+        ? t(guildId, 'added_to_queue.description_with_artist', { trackTitle: track.title, artist: track.artist })
+        : t(guildId, 'added_to_queue.description', { trackTitle: track.title });
+
     return new EmbedBuilder()
-        .setTitle('➕ Added to Queue')
-        .setDescription(`**${track.title}**${track.artist ? ` by ${track.artist}` : ''}`)
-        .addFields({ name: 'Position', value: `#${position}`, inline: true })
+        .setTitle(t(guildId, 'added_to_queue.title'))
+        .setDescription(description)
+        .addFields({ name: t(guildId, 'added_to_queue.field.position'), value: `#${position}`, inline: true })
         .setColor(COLORS.INFO);
 }
 
 /**
  * Queue listing embed.
+ * @param {string} guildId
  * @param {Array<{ title: string, artist?: string, duration?: number }>} tracks
  * @param {{ title: string, artist?: string, duration?: number }|null} currentTrack
  */
-export function queueList(tracks, currentTrack) {
+export function queueList(guildId, tracks, currentTrack) {
     const embed = new EmbedBuilder()
-        .setTitle('📋 Queue')
+        .setTitle(t(guildId, 'queue.title'))
         .setColor(COLORS.INFO);
 
     if (currentTrack) {
         embed.addFields({
-            name: '🎵 Now Playing',
+            name: t(guildId, 'queue.now_playing'),
             value: `**${currentTrack.title}**${currentTrack.artist ? ` — ${currentTrack.artist}` : ''} [${formatDuration(currentTrack.duration)}]`,
         });
     }
 
     if (!tracks || tracks.length === 0) {
-        embed.setDescription(currentTrack ? 'The queue is empty.' : 'Nothing is playing and the queue is empty.');
+        embed.setDescription(currentTrack ? t(guildId, 'queue.empty') : t(guildId, 'queue.empty_nothing_playing'));
     } else {
         const lines = tracks.map(
-            (t, i) => `**${i + 1}.** ${t.title}${t.artist ? ` — ${t.artist}` : ''} [${formatDuration(t.duration)}]`,
+            (tr, i) => `**${i + 1}.** ${tr.title}${tr.artist ? ` — ${tr.artist}` : ''} [${formatDuration(tr.duration)}]`,
         );
         // Discord embed description limit is 4096 chars
         let description = lines.join('\n');
@@ -121,7 +130,7 @@ export function queueList(tracks, currentTrack) {
             description = description.slice(0, 4000) + '\n...';
         }
         embed.setDescription(description);
-        embed.setFooter({ text: `${tracks.length} track${tracks.length === 1 ? '' : 's'} in queue` });
+        embed.setFooter({ text: tp(guildId, 'queue.footer', tracks.length) });
     }
 
     return embed;
@@ -132,128 +141,130 @@ export function queueList(tracks, currentTrack) {
 /**
  * Lyrics embed. Truncates at 4000 characters with "..." to stay within
  * Discord's 4096-char description limit.
+ * @param {string} guildId
  * @param {string} title
  * @param {string} artist
  * @param {string} lyricsText
  */
-export function lyrics(title, artist, lyricsText) {
-    let text = lyricsText || 'No lyrics available.';
+export function lyrics(guildId, title, artist, lyricsText) {
+    let text = lyricsText || t(guildId, 'lyrics.not_available');
     if (text.length > 4000) {
         text = text.slice(0, 4000) + '...';
     }
     return new EmbedBuilder()
-        .setTitle(`📜 ${title} — ${artist}`)
+        .setTitle(t(guildId, 'lyrics.title', { title, artist }))
         .setDescription(text)
         .setColor(COLORS.NOW_PLAYING);
 }
 
 // ── Connection embeds ────────────────────────────────────────────────
 
-export function connected(channelName) {
+export function connected(guildId, channelName) {
     return new EmbedBuilder()
-        .setTitle('🔗 Connected')
-        .setDescription(`Connected to **${channelName}**.`)
+        .setTitle(t(guildId, 'connected.title'))
+        .setDescription(t(guildId, 'connected.description', { channel: channelName }))
         .setColor(COLORS.SUCCESS);
 }
 
-export function disconnected() {
+export function disconnected(guildId) {
     return new EmbedBuilder()
-        .setTitle('🔌 Disconnected')
-        .setDescription('The bot has left the voice channel.')
+        .setTitle(t(guildId, 'disconnected.title'))
+        .setDescription(t(guildId, 'disconnected.description'))
         .setColor(COLORS.INFO);
 }
 
 // ── Transport control embeds ─────────────────────────────────────────
 
-export function skipped(title) {
+export function skipped(guildId, title) {
     return new EmbedBuilder()
-        .setTitle('⏩ Skipped')
-        .setDescription(`Skipped **${title}**.`)
+        .setTitle(t(guildId, 'skipped.title'))
+        .setDescription(t(guildId, 'skipped.description', { title }))
         .setColor(COLORS.INFO);
 }
 
-export function paused() {
+export function paused(guildId) {
     return new EmbedBuilder()
-        .setTitle('⏸️ Paused')
-        .setDescription('Playback has been paused.')
+        .setTitle(t(guildId, 'paused.title'))
+        .setDescription(t(guildId, 'paused.description'))
         .setColor(COLORS.INFO);
 }
 
-export function resumed() {
+export function resumed(guildId) {
     return new EmbedBuilder()
-        .setTitle('▶️ Resumed')
-        .setDescription('Playback has been resumed.')
+        .setTitle(t(guildId, 'resumed.title'))
+        .setDescription(t(guildId, 'resumed.description'))
         .setColor(COLORS.INFO);
 }
 
-export function stopped() {
+export function stopped(guildId) {
     return new EmbedBuilder()
-        .setTitle('⏹️ Stopped')
-        .setDescription('Playback has been stopped and the queue has been cleared.')
+        .setTitle(t(guildId, 'stopped.title'))
+        .setDescription(t(guildId, 'stopped.description'))
         .setColor(COLORS.INFO);
 }
 
 // ── Volume / Loop ────────────────────────────────────────────────────
 
-export function volumeSet(percent) {
+export function volumeSet(guildId, percent) {
     return new EmbedBuilder()
-        .setTitle('🔊 Volume Set')
-        .setDescription(`Volume set to **${percent}%**.`)
+        .setTitle(t(guildId, 'volume.title'))
+        .setDescription(t(guildId, 'volume.description', { percent }))
         .setColor(COLORS.SUCCESS);
 }
 
-export function loopOn() {
+export function loopOn(guildId) {
     return new EmbedBuilder()
-        .setTitle('🔁 Loop On')
-        .setDescription('The current track will now loop.')
+        .setTitle(t(guildId, 'loop_on.title'))
+        .setDescription(t(guildId, 'loop_on.description'))
         .setColor(COLORS.SUCCESS);
 }
 
-export function loopOff() {
+export function loopOff(guildId) {
     return new EmbedBuilder()
-        .setTitle('🔁 Loop Off')
-        .setDescription('Looping has been disabled.')
+        .setTitle(t(guildId, 'loop_off.title'))
+        .setDescription(t(guildId, 'loop_off.description'))
         .setColor(COLORS.SUCCESS);
 }
 
 // ── Vote skip ────────────────────────────────────────────────────────
 
-export function voteSkipRegistered(currentVotes, requiredVotes) {
+export function voteSkipRegistered(guildId, currentVotes, requiredVotes) {
     return new EmbedBuilder()
-        .setTitle('🗳️ Vote Skip')
-        .setDescription(`Vote registered! **${currentVotes}/${requiredVotes}** votes needed to skip.`)
+        .setTitle(t(guildId, 'vote_skip.title'))
+        .setDescription(t(guildId, 'vote_skip.description', { current: currentVotes, required: requiredVotes }))
         .setColor(COLORS.INFO);
 }
 
-export function voteSkipPassed(title) {
+export function voteSkipPassed(guildId, title) {
     return new EmbedBuilder()
-        .setTitle('⏩ Vote Skip Passed')
-        .setDescription(`Enough votes received — skipping **${title}**.`)
+        .setTitle(t(guildId, 'vote_skip_passed.title'))
+        .setDescription(t(guildId, 'vote_skip_passed.description', { title }))
         .setColor(COLORS.SUCCESS);
 }
 
 // ── Playlist embeds ──────────────────────────────────────────────────
 
-export function playlistAdded(name, url) {
+export function playlistAdded(guildId, name, url) {
     return new EmbedBuilder()
-        .setTitle('🎶 Added to Playlist')
-        .setDescription(`**${url}** has been added to playlist **${name}**.`)
+        .setTitle(t(guildId, 'playlist_added.title'))
+        .setDescription(t(guildId, 'playlist_added.description', { name, url }))
         .setColor(COLORS.SUCCESS);
 }
 
 /**
  * List all playlists.
+ * @param {string} guildId
  * @param {Array<{ name: string, count: number }>} playlists
  */
-export function playlistList(playlists) {
+export function playlistList(guildId, playlists) {
     const embed = new EmbedBuilder()
-        .setTitle('📂 Playlists')
+        .setTitle(t(guildId, 'playlist_list.title'))
         .setColor(COLORS.INFO);
 
     if (!playlists || playlists.length === 0) {
-        embed.setDescription('No playlists found. Create one with `/add_to_playlist`.');
+        embed.setDescription(t(guildId, 'playlist_list.empty'));
     } else {
-        const lines = playlists.map((p) => `• **${p.name}** — ${p.count} track${p.count === 1 ? '' : 's'}`);
+        const lines = playlists.map((p) => tp(guildId, 'playlist_list.entry', p.count, { name: p.name }));
         embed.setDescription(lines.join('\n'));
     }
 
@@ -262,29 +273,29 @@ export function playlistList(playlists) {
 
 // ── Help embed ───────────────────────────────────────────────────────
 
-export function helpEmbed() {
+export function helpEmbed(guildId) {
     return new EmbedBuilder()
-        .setTitle('📖 Music Bot Help')
+        .setTitle(t(guildId, 'help.title'))
         .setColor(COLORS.INFO)
-        .setDescription('Here are all available commands:')
+        .setDescription(t(guildId, 'help.description'))
         .addFields(
-            { name: '🎵 Playback',          value: '`/play <query>` — Play a song or add to queue\n`/skip` — Skip the current track\n`/stop` — Stop playback and clear queue\n`/pause` — Pause playback\n`/resume` — Resume playback', inline: false },
-            { name: '🔊 Audio',             value: '`/volume <0-100>` — Set playback volume\n`/loop` — Toggle loop for current track', inline: false },
-            { name: '📋 Queue',             value: '`/queue` — Show the current queue\n`/nowplaying` — Show current track info', inline: false },
-            { name: '🗳️ Voting',            value: '`/vote_skip` — Vote to skip the current track', inline: false },
-            { name: '📜 Lyrics',            value: '`/lyrics` — Fetch lyrics for the current song', inline: false },
-            { name: '🎶 Playlists',         value: '`/add_to_playlist <name> <url>` — Add a song to a playlist\n`/play_playlist <name>` — Play a saved playlist\n`/list_playlists` — List all playlists', inline: false },
-            { name: '🔗 Connection',        value: '`/join` — Join your voice channel\n`/leave` — Leave the voice channel', inline: false },
-            { name: '🧹 Utility',           value: '`/clear [count]` — Delete recent messages\n`/help` — Show this help message', inline: false },
+            { name: t(guildId, 'help.playback.name'),   value: t(guildId, 'help.playback.value'), inline: false },
+            { name: t(guildId, 'help.audio.name'),       value: t(guildId, 'help.audio.value'), inline: false },
+            { name: t(guildId, 'help.queue.name'),       value: t(guildId, 'help.queue.value'), inline: false },
+            { name: t(guildId, 'help.voting.name'),      value: t(guildId, 'help.voting.value'), inline: false },
+            { name: t(guildId, 'help.lyrics.name'),      value: t(guildId, 'help.lyrics.value'), inline: false },
+            { name: t(guildId, 'help.playlists.name'),   value: t(guildId, 'help.playlists.value'), inline: false },
+            { name: t(guildId, 'help.connection.name'),  value: t(guildId, 'help.connection.value'), inline: false },
+            { name: t(guildId, 'help.utility.name'),     value: t(guildId, 'help.utility.value'), inline: false },
         );
 }
 
 // ── Utility embeds ───────────────────────────────────────────────────
 
-export function messagesCleared(count) {
+export function messagesCleared(guildId, count) {
     return new EmbedBuilder()
-        .setTitle('🧹 Messages Cleared')
-        .setDescription(`Deleted **${count}** message${count === 1 ? '' : 's'}.`)
+        .setTitle(t(guildId, 'cleared.title'))
+        .setDescription(tp(guildId, 'cleared.description', count))
         .setColor(COLORS.SUCCESS);
 }
 

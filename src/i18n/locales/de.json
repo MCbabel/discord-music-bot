@@ -1,0 +1,125 @@
+{
+    "locale.name": "Deutsch",
+    "locale.flag": "🇩🇪",
+
+    "embed.error.title": "❌ Fehler",
+    "embed.success.title": "✅ Erfolg",
+    "embed.info.title": "ℹ️ Info",
+    "embed.warning.title": "⚠️ Warnung",
+
+    "now_playing.title": "🎵 Wird gespielt",
+    "now_playing.field.title": "Titel",
+    "now_playing.field.artist": "Künstler",
+    "now_playing.field.duration": "Dauer",
+    "now_playing.unknown": "Unbekannt",
+
+    "added_to_queue.title": "➕ Zur Warteschlange hinzugefügt",
+    "added_to_queue.description": "**{trackTitle}**",
+    "added_to_queue.description_with_artist": "**{trackTitle}** von {artist}",
+    "added_to_queue.field.position": "Position",
+
+    "queue.title": "📋 Warteschlange",
+    "queue.now_playing": "🎵 Wird gespielt",
+    "queue.empty": "Die Warteschlange ist leer.",
+    "queue.empty_nothing_playing": "Es wird nichts abgespielt und die Warteschlange ist leer.",
+    "queue.footer.one": "{count} Titel in der Warteschlange",
+    "queue.footer.other": "{count} Titel in der Warteschlange",
+
+    "lyrics.title": "📜 {title} — {artist}",
+    "lyrics.not_available": "Keine Songtexte verfügbar.",
+
+    "connected.title": "🔗 Verbunden",
+    "connected.description": "Verbunden mit **{channel}**.",
+
+    "disconnected.title": "🔌 Getrennt",
+    "disconnected.description": "Der Bot hat den Sprachkanal verlassen.",
+
+    "skipped.title": "⏩ Übersprungen",
+    "skipped.description": "**{title}** übersprungen.",
+
+    "paused.title": "⏸️ Pausiert",
+    "paused.description": "Die Wiedergabe wurde pausiert.",
+
+    "resumed.title": "▶️ Fortgesetzt",
+    "resumed.description": "Die Wiedergabe wurde fortgesetzt.",
+
+    "stopped.title": "⏹️ Gestoppt",
+    "stopped.description": "Die Wiedergabe wurde gestoppt und die Warteschlange geleert.",
+
+    "volume.title": "🔊 Lautstärke",
+    "volume.description": "Lautstärke auf **{percent}%** gesetzt.",
+
+    "loop_on.title": "🔁 Wiederholen An",
+    "loop_on.description": "Der aktuelle Titel wird nun wiederholt.",
+
+    "loop_off.title": "🔁 Wiederholen Aus",
+    "loop_off.description": "Wiederholung wurde deaktiviert.",
+
+    "vote_skip.title": "🗳️ Abstimmung Überspringen",
+    "vote_skip.description": "Stimme registriert! **{current}/{required}** Stimmen zum Überspringen benötigt.",
+
+    "vote_skip_passed.title": "⏩ Abstimmung bestanden",
+    "vote_skip_passed.description": "Genug Stimmen erhalten — **{title}** wird übersprungen.",
+
+    "playlist_added.title": "🎶 Zur Playlist hinzugefügt",
+    "playlist_added.description": "**{url}** wurde zur Playlist **{name}** hinzugefügt.",
+
+    "playlist_list.title": "📂 Playlists",
+    "playlist_list.empty": "Keine Playlists gefunden. Erstelle eine mit `/add_to_playlist`.",
+    "playlist_list.entry.one": "• **{name}** — {count} Titel",
+    "playlist_list.entry.other": "• **{name}** — {count} Titel",
+
+    "help.title": "📖 Musikbot Hilfe",
+    "help.description": "Hier sind alle verfügbaren Befehle:",
+    "help.playback.name": "🎵 Wiedergabe",
+    "help.playback.value": "`/play <Suche>` — Einen Song abspielen oder zur Warteschlange hinzufügen\n`/skip` — Aktuellen Titel überspringen\n`/stop` — Wiedergabe stoppen und Warteschlange leeren\n`/pause` — Wiedergabe pausieren\n`/resume` — Wiedergabe fortsetzen",
+    "help.audio.name": "🔊 Audio",
+    "help.audio.value": "`/volume <0-100>` — Wiedergabelautstärke einstellen\n`/loop` — Wiederholung für aktuellen Titel umschalten",
+    "help.queue.name": "📋 Warteschlange",
+    "help.queue.value": "`/queue` — Aktuelle Warteschlange anzeigen\n`/nowplaying` — Aktuellen Titel anzeigen",
+    "help.voting.name": "🗳️ Abstimmung",
+    "help.voting.value": "`/vote_skip` — Zum Überspringen des aktuellen Titels abstimmen",
+    "help.lyrics.name": "📜 Songtexte",
+    "help.lyrics.value": "`/lyrics` — Songtexte für den aktuellen Song abrufen",
+    "help.playlists.name": "🎶 Playlists",
+    "help.playlists.value": "`/add_to_playlist <Name> <URL>` — Song zu einer Playlist hinzufügen\n`/play_playlist <Name>` — Gespeicherte Playlist abspielen\n`/list_playlists` — Alle Playlists anzeigen",
+    "help.connection.name": "🔗 Verbindung",
+    "help.connection.value": "`/join` — Deinem Sprachkanal beitreten\n`/leave` — Sprachkanal verlassen",
+    "help.utility.name": "🧹 Werkzeuge",
+    "help.utility.value": "`/clear [Anzahl]` — Letzte Nachrichten löschen\n`/help` — Diese Hilfe anzeigen\n`/language <Sprache>` — Bot-Sprache einstellen",
+
+    "cleared.title": "🧹 Nachrichten gelöscht",
+    "cleared.description.one": "**{count}** Nachricht gelöscht.",
+    "cleared.description.other": "**{count}** Nachrichten gelöscht.",
+
+    "error.not_in_voice": "Du musst in einem Sprachkanal sein.",
+    "error.bot_not_in_voice": "Ich bin in keinem Sprachkanal.",
+    "error.not_same_channel": "Du musst im selben Sprachkanal wie der Bot sein.",
+    "error.not_playing": "Ich spiele gerade nichts ab.",
+    "error.nothing_playing": "Es wird nichts abgespielt.",
+    "error.nothing_currently_playing": "Es wird gerade nichts abgespielt.",
+    "error.not_connected": "Ich bin mit keinem Sprachkanal verbunden.",
+    "error.queue_empty_nothing_playing": "Die Warteschlange ist leer und es wird nichts abgespielt.",
+    "error.spotify_non_track": "Spotify-Playlists und -Alben werden nicht unterstützt. Bitte einen Spotify-Track-Link angeben.",
+    "error.unknown_command": "Unbekannter Befehl: /{command}",
+    "error.unexpected": "Ein unerwarteter Fehler ist aufgetreten.",
+    "error.queue_full": "Warteschlange ist voll (maximal {max} Titel).",
+    "error.no_results": "Keine Ergebnisse gefunden für: {query}",
+    "error.no_lyrics": "Keine Songtexte gefunden für: {query}",
+    "error.playlist_not_found": "Playlist '{name}' nicht gefunden.",
+    "error.playlist_empty": "Playlist '{name}' ist leer.",
+    "error.playlist_full": "Playlist ist voll (maximal {max} Einträge).",
+    "error.invalid_url": "Ungültige URL: {url}",
+    "error.spotify_resolve_failed": "Kein YouTube-Ergebnis für Spotify-Track gefunden: {title} von {artist}",
+
+    "success.now_playing": "Spielt jetzt **{title}**",
+    "success.playlist_loaded": "**{loaded}/{total}** Titel aus Playlist **{name}** geladen.",
+
+    "player.queue_finished": "Warteschlange beendet. Trenne in 3 Minuten bei Inaktivität.",
+    "player.button_not_same_channel": "Du musst im selben Sprachkanal sein.",
+
+    "language.title": "🌐 Sprache",
+    "language.changed": "Sprache wurde auf **{language}** gesetzt.",
+    "language.invalid": "Ungültige Sprache. Verfügbare Sprachen: {available}",
+    "language.current": "Aktuelle Sprache: **{language}**"
+}

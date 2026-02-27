@@ -11,6 +11,7 @@ import {
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } from 'discord.js';
 import { createYouTubeStream } from './youtube.js';
 import * as messages from '../messages.js';
+import { t } from '../i18n/index.js';
 import config from '../config.js';
 
 // Store all guild players: Map<guildId, GuildPlayer>
@@ -201,7 +202,7 @@ class GuildPlayer {
 
             if (this.textChannel) {
                 try {
-                    await this.textChannel.send({ embeds: [messages.info('Queue finished. Disconnecting in 3 minutes if idle.')] });
+                    await this.textChannel.send({ embeds: [messages.info(this.guildId, t(this.guildId, 'player.queue_finished'))] });
                 } catch { /* channel might not exist anymore */ }
             }
         }
@@ -231,7 +232,7 @@ class GuildPlayer {
     async _sendNowPlaying(track) {
         if (!this.textChannel) return;
 
-        const embed = messages.nowPlaying(track);
+        const embed = messages.nowPlaying(this.guildId, track);
         const row = this._buildNowPlayingButtons();
 
         try {
@@ -253,7 +254,7 @@ class GuildPlayer {
 
                 if (userChannel !== botChannel) {
                     await interaction.reply({
-                        embeds: [messages.error('You must be in the same voice channel.')],
+                        embeds: [messages.error(this.guildId, t(this.guildId, 'player.button_not_same_channel'))],
                         flags: MessageFlags.Ephemeral,
                     });
                     return;
@@ -273,12 +274,12 @@ class GuildPlayer {
                         break;
                     case 'skip':
                         this.skip();
-                        await interaction.reply({ embeds: [messages.skipped(this.currentTrack?.title || 'Unknown')], flags: MessageFlags.Ephemeral });
+                        await interaction.reply({ embeds: [messages.skipped(this.guildId, this.currentTrack?.title || t(this.guildId, 'now_playing.unknown'))], flags: MessageFlags.Ephemeral });
                         break;
                     case 'loop':
                         this.isLooping = !this.isLooping;
                         await interaction.reply({
-                            embeds: [this.isLooping ? messages.loopOn() : messages.loopOff()],
+                            embeds: [this.isLooping ? messages.loopOn(this.guildId) : messages.loopOff(this.guildId)],
                             flags: MessageFlags.Ephemeral,
                         });
                         break;
@@ -408,7 +409,7 @@ class GuildPlayer {
         this.inactivityTimer = setTimeout(() => {
             if (!this.currentTrack && this.queue.length === 0) {
                 if (this.textChannel) {
-                    this.textChannel.send({ embeds: [messages.disconnected()] }).catch(() => {});
+                    this.textChannel.send({ embeds: [messages.disconnected(this.guildId)] }).catch(() => {});
                 }
                 this.destroy();
                 guildPlayers.delete(this.guildId);

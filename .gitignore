@@ -6,6 +6,7 @@ node_modules/
 
 # Data
 playlists.json
+guild-settings.json
 
 # YouTube cookies (contains auth tokens — never commit!)
 cookies.txt
@@ -17,6 +18,9 @@ Thumbs.db
 # IDE
 .vscode/
 .idea/
+
+# Plans / design docs
+plans/
 
 # Build
 dist/
