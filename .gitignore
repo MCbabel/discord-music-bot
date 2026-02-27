@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+
+# Environment
+.env
+
+# Data
+playlists.json
+
+# YouTube cookies (contains auth tokens — never commit!)
+cookies.txt
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Build
+dist/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Old Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Old Rust
+/target
+Cargo.lock
