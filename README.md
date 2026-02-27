@@ -4,7 +4,7 @@ A feature-rich Discord music bot built with **discord.js v14** and **Node.js**. 
 
 <p align="center">
   <img src="https://img.shields.io/badge/version-2.0.0-green" alt="Version" />
-  <img src="https://img.shields.io/badge/license-MelodyBot_License-blue" alt="License" />
+  <img src="https://img.shields.io/badge/license-MIT-blue" alt="License" />
   <img src="https://img.shields.io/badge/node-18%2B-brightgreen?logo=node.js" alt="Node" />
   <img src="https://img.shields.io/badge/discord.js-v14-5865F2?logo=discord&logoColor=white" alt="discord.js" />
   <img src="https://img.shields.io/badge/audio-yt--dlp-red" alt="yt-dlp" />
@@ -272,7 +272,7 @@ Contributions are welcome! Fork this repository and submit a pull request with y
 
 ## License
 
-This project is licensed under the **MelodyBot License** — a non-commercial, attribution-required license. See the [LICENSE](LICENSE) file for full terms.
+This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for full terms.
 
 ---
 
