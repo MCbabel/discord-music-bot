@@ -1,5 +1,6 @@
 import { EmbedBuilder } from 'discord.js';
 import { t, tp } from './i18n/index.js';
+import { SourceInfo } from './audio/resolver.js';
 
 // ── Color constants ──────────────────────────────────────────────────
 const COLORS = {
@@ -67,6 +68,11 @@ export function warning(guildId, description) {
  */
 export function nowPlaying(guildId, track) {
     const unknown = t(guildId, 'now_playing.unknown');
+    const sourceInfo = SourceInfo[track.source];
+    const sourceDisplay = sourceInfo
+        ? `${sourceInfo.emoji} ${t(guildId, 'source.' + track.source)}`
+        : `▶️ ${t(guildId, 'source.youtube')}`;
+
     const embed = new EmbedBuilder()
         .setTitle(t(guildId, 'now_playing.title'))
         .setColor(COLORS.NOW_PLAYING)
@@ -74,6 +80,7 @@ export function nowPlaying(guildId, track) {
             { name: t(guildId, 'now_playing.field.title'), value: track.title || unknown, inline: true },
             { name: t(guildId, 'now_playing.field.artist'), value: track.artist || unknown, inline: true },
             { name: t(guildId, 'now_playing.field.duration'), value: formatDuration(track.duration), inline: true },
+            { name: t(guildId, 'now_playing.source'), value: sourceDisplay, inline: true },
         );
 
     if (track.url) embed.setURL(track.url);
@@ -93,10 +100,18 @@ export function addedToQueue(guildId, track, position) {
         ? t(guildId, 'added_to_queue.description_with_artist', { trackTitle: track.title, artist: track.artist })
         : t(guildId, 'added_to_queue.description', { trackTitle: track.title });
 
+    const sourceInfo = SourceInfo[track.source];
+    const sourceDisplay = sourceInfo
+        ? `${sourceInfo.emoji} ${t(guildId, 'source.' + track.source)}`
+        : `▶️ ${t(guildId, 'source.youtube')}`;
+
     return new EmbedBuilder()
         .setTitle(t(guildId, 'added_to_queue.title'))
         .setDescription(description)
-        .addFields({ name: t(guildId, 'added_to_queue.field.position'), value: `#${position}`, inline: true })
+        .addFields(
+            { name: t(guildId, 'added_to_queue.field.position'), value: `#${position}`, inline: true },
+            { name: t(guildId, 'now_playing.source'), value: sourceDisplay, inline: true },
+        )
         .setColor(COLORS.INFO);
 }
 

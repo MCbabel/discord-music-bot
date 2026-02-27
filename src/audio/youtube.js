@@ -130,9 +130,9 @@ export async function getYouTubeInfo(url) {
         const { stdout } = await execAsync(cmd, { maxBuffer: 10 * 1024 * 1024 });
         const data = JSON.parse(stdout);
         return {
-            title: data.title || 'Unknown Title',
-            artist: data.uploader || data.channel || 'Unknown Artist',
-            duration: data.duration || 0,
+            title: data.track || data.title || 'Unknown Title',
+            artist: data.artist || data.creator || data.uploader || data.channel || 'Unknown Artist',
+            duration: Math.max(0, data.duration || 0),
             thumbnailUrl: data.thumbnail || null,
             url: data.webpage_url || url,
         };

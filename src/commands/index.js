@@ -1,8 +1,7 @@
 import { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } from 'discord.js';
 import * as messages from '../messages.js';
 import { getGuildPlayer, getOrCreateGuildPlayer, deleteGuildPlayer } from '../audio/player.js';
-import { searchYouTube, getYouTubeInfo, isYouTubeUrl } from '../audio/youtube.js';
-import { isSpotifyTrack, isSpotifyNonTrack, resolveSpotifyTrack } from '../audio/spotify.js';
+import { resolveQuery } from '../audio/resolver.js';
 import { fetchLyrics } from '../services/lyrics.js';
 import { addToPlaylist, getPlaylist, listPlaylists } from '../services/playlist.js';
 import { t, getLocale, setLocale, getAvailableLocales } from '../i18n/index.js';
@@ -107,27 +106,18 @@ const play = {
 
         const query = interaction.options.getString('query');
 
-        let track;
-        if (isSpotifyNonTrack(query)) {
-            // BUG-36: Spotify playlists/albums not supported
+        try {
+            const track = await resolveQuery(query);
+            const result = await player.addTrack(track, interaction);
+
+            if (result === 'queued') {
+                await interaction.editReply({ embeds: [messages.addedToQueue(guildId, track, player.queue.length)] });
+            }
+            // When 'playing', the "Now Playing" embed is already sent as the interaction reply by the player
+        } catch (err) {
             return interaction.editReply({
-                embeds: [messages.error(guildId, t(guildId, 'error.spotify_non_track'))],
+                embeds: [messages.error(guildId, err.message)],
             });
-        } else if (isSpotifyTrack(query)) {
-            track = await resolveSpotifyTrack(query);
-        } else if (isYouTubeUrl(query)) {
-            track = await getYouTubeInfo(query);
-        } else {
-            track = await searchYouTube(query);
-        }
-
-        const result = await player.addTrack(track);
-
-        if (result === 'playing') {
-            // Brief confirmation only — the player sends the rich "Now Playing" embed with buttons
-            await interaction.editReply({ embeds: [messages.success(guildId, t(guildId, 'success.now_playing', { title: track.title }))] });
-        } else {
-            await interaction.editReply({ embeds: [messages.addedToQueue(guildId, track, player.queue.length)] });
         }
     },
 };
@@ -409,14 +399,7 @@ const playPlaylist = {
 
         for (const entry of entries) {
             try {
-                let track;
-                if (isYouTubeUrl(entry.url)) {
-                    track = await getYouTubeInfo(entry.url);
-                } else if (isSpotifyTrack(entry.url)) {
-                    track = await resolveSpotifyTrack(entry.url);
-                } else {
-                    track = await searchYouTube(entry.url);
-                }
+                const track = await resolveQuery(entry.url);
                 await player.addTrack(track);
                 successCount++;
             } catch (err) {

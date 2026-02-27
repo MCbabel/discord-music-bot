@@ -134,6 +134,49 @@ footer a:hover{color:var(--cyan);text-shadow:0 0 8px rgba(0,255,255,.4)}
   <div class="container">
     <div class="timeline">
 
+      <!-- v2.1.0 -->
+      <div class="version-block major reveal">
+        <div class="version-header">
+          <div class="version-tag"><span class="v-num">v2.1.0</span> <span class="version-date">— 2026-02-27</span></div>
+          <div class="version-subtitle">Multi-Service Streaming</div>
+        </div>
+
+        <div class="change-card">
+          <div class="change-category cat-features"><span class="cat-icon">✨</span> New Features</div>
+          <ul class="change-list">
+            <li>Unified URL resolver — automatic detection for 9 streaming services</li>
+            <li>SoundCloud support (direct streaming via <code>yt-dlp</code>)</li>
+            <li>Bandcamp support (direct streaming via <code>yt-dlp</code>)</li>
+            <li>Apple Music support (metadata bridge → YouTube)</li>
+            <li>Deezer support (metadata bridge → YouTube)</li>
+            <li>Tidal support (metadata bridge → YouTube)</li>
+            <li>Direct audio URL support (<code>.mp3</code>, <code>.wav</code>, <code>.ogg</code>, <code>.flac</code>, <code>.m4a</code>)</li>
+            <li>Internet radio stream support (Icecast/Shoutcast)</li>
+            <li>Source indicator in "Now Playing" embeds</li>
+          </ul>
+        </div>
+
+        <div class="change-card">
+          <div class="change-category cat-fixes"><span class="cat-icon">🔧</span> Improvements</div>
+          <ul class="change-list">
+            <li>Simplified <code>/play</code> command — single <code>resolveQuery()</code> replaces 12-line if/else chain</li>
+            <li>Service abstraction layer (<code>resolver.js</code> + <code>stream.js</code>)</li>
+            <li>All metadata bridge services use free public APIs (no extra API keys needed)</li>
+          </ul>
+        </div>
+
+        <div class="change-card">
+          <div class="change-category cat-docs"><span class="cat-icon">📚</span> Documentation</div>
+          <ul class="change-list">
+            <li>Updated README with supported services table</li>
+            <li>Added i18n keys for all new services in EN, DE, ES locales</li>
+            <li>Updated project structure in README</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="version-divider"></div>
+
       <!-- v2.0.0 -->
       <div class="version-block major reveal">
         <div class="version-header">

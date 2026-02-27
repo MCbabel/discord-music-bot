@@ -1,12 +1,13 @@
 # 🎶 Discord Music Bot
 
-A feature-rich Discord music bot built with **discord.js v14** and **Node.js**. Supports YouTube and Spotify playback, lyrics fetching via Genius, custom playlists, queue management, and more — all through modern slash commands.
+A feature-rich Discord music bot built with **discord.js v14** and **Node.js**. Supports 9 streaming services including YouTube, Spotify, SoundCloud, Bandcamp, Apple Music, Deezer, and Tidal — plus lyrics fetching via Genius, custom playlists, queue management, and more — all through modern slash commands.
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-2.0.0-green" alt="Version" />
+  <img src="https://img.shields.io/badge/version-2.1.0-green" alt="Version" />
   <img src="https://img.shields.io/badge/license-MIT-blue" alt="License" />
   <img src="https://img.shields.io/badge/node-18%2B-brightgreen?logo=node.js" alt="Node" />
   <img src="https://img.shields.io/badge/discord.js-v14-5865F2?logo=discord&logoColor=white" alt="discord.js" />
+  <img src="https://img.shields.io/badge/services-9%20supported-red" alt="9 Services" />
   <img src="https://img.shields.io/badge/audio-yt--dlp-red" alt="yt-dlp" />
   <img src="https://img.shields.io/badge/FFmpeg-required-orange?logo=ffmpeg" alt="FFmpeg" />
   <img src="https://img.shields.io/badge/languages-EN%20%7C%20DE%20%7C%20ES-blueviolet" alt="i18n" />
@@ -35,16 +36,34 @@ A feature-rich Discord music bot built with **discord.js v14** and **Node.js**. 
 
 ## Features
 
-- 🎵 **YouTube Playback** — Play any song or video from YouTube via URL or search query
+- 🎵 **Multi-Service Playback** — Play from YouTube, SoundCloud, Bandcamp, and direct URLs natively via yt-dlp
 - 🟢 **Spotify Integration** — Paste a Spotify track link and the bot resolves it to YouTube for playback
-- 📜 **Lyrics Fetching** — Retrieve song lyrics from the Genius API
+- 🍎 **Apple Music Support** — Paste an Apple Music track link — metadata is resolved via free API, then played via YouTube
+- 💜 **Deezer Support** — Paste a Deezer track link — metadata is resolved via free API, then played via YouTube
+- 🌊 **Tidal Support** — Paste a Tidal track link — metadata is resolved via free API, then played via YouTube
+- 📻 **Radio & Direct URLs** — Stream internet radio (Icecast/Shoutcast) or direct audio files (.mp3, .wav, .ogg, .flac, .m4a)
+- � **Lyrics Fetching** — Retrieve song lyrics from the Genius API
 - 📋 **Queue Management** — View, skip, loop, and control the playback queue
 - 🔊 **Volume Control** — Adjust playback volume from 0–100%
 - 🗳️ **Vote Skip** — Democratic skip voting for shared listening sessions
 - 🎶 **Custom Playlists** — Save and play user-created playlists
-- ⏱️ **Now Playing** — See what's currently playing with track details
+- ⏱️ **Now Playing** — See what's currently playing with track details and source indicator
 - 🤖 **Auto-Disconnect** — Leaves the voice channel after 3 minutes of inactivity
 - 🧹 **Message Cleanup** — Bulk-delete messages with the `/clear` command
+
+### 🎵 Supported Services
+
+| Service | Type | API Key Required |
+|---------|------|-----------------|
+| YouTube | Direct Streaming (yt-dlp) | No |
+| Spotify | Metadata → YouTube | Yes (Client ID + Secret) |
+| SoundCloud | Direct Streaming (yt-dlp) | No |
+| Bandcamp | Direct Streaming (yt-dlp) | No |
+| Apple Music | Metadata → YouTube | No |
+| Deezer | Metadata → YouTube | No |
+| Tidal | Metadata → YouTube | No |
+| Direct URLs | HTTP Stream (.mp3, .wav, etc.) | No |
+| Internet Radio | HTTP Stream | No |
 
 ## Commands
 
@@ -52,7 +71,7 @@ A feature-rich Discord music bot built with **discord.js v14** and **Node.js**. 
 
 | Command | Description |
 |---|---|
-| `/play <query>` | Play a song by name, YouTube URL, or Spotify link |
+| `/play <query>` | Play a song by name, URL (YouTube, Spotify, SoundCloud, Bandcamp, Apple Music, Deezer, Tidal), or direct audio link |
 | `/pause` | Pause the current playback |
 | `/resume` | Resume paused playback |
 | `/skip` | Skip the current track |
@@ -234,10 +253,18 @@ src/
 ├── messages.js           # Discord embed builders (now playing, queue, errors, etc.)
 ├── audio/
 │   ├── player.js         # GuildPlayer — per-guild queue & playback management
+│   ├── resolver.js       # Unified URL/query resolver — auto-detects 9 services
+│   ├── stream.js         # Stream creation for all source types
 │   ├── youtube.js        # yt-dlp integration — search, stream, info extraction
-│   └── spotify.js        # Spotify → YouTube bridge (resolve track metadata)
+│   ├── spotify.js        # Spotify → YouTube bridge (resolve track metadata)
+│   ├── applemusic.js     # Apple Music → YouTube bridge (free API)
+│   ├── deezer.js         # Deezer → YouTube bridge (free API)
+│   └── tidal.js          # Tidal → YouTube bridge (free API)
 ├── commands/
 │   └── index.js          # All 18 slash command definitions & handlers
+├── i18n/
+│   ├── index.js          # i18n engine (EN, DE, ES)
+│   └── locales/          # Locale JSON files
 └── services/
     ├── lyrics.js         # Genius lyrics fetching
     └── playlist.js       # Playlist persistence (JSON file storage)
@@ -258,7 +285,7 @@ Contributions are welcome! Fork this repository and submit a pull request with y
 - [x] User-specific playlists
 - [x] Song search functionality
 - [x] Now playing message with song progress
-- [ ] Integration with more streaming services
+- [x] Integration with more streaming services (SoundCloud, Bandcamp, Apple Music, Deezer, Tidal, Direct URLs, Radio)
 - [ ] Customizable bot settings
 - [ ] Song crossfade: Smoothly transition between songs with a configurable crossfade duration.
 - [ ] DJ Mode: Allow certain users to have elevated control over the bot, including song reordering and queue management.

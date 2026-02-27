@@ -8,8 +8,8 @@ import {
     NoSubscriberBehavior,
     StreamType,
 } from '@discordjs/voice';
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } from 'discord.js';
-import { createYouTubeStream } from './youtube.js';
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, MessageFlags } from 'discord.js';
+import { createAudioStream } from './stream.js';
 import * as messages from '../messages.js';
 import { t } from '../i18n/index.js';
 import config from '../config.js';
@@ -77,8 +77,10 @@ class GuildPlayer {
         this.currentResource = null;
         this.textChannel = null; // Channel to send "Now Playing" messages
         this.nowPlayingMessage = null;
+        this._nowPlayingCollector = null; // Button collector reference for cleanup
         this.inactivityTimer = null;
         this._currentProcess = null; // yt-dlp subprocess reference for cleanup
+        this._isLoopReplay = false; // Flag to suppress duplicate "Now Playing" on loop
     }
 
     /**
@@ -135,17 +137,24 @@ class GuildPlayer {
      * Add a track to the queue and play if nothing is playing.
      * Addresses BUG-31 (queue limit).
      * @param {{title: string, artist: string, duration: number, thumbnailUrl: string|null, url: string}} track
+     * @param {import('discord.js').ChatInputCommandInteraction|null} interaction - Optional interaction to reply to
      * @returns {Promise<'playing'|'queued'>}
      */
-    async addTrack(track) {
-        if (this.currentTrack && this.audioPlayer?.state.status === AudioPlayerStatus.Playing) {
+    async addTrack(track, interaction = null) {
+        const status = this.audioPlayer?.state.status;
+        const isActive = this.currentTrack && (
+            status === AudioPlayerStatus.Playing ||
+            status === AudioPlayerStatus.Buffering ||
+            status === AudioPlayerStatus.Paused
+        );
+        if (isActive) {
             if (this.queue.length >= config.maxQueueSize) {
                 throw new Error(`Queue is full (max ${config.maxQueueSize} tracks).`);
             }
             this.queue.push(track);
             return 'queued';
         } else {
-            await this._playTrack(track);
+            await this._playTrack(track, interaction);
             return 'playing';
         }
     }
@@ -153,26 +162,35 @@ class GuildPlayer {
     /**
      * Play a specific track.
      * @param {{title: string, artist: string, duration: number, thumbnailUrl: string|null, url: string}} track
+     * @param {import('discord.js').ChatInputCommandInteraction|null} interaction - Optional interaction to reply to
      */
-    async _playTrack(track) {
+    async _playTrack(track, interaction = null) {
         this._clearInactivityTimer();
         this.skipVotes.clear(); // BUG-11 fix: clear votes on song change
         this.currentTrack = track;
         this.isPaused = false;
 
+        const isLoopReplay = this._isLoopReplay;
+        this._isLoopReplay = false;
+
         try {
-            this._killCurrentProcess(); // Kill any lingering yt-dlp process
-            const ytStream = await createYouTubeStream(track.url);
-            this._currentProcess = ytStream.process;
-            this.currentResource = createAudioResource(ytStream.stream, {
+            this._killCurrentProcess(); // Kill any lingering subprocess
+            const audioStream = await createAudioStream(track);
+            this._currentProcess = audioStream.process;
+            this.currentResource = createAudioResource(audioStream.stream, {
                 inputType: StreamType.Arbitrary,
                 inlineVolume: true,
             });
             this.currentResource.volume?.setVolume(this.volume); // BUG-14: apply persisted volume
             this.audioPlayer.play(this.currentResource);
 
-            // Send "Now Playing" embed with buttons
-            await this._sendNowPlaying(track);
+            if (isLoopReplay) {
+                // Update existing "Now Playing" message with loop indicator instead of sending a new one
+                await this._updateNowPlayingLoop(track);
+            } else {
+                // Send "Now Playing" embed with buttons
+                await this._sendNowPlaying(track, interaction);
+            }
         } catch (err) {
             console.error('Error playing track:', err.message);
             this._onTrackEnd(); // Skip to next
@@ -186,24 +204,27 @@ class GuildPlayer {
     async _onTrackEnd() {
         this.skipVotes.clear(); // BUG-11
 
-        // Disable buttons on old "Now Playing" message (BUG-32: handle deleted messages)
-        await this._disableNowPlayingButtons();
-
         if (this.isLooping && this.currentTrack) {
-            // Re-play the same track
+            // Re-play the same track — keep existing "Now Playing" message
+            this._isLoopReplay = true;
             await this._playTrack(this.currentTrack);
-        } else if (this.queue.length > 0) {
-            const nextTrack = this.queue.shift();
-            await this._playTrack(nextTrack);
         } else {
-            // Queue empty
-            this.currentTrack = null;
-            this._startInactivityTimer(); // BUG-27: auto-cleanup
+            // Disable buttons on old "Now Playing" message (BUG-32: handle deleted messages)
+            await this._disableNowPlayingButtons();
 
-            if (this.textChannel) {
-                try {
-                    await this.textChannel.send({ embeds: [messages.info(this.guildId, t(this.guildId, 'player.queue_finished'))] });
-                } catch { /* channel might not exist anymore */ }
+            if (this.queue.length > 0) {
+                const nextTrack = this.queue.shift();
+                await this._playTrack(nextTrack);
+            } else {
+                // Queue empty
+                this.currentTrack = null;
+                this._startInactivityTimer(); // BUG-27: auto-cleanup
+
+                if (this.textChannel) {
+                    try {
+                        await this.textChannel.send({ embeds: [messages.info(this.guildId, t(this.guildId, 'player.queue_finished'))] });
+                    } catch { /* channel might not exist anymore */ }
+                }
             }
         }
     }
@@ -226,25 +247,51 @@ class GuildPlayer {
 
     /**
      * Send "Now Playing" embed with interactive buttons.
+     * If an interaction is provided (from /play), uses interaction.editReply() so the
+     * "Now Playing" message appears as the command reply (showing who requested it).
+     * For auto-advance (no interaction), falls back to channel.send().
      * Includes button collector with timeout (BUG-33 fix).
      * @param {{title: string, artist: string, duration: number, thumbnailUrl: string|null, url: string}} track
+     * @param {import('discord.js').ChatInputCommandInteraction|null} interaction - Optional interaction to reply to
      */
-    async _sendNowPlaying(track) {
-        if (!this.textChannel) return;
+    async _sendNowPlaying(track, interaction = null) {
+        if (!interaction && !this.textChannel) return;
+
+        // Stop the old collector before creating a new one (prevents stale collectors
+        // from disabling the new message's buttons)
+        if (this._nowPlayingCollector) {
+            try { this._nowPlayingCollector.stop('replaced'); } catch { /* already stopped */ }
+            this._nowPlayingCollector = null;
+        }
 
         const embed = messages.nowPlaying(this.guildId, track);
         const row = this._buildNowPlayingButtons();
 
         try {
-            this.nowPlayingMessage = await this.textChannel.send({
-                embeds: [embed],
-                components: [row],
-            });
+            if (interaction) {
+                // Reply to the /play command so the user's name/avatar is shown
+                this.nowPlayingMessage = await interaction.editReply({
+                    embeds: [embed],
+                    components: [row],
+                });
+            } else {
+                // Auto-advance: send as a standalone channel message
+                this.nowPlayingMessage = await this.textChannel.send({
+                    embeds: [embed],
+                    components: [row],
+                });
+            }
+
+            // Capture reference to THIS specific message for the collector's end handler
+            const thisMessage = this.nowPlayingMessage;
 
             // Set up button collector with timeout (BUG-33 fix)
+            // Guard with Math.max to prevent TimeoutNegativeWarning
+            const collectorTime = Math.max(60_000, 600_000);
             const collector = this.nowPlayingMessage.createMessageComponentCollector({
-                time: 600_000, // 10 minute timeout
+                time: collectorTime,
             });
+            this._nowPlayingCollector = collector;
 
             collector.on('collect', async (interaction) => {
                 // Check if user is in same voice channel (BUG-12)
@@ -278,19 +325,54 @@ class GuildPlayer {
                         break;
                     case 'loop':
                         this.isLooping = !this.isLooping;
-                        await interaction.reply({
-                            embeds: [this.isLooping ? messages.loopOn(this.guildId) : messages.loopOff(this.guildId)],
-                            flags: MessageFlags.Ephemeral,
+                        // Update the "Now Playing" embed in-place with/without the loop footer
+                        const currentEmbed = interaction.message.embeds[0];
+                        const updatedEmbed = EmbedBuilder.from(currentEmbed);
+                        if (this.isLooping) {
+                            updatedEmbed.setFooter({ text: '🔁 Looping' });
+                        } else {
+                            updatedEmbed.setFooter(null);
+                        }
+                        await interaction.update({
+                            embeds: [updatedEmbed],
+                            components: [this._buildNowPlayingButtons()],
                         });
                         break;
                 }
             });
 
-            collector.on('end', () => {
-                this._disableNowPlayingButtons();
+            collector.on('end', (_collected, reason) => {
+                // Only disable buttons if this collector's message is still the current
+                // now-playing message and wasn't replaced by a newer one
+                if (reason !== 'replaced' && this.nowPlayingMessage === thisMessage) {
+                    this._disableNowPlayingButtons();
+                }
             });
         } catch (err) {
             console.error('Error sending now playing:', err.message);
+        }
+    }
+
+    /**
+     * Update existing "Now Playing" message with a loop indicator instead of sending a new one.
+     * Falls back to sending a new message if the existing one was deleted.
+     * @param {{title: string, artist: string, duration: number, thumbnailUrl: string|null, url: string}} track
+     */
+    async _updateNowPlayingLoop(track) {
+        if (!this.nowPlayingMessage) {
+            // Fallback: if no existing message, send a new one
+            await this._sendNowPlaying(track);
+            return;
+        }
+
+        try {
+            const embed = messages.nowPlaying(this.guildId, track);
+            embed.setFooter({ text: '🔁 Looping' });
+            const row = this._buildNowPlayingButtons();
+            await this.nowPlayingMessage.edit({ embeds: [embed], components: [row] });
+        } catch {
+            // Message was deleted — send a fresh one
+            await this._sendNowPlaying(track);
         }
     }
 
@@ -406,6 +488,8 @@ class GuildPlayer {
      */
     _startInactivityTimer() {
         this._clearInactivityTimer();
+        // Guard with Math.max to prevent TimeoutNegativeWarning (Node.js warns on negative setTimeout values)
+        const timeout = Math.max(1_000, config.inactivityTimeout);
         this.inactivityTimer = setTimeout(() => {
             if (!this.currentTrack && this.queue.length === 0) {
                 if (this.textChannel) {
@@ -414,7 +498,7 @@ class GuildPlayer {
                 this.destroy();
                 guildPlayers.delete(this.guildId);
             }
-        }, config.inactivityTimeout);
+        }, timeout);
     }
 
     /** Clear the inactivity timer if running. */
