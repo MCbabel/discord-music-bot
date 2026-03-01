@@ -1,6 +1,6 @@
 {
   "name": "discord-music-bot",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "A feature-rich Discord music bot with 9 streaming services, Genius lyrics, and modern slash commands",
   "main": "src/index.js",
   "type": "module",

@@ -87,6 +87,8 @@
     "help.connection.value": "`/join` — Deinem Sprachkanal beitreten\n`/leave` — Sprachkanal verlassen",
     "help.utility.name": "🧹 Werkzeuge",
     "help.utility.value": "`/clear [Anzahl]` — Letzte Nachrichten löschen\n`/help` — Diese Hilfe anzeigen\n`/language <Sprache>` — Bot-Sprache einstellen",
+    "help.settings.name": "⚙️ Einstellungen",
+    "help.settings.value": "`/settings view` — Alle Einstellungen anzeigen\n`/settings audio` — Audio-Einstellungen\n`/settings moderation` — Moderationseinstellungen\n`/settings display` — Anzeigeeinstellungen\n`/settings reset` — Einstellungen zurücksetzen",
 
     "cleared.title": "🧹 Nachrichten gelöscht",
     "cleared.description.one": "**{count}** Nachricht gelöscht.",
@@ -139,5 +141,67 @@
     "language.title": "🌐 Sprache",
     "language.changed": "Sprache wurde auf **{language}** gesetzt.",
     "language.invalid": "Ungültige Sprache. Verfügbare Sprachen: {available}",
-    "language.current": "Aktuelle Sprache: **{language}**"
+    "language.current": "Aktuelle Sprache: **{language}**",
+
+    "settings.title": "⚙️ Server-Einstellungen",
+    "settings.audio.title": "🔊 Audio",
+    "settings.moderation.title": "🛡️ Moderation",
+    "settings.display.title": "🎨 Anzeige",
+
+    "settings.default_volume.name": "Standardlautstärke",
+    "settings.default_volume.description": "Lautstärke beim Beitreten (1-100%)",
+    "settings.default_volume.set": "Standardlautstärke auf **{value}%** gesetzt.",
+
+    "settings.max_queue_size.name": "Max. Warteschlangengröße",
+    "settings.max_queue_size.description": "Maximale Titel in der Warteschlange (10-500)",
+    "settings.max_queue_size.set": "Max. Warteschlangengröße auf **{value}** gesetzt.",
+
+    "settings.inactivity_timeout.name": "Inaktivitäts-Timeout",
+    "settings.inactivity_timeout.description": "Sekunden bis zur automatischen Trennung (30-600)",
+    "settings.inactivity_timeout.set": "Inaktivitäts-Timeout auf **{value} Sekunden** gesetzt.",
+
+    "settings.max_song_duration.name": "Max. Songdauer",
+    "settings.max_song_duration.description": "Max. Songlänge in Sekunden; 0 = kein Limit (0-3600)",
+    "settings.max_song_duration.set": "Max. Songdauer auf **{value} Sekunden** gesetzt.",
+    "settings.max_song_duration.set_unlimited": "Max. Songdauer-Limit **entfernt**.",
+
+    "settings.vote_skip_threshold.name": "Abstimmungsschwelle",
+    "settings.vote_skip_threshold.description": "Prozent der Mitglieder zum Überspringen (1-100%)",
+    "settings.vote_skip_threshold.set": "Abstimmungsschwelle auf **{value}%** gesetzt.",
+
+    "settings.dj_role.name": "DJ-Rolle",
+    "settings.dj_role.description": "Rolle für Wiedergabesteuerung erforderlich",
+    "settings.dj_role.set": "DJ-Rolle auf **{role}** gesetzt.",
+    "settings.dj_role.cleared": "DJ-Rollenanforderung **entfernt**.",
+
+    "settings.restricted_text_channel.name": "Textkanal",
+    "settings.restricted_text_channel.description": "Textkanal für Musikbefehle",
+    "settings.restricted_text_channel.set": "Musikbefehle auf **{channel}** beschränkt.",
+    "settings.restricted_text_channel.cleared": "Textkanalbeschränkung **entfernt**.",
+
+    "settings.restricted_voice_channel.name": "Sprachkanal",
+    "settings.restricted_voice_channel.description": "Sprachkanal, dem der Bot beitreten darf",
+    "settings.restricted_voice_channel.set": "Bot auf Sprachkanal **{channel}** beschränkt.",
+    "settings.restricted_voice_channel.cleared": "Sprachkanalbeschränkung **entfernt**.",
+
+    "settings.embed_color.name": "Embed-Farbe",
+    "settings.embed_color.description": "Benutzerdefinierte Farbe für Bot-Embeds (Hex, z.B. #8b5cf6)",
+    "settings.embed_color.set": "Embed-Farbe auf **{value}** gesetzt.",
+    "settings.embed_color.invalid": "Ungültige Farbe. Verwende Hex-Format: `#FF5733`.",
+
+    "settings.reset.all": "Alle Einstellungen wurden auf **Standardwerte zurückgesetzt**.",
+    "settings.reset.single": "**{setting}** wurde auf Standard zurückgesetzt.",
+    "settings.updated": "Einstellungen aktualisiert.",
+    "settings.no_changes": "Keine Optionen angegeben. Verwende `/settings view` um aktuelle Werte zu sehen.",
+    "settings.footer": "Verwende /settings audio, /settings moderation oder /settings display um Einstellungen zu ändern.",
+    "settings.value.none": "Keine",
+    "settings.value.unlimited": "Unbegrenzt",
+    "settings.value.all_channels": "Alle",
+
+    "error.no_permission": "Du benötigst die Berechtigung **Server verwalten** um Einstellungen zu ändern.",
+    "error.dj_role_required": "Dieser Befehl erfordert die Rolle **{role}**.",
+    "error.channel_not_allowed": "Musikbefehle sind in diesem Kanal nicht erlaubt.",
+    "error.voice_channel_not_allowed": "Der Bot darf diesem Sprachkanal nicht beitreten.",
+    "error.song_too_long": "Song ist zu lang ({duration}). Maximal erlaubt: {max}.",
+    "error.invalid_setting": "Unbekannte Einstellung: `{key}`."
 }

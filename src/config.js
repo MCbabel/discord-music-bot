@@ -22,11 +22,10 @@ const config = {
     spotifyClientSecret: requireEnv('SPOTIFY_CLIENT_SECRET'),
     geniusAccessToken: requireEnv('GENIUS_ACCESS_TOKEN'),
 
-    // Constants
-    maxQueueSize: 100,          // BUG-31 fix: cap queue length
+    // Global constants (not per-guild customizable)
     maxPlaylistSize: 200,       // BUG-30 fix: cap playlist length
-    inactivityTimeout: 180_000, // 3 minutes in ms
-    defaultVolume: 50,          // 0-100
+    // Per-guild settings (defaultVolume, maxQueueSize, inactivityTimeout) are
+    // now managed by src/services/settings.js and configurable via /settings.
 };
 
 export default config;

@@ -87,6 +87,8 @@
     "help.connection.value": "`/join` — Join your voice channel\n`/leave` — Leave the voice channel",
     "help.utility.name": "🧹 Utility",
     "help.utility.value": "`/clear [count]` — Delete recent messages\n`/help` — Show this help message\n`/language <lang>` — Set bot language",
+    "help.settings.name": "⚙️ Settings",
+    "help.settings.value": "`/settings view` — View all settings\n`/settings audio` — Audio settings\n`/settings moderation` — Moderation settings\n`/settings display` — Display settings\n`/settings reset` — Reset settings",
 
     "cleared.title": "🧹 Messages Cleared",
     "cleared.description.one": "Deleted **{count}** message.",
@@ -139,5 +141,67 @@
     "language.title": "🌐 Language",
     "language.changed": "Language has been set to **{language}**.",
     "language.invalid": "Invalid language. Available languages: {available}",
-    "language.current": "Current language: **{language}**"
+    "language.current": "Current language: **{language}**",
+
+    "settings.title": "⚙️ Server Settings",
+    "settings.audio.title": "🔊 Audio",
+    "settings.moderation.title": "🛡️ Moderation",
+    "settings.display.title": "🎨 Display",
+
+    "settings.default_volume.name": "Default Volume",
+    "settings.default_volume.description": "Volume level when the bot joins (1-100%)",
+    "settings.default_volume.set": "Default volume set to **{value}%**.",
+
+    "settings.max_queue_size.name": "Max Queue Size",
+    "settings.max_queue_size.description": "Maximum tracks allowed in queue (10-500)",
+    "settings.max_queue_size.set": "Max queue size set to **{value}**.",
+
+    "settings.inactivity_timeout.name": "Inactivity Timeout",
+    "settings.inactivity_timeout.description": "Seconds before auto-disconnect (30-600)",
+    "settings.inactivity_timeout.set": "Inactivity timeout set to **{value} seconds**.",
+
+    "settings.max_song_duration.name": "Max Song Duration",
+    "settings.max_song_duration.description": "Max song length in seconds; 0 = no limit (0-3600)",
+    "settings.max_song_duration.set": "Max song duration set to **{value} seconds**.",
+    "settings.max_song_duration.set_unlimited": "Max song duration limit **removed**.",
+
+    "settings.vote_skip_threshold.name": "Vote Skip Threshold",
+    "settings.vote_skip_threshold.description": "Percentage of members needed to vote-skip (1-100%)",
+    "settings.vote_skip_threshold.set": "Vote skip threshold set to **{value}%**.",
+
+    "settings.dj_role.name": "DJ Role",
+    "settings.dj_role.description": "Role required for playback control commands",
+    "settings.dj_role.set": "DJ role set to **{role}**.",
+    "settings.dj_role.cleared": "DJ role requirement **removed**.",
+
+    "settings.restricted_text_channel.name": "Text Channel",
+    "settings.restricted_text_channel.description": "Text channel where music commands work",
+    "settings.restricted_text_channel.set": "Music commands restricted to **{channel}**.",
+    "settings.restricted_text_channel.cleared": "Text channel restriction **removed**.",
+
+    "settings.restricted_voice_channel.name": "Voice Channel",
+    "settings.restricted_voice_channel.description": "Voice channel the bot can join",
+    "settings.restricted_voice_channel.set": "Bot restricted to voice channel **{channel}**.",
+    "settings.restricted_voice_channel.cleared": "Voice channel restriction **removed**.",
+
+    "settings.embed_color.name": "Embed Color",
+    "settings.embed_color.description": "Custom color for bot embeds (hex, e.g. #8b5cf6)",
+    "settings.embed_color.set": "Embed color set to **{value}**.",
+    "settings.embed_color.invalid": "Invalid color. Use hex format: `#FF5733`.",
+
+    "settings.reset.all": "All settings have been **reset to defaults**.",
+    "settings.reset.single": "**{setting}** has been reset to default.",
+    "settings.updated": "Settings updated.",
+    "settings.no_changes": "No options provided. Use `/settings view` to see current values.",
+    "settings.footer": "Use /settings audio, /settings moderation, or /settings display to change settings.",
+    "settings.value.none": "None",
+    "settings.value.unlimited": "Unlimited",
+    "settings.value.all_channels": "Any",
+
+    "error.no_permission": "You need the **Manage Server** permission to change settings.",
+    "error.dj_role_required": "This command requires the **{role}** role.",
+    "error.channel_not_allowed": "Music commands are not allowed in this channel.",
+    "error.voice_channel_not_allowed": "The bot is not allowed to join this voice channel.",
+    "error.song_too_long": "Song is too long ({duration}). Maximum allowed: {max}.",
+    "error.invalid_setting": "Unknown setting: `{key}`."
 }

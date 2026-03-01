@@ -134,6 +134,47 @@ footer a:hover{color:var(--cyan);text-shadow:0 0 8px rgba(0,255,255,.4)}
   <div class="container">
     <div class="timeline">
 
+      <!-- v2.2.0 -->
+      <div class="version-block major reveal">
+        <div class="version-header">
+          <div class="version-tag"><span class="v-num">v2.2.0</span> <span class="version-date">— 2026-03-01</span></div>
+          <div class="version-subtitle">Customizable Bot Settings</div>
+        </div>
+
+        <div class="change-card">
+          <div class="change-category cat-features"><span class="cat-icon">✨</span> New Features</div>
+          <ul class="change-list">
+            <li><code>/settings</code> command with 5 subcommands (view, audio, moderation, display, reset)</li>
+            <li>9 per-server customizable settings</li>
+            <li>DJ role system — restrict music control to specific roles</li>
+            <li>Channel restrictions — limit bot to specific text/voice channels</li>
+            <li>Custom embed colors per server</li>
+            <li>Max song duration limit</li>
+            <li>Configurable vote skip threshold</li>
+            <li>Per-guild default volume, queue size, inactivity timeout</li>
+          </ul>
+        </div>
+
+        <div class="change-card">
+          <div class="change-category cat-fixes"><span class="cat-icon">🔧</span> Improvements</div>
+          <ul class="change-list">
+            <li>Settings persist in <code>guild-settings.json</code> alongside language preferences</li>
+            <li>ManageGuild permission required to change settings</li>
+            <li>Admins bypass DJ role restrictions</li>
+            <li>All settings have validation (range checks, hex color validation)</li>
+          </ul>
+        </div>
+
+        <div class="change-card">
+          <div class="change-category cat-docs"><span class="cat-icon">📚</span> Documentation</div>
+          <ul class="change-list">
+            <li>~40 new i18n keys in all 3 languages (EN, DE, ES)</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="version-divider"></div>
+
       <!-- v2.1.0 -->
       <div class="version-block major reveal">
         <div class="version-header">

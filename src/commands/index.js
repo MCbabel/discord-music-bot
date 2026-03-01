@@ -1,11 +1,14 @@
-import { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } from 'discord.js';
+import { SlashCommandBuilder, PermissionFlagsBits, MessageFlags, ChannelType } from 'discord.js';
 import * as messages from '../messages.js';
 import { getGuildPlayer, getOrCreateGuildPlayer, deleteGuildPlayer } from '../audio/player.js';
 import { resolveQuery } from '../audio/resolver.js';
 import { fetchLyrics } from '../services/lyrics.js';
 import { addToPlaylist, getPlaylist, listPlaylists } from '../services/playlist.js';
 import { t, getLocale, setLocale, getAvailableLocales } from '../i18n/index.js';
-import config from '../config.js';
+import {
+    getSetting, setSetting, resetSetting, resetAllSettings,
+    getGuildSettings, SETTINGS_SCHEMA,
+} from '../services/settings.js';
 
 // ── Helpers ──────────────────────────────────────────────────────────
 
@@ -34,6 +37,82 @@ function isSameChannel(interaction, guildPlayer) {
     return userChannel === botChannel;
 }
 
+// ── Settings Guards ──────────────────────────────────────────────────
+
+/**
+ * Check if DJ role is required and if the member has it.
+ * Returns true if the member is allowed. Admins always bypass.
+ * @param {string} guildId
+ * @param {import('discord.js').GuildMember} member
+ * @returns {boolean}
+ */
+function hasDjRole(guildId, member) {
+    const djRoleId = getSetting(guildId, 'dj_role');
+    if (!djRoleId) return true; // No DJ role configured — everyone can use commands
+    if (member.permissions.has(PermissionFlagsBits.ManageGuild)) return true; // Admins bypass
+    return member.roles.cache.has(djRoleId);
+}
+
+/**
+ * Reply with a DJ role error. Returns true if the check failed (command should stop).
+ * @param {import('discord.js').ChatInputCommandInteraction} interaction
+ * @param {string} guildId
+ * @returns {Promise<boolean>} true if blocked
+ */
+async function requireDJ(interaction, guildId) {
+    if (hasDjRole(guildId, interaction.member)) return false;
+    const djRoleId = getSetting(guildId, 'dj_role');
+    const role = interaction.guild?.roles?.cache?.get(djRoleId);
+    const roleName = role ? role.name : 'DJ';
+    await interaction.reply({
+        embeds: [messages.error(guildId, t(guildId, 'error.dj_role_required', { role: roleName }))],
+        flags: MessageFlags.Ephemeral,
+    });
+    return true;
+}
+
+/**
+ * Check if commands are restricted to a specific text channel.
+ * Returns true if blocked (command should stop).
+ * @param {import('discord.js').ChatInputCommandInteraction} interaction
+ * @param {string} guildId
+ * @returns {Promise<boolean>} true if blocked
+ */
+async function checkChannelRestriction(interaction, guildId) {
+    const restrictedChannel = getSetting(guildId, 'restricted_text_channel');
+    if (!restrictedChannel) return false; // No restriction
+    if (interaction.channelId === restrictedChannel) return false; // Correct channel
+    // Admins bypass
+    if (interaction.member.permissions.has(PermissionFlagsBits.ManageGuild)) return false;
+    await interaction.reply({
+        embeds: [messages.error(guildId, t(guildId, 'error.channel_not_allowed'))],
+        flags: MessageFlags.Ephemeral,
+    });
+    return true;
+}
+
+/**
+ * Check if the user's voice channel is the restricted one.
+ * Returns true if blocked (command should stop).
+ * @param {import('discord.js').ChatInputCommandInteraction} interaction
+ * @param {string} guildId
+ * @param {import('discord.js').VoiceChannel} voiceChannel - The user's voice channel
+ * @param {boolean} [deferred=false] - Whether the interaction has been deferred
+ * @returns {Promise<boolean>} true if blocked
+ */
+async function checkVoiceRestriction(interaction, guildId, voiceChannel, deferred = false) {
+    const restrictedVoice = getSetting(guildId, 'restricted_voice_channel');
+    if (!restrictedVoice) return false; // No restriction
+    if (voiceChannel.id === restrictedVoice) return false; // Correct channel
+    // Admins bypass
+    if (interaction.member.permissions.has(PermissionFlagsBits.ManageGuild)) return false;
+    const replyFn = deferred ? 'editReply' : 'reply';
+    const opts = { embeds: [messages.error(guildId, t(guildId, 'error.voice_channel_not_allowed'))] };
+    if (!deferred) opts.flags = MessageFlags.Ephemeral;
+    await interaction[replyFn](opts);
+    return true;
+}
+
 // ── 1. /join ─────────────────────────────────────────────────────────
 
 const join = {
@@ -42,10 +121,17 @@ const join = {
         .setDescription('Join your voice channel'),
     async execute(interaction) {
         const guildId = interaction.guildId;
+
+        // Channel restriction check
+        if (await checkChannelRestriction(interaction, guildId)) return;
+
         const channel = getUserVoiceChannel(interaction);
         if (!channel) {
             return interaction.reply({ embeds: [messages.error(guildId, t(guildId, 'error.not_in_voice'))], flags: MessageFlags.Ephemeral });
         }
+
+        // Voice channel restriction
+        if (await checkVoiceRestriction(interaction, guildId, channel)) return;
 
         const player = getOrCreateGuildPlayer(guildId);
         player.connect(channel, interaction.channel);
@@ -62,6 +148,10 @@ const leave = {
         .setDescription('Leave the voice channel'),
     async execute(interaction) {
         const guildId = interaction.guildId;
+
+        // Channel restriction check
+        if (await checkChannelRestriction(interaction, guildId)) return;
+
         const player = getGuildPlayer(guildId);
         if (!player || !player.connection) {
             return interaction.reply({ embeds: [messages.error(guildId, t(guildId, 'error.bot_not_in_voice'))], flags: MessageFlags.Ephemeral });
@@ -87,10 +177,21 @@ const play = {
         await interaction.deferReply(); // BUG-02: defer for long operations
 
         const guildId = interaction.guildId;
+
+        // Channel restriction check (deferred)
+        const restrictedChannel = getSetting(guildId, 'restricted_text_channel');
+        if (restrictedChannel && interaction.channelId !== restrictedChannel
+            && !interaction.member.permissions.has(PermissionFlagsBits.ManageGuild)) {
+            return interaction.editReply({ embeds: [messages.error(guildId, t(guildId, 'error.channel_not_allowed'))] });
+        }
+
         const channel = getUserVoiceChannel(interaction);
         if (!channel) {
             return interaction.editReply({ embeds: [messages.error(guildId, t(guildId, 'error.not_in_voice'))] });
         }
+
+        // Voice channel restriction (deferred)
+        if (await checkVoiceRestriction(interaction, guildId, channel, true)) return;
 
         const player = getOrCreateGuildPlayer(guildId);
 
@@ -130,6 +231,10 @@ const pause = {
         .setDescription('Pause playback'),
     async execute(interaction) {
         const guildId = interaction.guildId;
+
+        if (await checkChannelRestriction(interaction, guildId)) return;
+        if (await requireDJ(interaction, guildId)) return;
+
         const channel = getUserVoiceChannel(interaction);
         if (!channel) {
             return interaction.reply({ embeds: [messages.error(guildId, t(guildId, 'error.not_in_voice'))], flags: MessageFlags.Ephemeral });
@@ -157,6 +262,10 @@ const resume = {
         .setDescription('Resume playback'),
     async execute(interaction) {
         const guildId = interaction.guildId;
+
+        if (await checkChannelRestriction(interaction, guildId)) return;
+        if (await requireDJ(interaction, guildId)) return;
+
         const channel = getUserVoiceChannel(interaction);
         if (!channel) {
             return interaction.reply({ embeds: [messages.error(guildId, t(guildId, 'error.not_in_voice'))], flags: MessageFlags.Ephemeral });
@@ -184,6 +293,10 @@ const skip = {
         .setDescription('Skip the current track'),
     async execute(interaction) {
         const guildId = interaction.guildId;
+
+        if (await checkChannelRestriction(interaction, guildId)) return;
+        if (await requireDJ(interaction, guildId)) return;
+
         const channel = getUserVoiceChannel(interaction);
         if (!channel) {
             return interaction.reply({ embeds: [messages.error(guildId, t(guildId, 'error.not_in_voice'))], flags: MessageFlags.Ephemeral });
@@ -212,6 +325,10 @@ const stop = {
         .setDescription('Stop playback and clear the queue'),
     async execute(interaction) {
         const guildId = interaction.guildId;
+
+        if (await checkChannelRestriction(interaction, guildId)) return;
+        if (await requireDJ(interaction, guildId)) return;
+
         const channel = getUserVoiceChannel(interaction);
         if (!channel) {
             return interaction.reply({ embeds: [messages.error(guildId, t(guildId, 'error.not_in_voice'))], flags: MessageFlags.Ephemeral });
@@ -246,6 +363,14 @@ const lyrics = {
         await interaction.deferReply(); // BUG-06: must defer
 
         const guildId = interaction.guildId;
+
+        // Channel restriction check (deferred)
+        const restrictedChannel = getSetting(guildId, 'restricted_text_channel');
+        if (restrictedChannel && interaction.channelId !== restrictedChannel
+            && !interaction.member.permissions.has(PermissionFlagsBits.ManageGuild)) {
+            return interaction.editReply({ embeds: [messages.error(guildId, t(guildId, 'error.channel_not_allowed'))] });
+        }
+
         const player = getGuildPlayer(guildId);
         if (!player || !player.currentTrack) {
             return interaction.editReply({ embeds: [messages.error(guildId, t(guildId, 'error.nothing_currently_playing'))] });
@@ -282,6 +407,10 @@ const volume = {
         ),
     async execute(interaction) {
         const guildId = interaction.guildId;
+
+        if (await checkChannelRestriction(interaction, guildId)) return;
+        if (await requireDJ(interaction, guildId)) return;
+
         const channel = getUserVoiceChannel(interaction);
         if (!channel) {
             return interaction.reply({ embeds: [messages.error(guildId, t(guildId, 'error.not_in_voice'))], flags: MessageFlags.Ephemeral });
@@ -314,6 +443,10 @@ const loop = {
         ),
     async execute(interaction) {
         const guildId = interaction.guildId;
+
+        if (await checkChannelRestriction(interaction, guildId)) return;
+        if (await requireDJ(interaction, guildId)) return;
+
         const channel = getUserVoiceChannel(interaction);
         if (!channel) {
             return interaction.reply({ embeds: [messages.error(guildId, t(guildId, 'error.not_in_voice'))], flags: MessageFlags.Ephemeral });
@@ -376,10 +509,21 @@ const playPlaylist = {
         await interaction.deferReply(); // BUG-02: defer for long operations
 
         const guildId = interaction.guildId;
+
+        // Channel restriction check (deferred)
+        const restrictedChannel = getSetting(guildId, 'restricted_text_channel');
+        if (restrictedChannel && interaction.channelId !== restrictedChannel
+            && !interaction.member.permissions.has(PermissionFlagsBits.ManageGuild)) {
+            return interaction.editReply({ embeds: [messages.error(guildId, t(guildId, 'error.channel_not_allowed'))] });
+        }
+
         const channel = getUserVoiceChannel(interaction);
         if (!channel) {
             return interaction.editReply({ embeds: [messages.error(guildId, t(guildId, 'error.not_in_voice'))] });
         }
+
+        // Voice channel restriction (deferred)
+        if (await checkVoiceRestriction(interaction, guildId, channel, true)) return;
 
         const player = getOrCreateGuildPlayer(guildId);
 
@@ -421,6 +565,9 @@ const voteSkip = {
         .setDescription('Vote to skip the current track'),
     async execute(interaction) {
         const guildId = interaction.guildId;
+
+        if (await checkChannelRestriction(interaction, guildId)) return;
+
         const channel = getUserVoiceChannel(interaction);
         if (!channel) {
             return interaction.reply({ embeds: [messages.error(guildId, t(guildId, 'error.not_in_voice'))], flags: MessageFlags.Ephemeral });
@@ -438,7 +585,9 @@ const voteSkip = {
         // BUG-17: exclude bots from member count
         const members = channel.members.filter(m => !m.user.bot);
         const humanMembers = members.size;
-        const required = Math.max(1, Math.floor(humanMembers / 2));
+        // Per-guild vote skip threshold
+        const threshold = getSetting(guildId, 'vote_skip_threshold') / 100;
+        const required = Math.max(1, Math.ceil(humanMembers * threshold));
 
         player.skipVotes.add(interaction.user.id);
 
@@ -498,6 +647,9 @@ const queue = {
         .setDescription('Show the current queue'),
     async execute(interaction) {
         const guildId = interaction.guildId;
+
+        if (await checkChannelRestriction(interaction, guildId)) return;
+
         const channel = getUserVoiceChannel(interaction);
         if (!channel) {
             return interaction.reply({ embeds: [messages.error(guildId, t(guildId, 'error.not_in_voice'))], flags: MessageFlags.Ephemeral });
@@ -520,6 +672,9 @@ const nowPlayingCmd = {
         .setDescription('Show the currently playing track'),
     async execute(interaction) {
         const guildId = interaction.guildId;
+
+        if (await checkChannelRestriction(interaction, guildId)) return;
+
         const channel = getUserVoiceChannel(interaction);
         if (!channel) {
             return interaction.reply({ embeds: [messages.error(guildId, t(guildId, 'error.not_in_voice'))], flags: MessageFlags.Ephemeral });
@@ -573,11 +728,213 @@ const language = {
     },
 };
 
+// ── 20. /settings ────────────────────────────────────────────────────
+
+const settings = {
+    data: new SlashCommandBuilder()
+        .setName('settings')
+        .setDescription('Manage bot settings for this server')
+        .addSubcommand(sub => sub
+            .setName('view')
+            .setDescription('View current settings'))
+        .addSubcommand(sub => sub
+            .setName('audio')
+            .setDescription('Configure audio settings')
+            .addIntegerOption(opt => opt.setName('default_volume').setDescription('Default volume (1-100)').setMinValue(1).setMaxValue(100).setRequired(false))
+            .addIntegerOption(opt => opt.setName('max_queue_size').setDescription('Max queue size (10-500)').setMinValue(10).setMaxValue(500).setRequired(false))
+            .addIntegerOption(opt => opt.setName('inactivity_timeout').setDescription('Inactivity timeout in seconds (30-600)').setMinValue(30).setMaxValue(600).setRequired(false))
+            .addIntegerOption(opt => opt.setName('max_song_duration').setDescription('Max song duration in seconds (0=unlimited, 60-3600)').setMinValue(0).setMaxValue(3600).setRequired(false))
+        )
+        .addSubcommand(sub => sub
+            .setName('moderation')
+            .setDescription('Configure moderation settings')
+            .addIntegerOption(opt => opt.setName('vote_skip_threshold').setDescription('Vote skip threshold percentage (1-100)').setMinValue(1).setMaxValue(100).setRequired(false))
+            .addRoleOption(opt => opt.setName('dj_role').setDescription('DJ role (users with this role can manage playback)').setRequired(false))
+            .addChannelOption(opt => opt.setName('text_channel').setDescription('Restrict commands to this text channel').addChannelTypes(ChannelType.GuildText).setRequired(false))
+            .addChannelOption(opt => opt.setName('voice_channel').setDescription('Restrict bot to this voice channel').addChannelTypes(ChannelType.GuildVoice).setRequired(false))
+        )
+        .addSubcommand(sub => sub
+            .setName('display')
+            .setDescription('Configure display settings')
+            .addStringOption(opt => opt.setName('embed_color').setDescription('Embed color as hex (e.g. #8b5cf6)').setRequired(false))
+        )
+        .addSubcommand(sub => sub
+            .setName('reset')
+            .setDescription('Reset settings to defaults')
+            .addStringOption(opt => opt.setName('setting').setDescription('Setting to reset (leave empty for all)').setRequired(false)
+                .addChoices(
+                    { name: 'Default Volume', value: 'default_volume' },
+                    { name: 'Max Queue Size', value: 'max_queue_size' },
+                    { name: 'Inactivity Timeout', value: 'inactivity_timeout' },
+                    { name: 'Max Song Duration', value: 'max_song_duration' },
+                    { name: 'Vote Skip Threshold', value: 'vote_skip_threshold' },
+                    { name: 'DJ Role', value: 'dj_role' },
+                    { name: 'Text Channel', value: 'restricted_text_channel' },
+                    { name: 'Voice Channel', value: 'restricted_voice_channel' },
+                    { name: 'Embed Color', value: 'embed_color' },
+                )
+            )
+        ),
+    async execute(interaction) {
+        const guildId = interaction.guildId;
+
+        // Permission check: ManageGuild required
+        if (!interaction.member.permissions.has(PermissionFlagsBits.ManageGuild)) {
+            return interaction.reply({
+                embeds: [messages.error(guildId, t(guildId, 'error.no_permission'))],
+                flags: MessageFlags.Ephemeral,
+            });
+        }
+
+        const sub = interaction.options.getSubcommand();
+
+        switch (sub) {
+            // ── view ─────────────────────────────────────────────
+            case 'view': {
+                const allSettings = getGuildSettings(guildId);
+                const embed = messages.settingsView(guildId, allSettings, interaction.guild);
+                return interaction.reply({ embeds: [embed] });
+            }
+
+            // ── audio ────────────────────────────────────────────
+            case 'audio': {
+                const changes = [];
+                const defaultVol = interaction.options.getInteger('default_volume');
+                const maxQueue = interaction.options.getInteger('max_queue_size');
+                const inactivity = interaction.options.getInteger('inactivity_timeout');
+                const maxDuration = interaction.options.getInteger('max_song_duration');
+
+                if (defaultVol !== null) {
+                    setSetting(guildId, 'default_volume', defaultVol);
+                    changes.push(t(guildId, 'settings.default_volume.set', { value: defaultVol }));
+                }
+                if (maxQueue !== null) {
+                    setSetting(guildId, 'max_queue_size', maxQueue);
+                    changes.push(t(guildId, 'settings.max_queue_size.set', { value: maxQueue }));
+                }
+                if (inactivity !== null) {
+                    setSetting(guildId, 'inactivity_timeout', inactivity);
+                    changes.push(t(guildId, 'settings.inactivity_timeout.set', { value: inactivity }));
+                }
+                if (maxDuration !== null) {
+                    setSetting(guildId, 'max_song_duration', maxDuration);
+                    if (maxDuration === 0) {
+                        changes.push(t(guildId, 'settings.max_song_duration.set_unlimited'));
+                    } else {
+                        changes.push(t(guildId, 'settings.max_song_duration.set', { value: maxDuration }));
+                    }
+                }
+
+                if (changes.length === 0) {
+                    return interaction.reply({
+                        embeds: [messages.info(guildId, t(guildId, 'settings.no_changes'))],
+                        flags: MessageFlags.Ephemeral,
+                    });
+                }
+
+                return interaction.reply({
+                    embeds: [messages.success(guildId, changes.join('\n'))],
+                });
+            }
+
+            // ── moderation ───────────────────────────────────────
+            case 'moderation': {
+                const changes = [];
+                const voteThreshold = interaction.options.getInteger('vote_skip_threshold');
+                const djRole = interaction.options.getRole('dj_role');
+                const textChannel = interaction.options.getChannel('text_channel');
+                const voiceChannel = interaction.options.getChannel('voice_channel');
+
+                if (voteThreshold !== null) {
+                    setSetting(guildId, 'vote_skip_threshold', voteThreshold);
+                    changes.push(t(guildId, 'settings.vote_skip_threshold.set', { value: voteThreshold }));
+                }
+                if (djRole !== undefined && djRole !== null) {
+                    setSetting(guildId, 'dj_role', djRole.id);
+                    changes.push(t(guildId, 'settings.dj_role.set', { role: djRole.name }));
+                }
+                if (textChannel !== undefined && textChannel !== null) {
+                    setSetting(guildId, 'restricted_text_channel', textChannel.id);
+                    changes.push(t(guildId, 'settings.restricted_text_channel.set', { channel: `#${textChannel.name}` }));
+                }
+                if (voiceChannel !== undefined && voiceChannel !== null) {
+                    setSetting(guildId, 'restricted_voice_channel', voiceChannel.id);
+                    changes.push(t(guildId, 'settings.restricted_voice_channel.set', { channel: voiceChannel.name }));
+                }
+
+                if (changes.length === 0) {
+                    return interaction.reply({
+                        embeds: [messages.info(guildId, t(guildId, 'settings.no_changes'))],
+                        flags: MessageFlags.Ephemeral,
+                    });
+                }
+
+                return interaction.reply({
+                    embeds: [messages.success(guildId, changes.join('\n'))],
+                });
+            }
+
+            // ── display ──────────────────────────────────────────
+            case 'display': {
+                const embedColor = interaction.options.getString('embed_color');
+
+                if (!embedColor) {
+                    return interaction.reply({
+                        embeds: [messages.info(guildId, t(guildId, 'settings.no_changes'))],
+                        flags: MessageFlags.Ephemeral,
+                    });
+                }
+
+                // Validate hex color
+                const hexRe = /^#[0-9A-Fa-f]{6}$/;
+                if (!hexRe.test(embedColor)) {
+                    return interaction.reply({
+                        embeds: [messages.error(guildId, t(guildId, 'settings.embed_color.invalid'))],
+                        flags: MessageFlags.Ephemeral,
+                    });
+                }
+
+                setSetting(guildId, 'embed_color', embedColor.toLowerCase());
+                return interaction.reply({
+                    embeds: [messages.success(guildId, t(guildId, 'settings.embed_color.set', { value: embedColor }))],
+                });
+            }
+
+            // ── reset ────────────────────────────────────────────
+            case 'reset': {
+                const settingKey = interaction.options.getString('setting');
+
+                if (!settingKey) {
+                    // Reset all settings
+                    resetAllSettings(guildId);
+                    return interaction.reply({
+                        embeds: [messages.success(guildId, t(guildId, 'settings.reset.all'))],
+                    });
+                }
+
+                // Reset a specific setting
+                if (!SETTINGS_SCHEMA[settingKey]) {
+                    return interaction.reply({
+                        embeds: [messages.error(guildId, t(guildId, 'error.invalid_setting', { key: settingKey }))],
+                        flags: MessageFlags.Ephemeral,
+                    });
+                }
+
+                resetSetting(guildId, settingKey);
+                const settingName = t(guildId, `settings.${settingKey}.name`);
+                return interaction.reply({
+                    embeds: [messages.success(guildId, t(guildId, 'settings.reset.single', { setting: settingName }))],
+                });
+            }
+        }
+    },
+};
+
 // ── Export all commands ──────────────────────────────────────────────
 
 export default [
     join, leave, play, pause, resume, skip, stop, lyrics,
     help, volume, loop, addToPlaylistCmd, playPlaylist,
     voteSkip, clear, listPlaylistsCmd, queue, nowPlayingCmd,
-    language,
+    language, settings,
 ];

@@ -9,7 +9,8 @@ import { initSpotify } from './audio/spotify.js';
 import { initLyrics } from './services/lyrics.js';
 import { loadPlaylists } from './services/playlist.js';
 import { logCookieStatus } from './audio/youtube.js';
-import { t, loadGuildSettings } from './i18n/index.js';
+import { t } from './i18n/index.js';
+import { loadSettings } from './services/settings.js';
 
 /**
  * Resolve FFmpeg's full path and ensure its directory is in process.env.PATH.
@@ -118,8 +119,8 @@ async function main() {
     console.log('Loading playlists...');
     await loadPlaylists();
 
-    console.log('Loading guild language settings...');
-    loadGuildSettings();
+    console.log('Loading guild settings...');
+    loadSettings();
 
     console.log('Checking YouTube cookie auth...');
     logCookieStatus();

@@ -87,6 +87,8 @@
     "help.connection.value": "`/join` — Únete a tu canal de voz\n`/leave` — Sal del canal de voz",
     "help.utility.name": "🧹 Utilidades",
     "help.utility.value": "`/clear [cantidad]` — Elimina mensajes recientes\n`/help` — Muestra este mensaje de ayuda\n`/language <idioma>` — Cambia el idioma del bot",
+    "help.settings.name": "⚙️ Configuración",
+    "help.settings.value": "`/settings view` — Ver toda la configuración\n`/settings audio` — Configuración de audio\n`/settings moderation` — Configuración de moderación\n`/settings display` — Configuración de visualización\n`/settings reset` — Restablecer configuración",
 
     "cleared.title": "🧹 Mensajes Eliminados",
     "cleared.description.one": "Se eliminó **{count}** mensaje.",
@@ -139,5 +141,67 @@
     "language.title": "🌐 Idioma",
     "language.changed": "El idioma ha sido cambiado a **{language}**.",
     "language.invalid": "Idioma inválido. Idiomas disponibles: {available}",
-    "language.current": "Idioma actual: **{language}**"
+    "language.current": "Idioma actual: **{language}**",
+
+    "settings.title": "⚙️ Configuración del Servidor",
+    "settings.audio.title": "🔊 Audio",
+    "settings.moderation.title": "🛡️ Moderación",
+    "settings.display.title": "🎨 Visualización",
+
+    "settings.default_volume.name": "Volumen Predeterminado",
+    "settings.default_volume.description": "Nivel de volumen al unirse (1-100%)",
+    "settings.default_volume.set": "Volumen predeterminado establecido en **{value}%**.",
+
+    "settings.max_queue_size.name": "Tamaño Máximo de Cola",
+    "settings.max_queue_size.description": "Máximo de pistas en la cola (10-500)",
+    "settings.max_queue_size.set": "Tamaño máximo de cola establecido en **{value}**.",
+
+    "settings.inactivity_timeout.name": "Tiempo de Inactividad",
+    "settings.inactivity_timeout.description": "Segundos antes de desconectar (30-600)",
+    "settings.inactivity_timeout.set": "Tiempo de inactividad establecido en **{value} segundos**.",
+
+    "settings.max_song_duration.name": "Duración Máxima de Canción",
+    "settings.max_song_duration.description": "Duración máxima en segundos; 0 = sin límite (0-3600)",
+    "settings.max_song_duration.set": "Duración máxima establecida en **{value} segundos**.",
+    "settings.max_song_duration.set_unlimited": "Límite de duración máxima **eliminado**.",
+
+    "settings.vote_skip_threshold.name": "Umbral de Votación",
+    "settings.vote_skip_threshold.description": "Porcentaje de miembros necesarios para saltar (1-100%)",
+    "settings.vote_skip_threshold.set": "Umbral de votación establecido en **{value}%**.",
+
+    "settings.dj_role.name": "Rol DJ",
+    "settings.dj_role.description": "Rol requerido para controles de reproducción",
+    "settings.dj_role.set": "Rol DJ establecido en **{role}**.",
+    "settings.dj_role.cleared": "Requisito de rol DJ **eliminado**.",
+
+    "settings.restricted_text_channel.name": "Canal de Texto",
+    "settings.restricted_text_channel.description": "Canal de texto para comandos de música",
+    "settings.restricted_text_channel.set": "Comandos de música restringidos a **{channel}**.",
+    "settings.restricted_text_channel.cleared": "Restricción de canal de texto **eliminada**.",
+
+    "settings.restricted_voice_channel.name": "Canal de Voz",
+    "settings.restricted_voice_channel.description": "Canal de voz al que el bot puede unirse",
+    "settings.restricted_voice_channel.set": "Bot restringido al canal de voz **{channel}**.",
+    "settings.restricted_voice_channel.cleared": "Restricción de canal de voz **eliminada**.",
+
+    "settings.embed_color.name": "Color de Embed",
+    "settings.embed_color.description": "Color personalizado para embeds del bot (hex, ej. #8b5cf6)",
+    "settings.embed_color.set": "Color de embed establecido en **{value}**.",
+    "settings.embed_color.invalid": "Color inválido. Usa formato hex: `#FF5733`.",
+
+    "settings.reset.all": "Toda la configuración ha sido **restablecida a los valores predeterminados**.",
+    "settings.reset.single": "**{setting}** ha sido restablecido al valor predeterminado.",
+    "settings.updated": "Configuración actualizada.",
+    "settings.no_changes": "No se proporcionaron opciones. Usa `/settings view` para ver los valores actuales.",
+    "settings.footer": "Usa /settings audio, /settings moderation o /settings display para cambiar la configuración.",
+    "settings.value.none": "Ninguno",
+    "settings.value.unlimited": "Ilimitado",
+    "settings.value.all_channels": "Cualquiera",
+
+    "error.no_permission": "Necesitas el permiso **Gestionar Servidor** para cambiar la configuración.",
+    "error.dj_role_required": "Este comando requiere el rol **{role}**.",
+    "error.channel_not_allowed": "Los comandos de música no están permitidos en este canal.",
+    "error.voice_channel_not_allowed": "El bot no puede unirse a este canal de voz.",
+    "error.song_too_long": "La canción es demasiado larga ({duration}). Máximo permitido: {max}.",
+    "error.invalid_setting": "Configuración desconocida: `{key}`."
 }

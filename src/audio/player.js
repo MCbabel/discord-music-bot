@@ -12,7 +12,7 @@ import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, MessageFlag
 import { createAudioStream } from './stream.js';
 import * as messages from '../messages.js';
 import { t } from '../i18n/index.js';
-import config from '../config.js';
+import { getSetting } from '../services/settings.js';
 
 // Store all guild players: Map<guildId, GuildPlayer>
 const guildPlayers = new Map();
@@ -68,7 +68,7 @@ class GuildPlayer {
         this.guildId = guildId;
         this.queue = [];
         this.currentTrack = null;
-        this.volume = config.defaultVolume / 100; // 0.0-1.0
+        this.volume = getSetting(guildId, 'default_volume') / 100; // 0.0-1.0
         this.isLooping = false;
         this.isPaused = false;
         this.skipVotes = new Set();
@@ -135,7 +135,7 @@ class GuildPlayer {
 
     /**
      * Add a track to the queue and play if nothing is playing.
-     * Addresses BUG-31 (queue limit).
+     * Addresses BUG-31 (queue limit). Uses per-guild max_queue_size setting.
      * @param {{title: string, artist: string, duration: number, thumbnailUrl: string|null, url: string}} track
      * @param {import('discord.js').ChatInputCommandInteraction|null} interaction - Optional interaction to reply to
      * @returns {Promise<'playing'|'queued'>}
@@ -148,8 +148,9 @@ class GuildPlayer {
             status === AudioPlayerStatus.Paused
         );
         if (isActive) {
-            if (this.queue.length >= config.maxQueueSize) {
-                throw new Error(`Queue is full (max ${config.maxQueueSize} tracks).`);
+            const maxQueueSize = getSetting(this.guildId, 'max_queue_size');
+            if (this.queue.length >= maxQueueSize) {
+                throw new Error(t(this.guildId, 'error.queue_full', { max: maxQueueSize }));
             }
             this.queue.push(track);
             return 'queued';
@@ -161,6 +162,7 @@ class GuildPlayer {
 
     /**
      * Play a specific track.
+     * Checks max_song_duration setting and skips if exceeded.
      * @param {{title: string, artist: string, duration: number, thumbnailUrl: string|null, url: string}} track
      * @param {import('discord.js').ChatInputCommandInteraction|null} interaction - Optional interaction to reply to
      */
@@ -172,6 +174,20 @@ class GuildPlayer {
 
         const isLoopReplay = this._isLoopReplay;
         this._isLoopReplay = false;
+
+        // Check max song duration setting
+        const maxDuration = getSetting(this.guildId, 'max_song_duration');
+        if (maxDuration > 0 && track.duration > maxDuration) {
+            const errMsg = t(this.guildId, 'error.song_too_long', {
+                duration: messages.formatDuration(track.duration),
+                max: messages.formatDuration(maxDuration),
+            });
+            if (this.textChannel) {
+                try { await this.textChannel.send({ embeds: [messages.error(this.guildId, errMsg)] }); } catch { /* ignore */ }
+            }
+            this._onTrackEnd(); // Skip to next
+            return;
+        }
 
         try {
             this._killCurrentProcess(); // Kill any lingering subprocess
@@ -484,12 +500,14 @@ class GuildPlayer {
     }
 
     /**
-     * Start inactivity timer. (BUG-27 fix)
+     * Start inactivity timer. Uses per-guild inactivity_timeout setting. (BUG-27 fix)
      */
     _startInactivityTimer() {
         this._clearInactivityTimer();
+        // Per-guild timeout in seconds, convert to ms
+        const timeoutMs = getSetting(this.guildId, 'inactivity_timeout') * 1000;
         // Guard with Math.max to prevent TimeoutNegativeWarning (Node.js warns on negative setTimeout values)
-        const timeout = Math.max(1_000, config.inactivityTimeout);
+        const timeout = Math.max(1_000, timeoutMs);
         this.inactivityTimer = setTimeout(() => {
             if (!this.currentTrack && this.queue.length === 0) {
                 if (this.textChannel) {

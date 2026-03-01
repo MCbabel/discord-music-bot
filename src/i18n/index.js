@@ -1,16 +1,13 @@
-import { readFileSync, writeFileSync, existsSync, readdirSync } from 'fs';
+import { readFileSync, readdirSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { getRawGuildSettings, setRawGuildSetting } from '../services/settings.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // In-memory store: { localeName: { key: value } }
 const locales = {};
 const DEFAULT_LOCALE = 'en';
-
-// Guild settings persistence
-const SETTINGS_FILE = join(__dirname, '../../guild-settings.json');
-let guildSettings = {};
 
 // ---------------------------------------------------------------------------
 // Locale loading
@@ -31,39 +28,6 @@ function loadLocales() {
     console.log(`🌐 Loaded locales: ${Object.keys(locales).join(', ')}`);
 }
 loadLocales();
-
-// ---------------------------------------------------------------------------
-// Guild settings persistence
-// ---------------------------------------------------------------------------
-
-/**
- * Load guild settings from disk.
- * Called automatically on import; can be called again to reload.
- */
-export function loadGuildSettings() {
-    try {
-        if (existsSync(SETTINGS_FILE)) {
-            guildSettings = JSON.parse(readFileSync(SETTINGS_FILE, 'utf-8'));
-        }
-    } catch {
-        console.warn('⚠️ Could not load guild-settings.json, starting fresh.');
-        guildSettings = {};
-    }
-}
-
-/**
- * Save guild settings to disk.
- */
-function saveGuildSettings() {
-    try {
-        writeFileSync(SETTINGS_FILE, JSON.stringify(guildSettings, null, 2), 'utf-8');
-    } catch (err) {
-        console.error('Failed to save guild settings:', err.message);
-    }
-}
-
-// Load on import
-loadGuildSettings();
 
 // ---------------------------------------------------------------------------
 // Translation API
@@ -105,7 +69,7 @@ export function tp(guildId, baseKey, count, params = {}) {
 }
 
 // ---------------------------------------------------------------------------
-// Locale management
+// Locale management (delegates persistence to settings service)
 // ---------------------------------------------------------------------------
 
 /**
@@ -114,7 +78,7 @@ export function tp(guildId, baseKey, count, params = {}) {
  * @returns {string} Locale code (e.g. "en", "de")
  */
 export function getLocale(guildId) {
-    return guildSettings[guildId]?.locale ?? DEFAULT_LOCALE;
+    return getRawGuildSettings(guildId)?.locale ?? DEFAULT_LOCALE;
 }
 
 /**
@@ -125,9 +89,7 @@ export function getLocale(guildId) {
  */
 export function setLocale(guildId, locale) {
     if (!locales[locale]) throw new Error(`Unknown locale: ${locale}`);
-    if (!guildSettings[guildId]) guildSettings[guildId] = {};
-    guildSettings[guildId].locale = locale;
-    saveGuildSettings();
+    setRawGuildSetting(guildId, 'locale', locale);
 }
 
 /**

@@ -1,5 +1,6 @@
 import { EmbedBuilder } from 'discord.js';
 import { t, tp } from './i18n/index.js';
+import { getSetting } from './services/settings.js';
 import { SourceInfo } from './audio/resolver.js';
 
 // ── Color constants ──────────────────────────────────────────────────
@@ -10,6 +11,27 @@ const COLORS = {
     NOW_PLAYING: 0xEB459E, // pink
     WARNING:     0xFEE75C, // yellow
 };
+
+// ── Color helper ─────────────────────────────────────────────────────
+
+/**
+ * Get the embed color for a guild, respecting custom embed_color setting.
+ * Custom color overrides accent colors (INFO, SUCCESS, NOW_PLAYING) but NOT error/warning.
+ * @param {string} guildId
+ * @param {string} colorKey - Key from COLORS (e.g. 'INFO', 'SUCCESS', 'NOW_PLAYING')
+ * @returns {number} Integer color value for Discord embed
+ */
+export function getEmbedColor(guildId, colorKey) {
+    // Error and warning embeds always use their standard colors
+    if (colorKey === 'ERROR' || colorKey === 'WARNING') {
+        return COLORS[colorKey];
+    }
+    const custom = getSetting(guildId, 'embed_color');
+    if (custom) {
+        return parseInt(custom.replace('#', ''), 16);
+    }
+    return COLORS[colorKey] || COLORS.INFO;
+}
 
 // ── Helper ───────────────────────────────────────────────────────────
 
@@ -40,7 +62,7 @@ export function success(guildId, description) {
     return new EmbedBuilder()
         .setTitle(t(guildId, 'embed.success.title'))
         .setDescription(description)
-        .setColor(COLORS.SUCCESS);
+        .setColor(getEmbedColor(guildId, 'SUCCESS'));
 }
 
 /** Blurple info embed. (BUG-01 fix — was missing in Python version) */
@@ -48,7 +70,7 @@ export function info(guildId, description) {
     return new EmbedBuilder()
         .setTitle(t(guildId, 'embed.info.title'))
         .setDescription(description)
-        .setColor(COLORS.INFO);
+        .setColor(getEmbedColor(guildId, 'INFO'));
 }
 
 /** Yellow warning embed. */
@@ -75,7 +97,7 @@ export function nowPlaying(guildId, track) {
 
     const embed = new EmbedBuilder()
         .setTitle(t(guildId, 'now_playing.title'))
-        .setColor(COLORS.NOW_PLAYING)
+        .setColor(getEmbedColor(guildId, 'NOW_PLAYING'))
         .addFields(
             { name: t(guildId, 'now_playing.field.title'), value: track.title || unknown, inline: true },
             { name: t(guildId, 'now_playing.field.artist'), value: track.artist || unknown, inline: true },
@@ -112,7 +134,7 @@ export function addedToQueue(guildId, track, position) {
             { name: t(guildId, 'added_to_queue.field.position'), value: `#${position}`, inline: true },
             { name: t(guildId, 'now_playing.source'), value: sourceDisplay, inline: true },
         )
-        .setColor(COLORS.INFO);
+        .setColor(getEmbedColor(guildId, 'INFO'));
 }
 
 /**
@@ -124,7 +146,7 @@ export function addedToQueue(guildId, track, position) {
 export function queueList(guildId, tracks, currentTrack) {
     const embed = new EmbedBuilder()
         .setTitle(t(guildId, 'queue.title'))
-        .setColor(COLORS.INFO);
+        .setColor(getEmbedColor(guildId, 'INFO'));
 
     if (currentTrack) {
         embed.addFields({
@@ -169,7 +191,7 @@ export function lyrics(guildId, title, artist, lyricsText) {
     return new EmbedBuilder()
         .setTitle(t(guildId, 'lyrics.title', { title, artist }))
         .setDescription(text)
-        .setColor(COLORS.NOW_PLAYING);
+        .setColor(getEmbedColor(guildId, 'NOW_PLAYING'));
 }
 
 // ── Connection embeds ────────────────────────────────────────────────
@@ -178,14 +200,14 @@ export function connected(guildId, channelName) {
     return new EmbedBuilder()
         .setTitle(t(guildId, 'connected.title'))
         .setDescription(t(guildId, 'connected.description', { channel: channelName }))
-        .setColor(COLORS.SUCCESS);
+        .setColor(getEmbedColor(guildId, 'SUCCESS'));
 }
 
 export function disconnected(guildId) {
     return new EmbedBuilder()
         .setTitle(t(guildId, 'disconnected.title'))
         .setDescription(t(guildId, 'disconnected.description'))
-        .setColor(COLORS.INFO);
+        .setColor(getEmbedColor(guildId, 'INFO'));
 }
 
 // ── Transport control embeds ─────────────────────────────────────────
@@ -194,28 +216,28 @@ export function skipped(guildId, title) {
     return new EmbedBuilder()
         .setTitle(t(guildId, 'skipped.title'))
         .setDescription(t(guildId, 'skipped.description', { title }))
-        .setColor(COLORS.INFO);
+        .setColor(getEmbedColor(guildId, 'INFO'));
 }
 
 export function paused(guildId) {
     return new EmbedBuilder()
         .setTitle(t(guildId, 'paused.title'))
         .setDescription(t(guildId, 'paused.description'))
-        .setColor(COLORS.INFO);
+        .setColor(getEmbedColor(guildId, 'INFO'));
 }
 
 export function resumed(guildId) {
     return new EmbedBuilder()
         .setTitle(t(guildId, 'resumed.title'))
         .setDescription(t(guildId, 'resumed.description'))
-        .setColor(COLORS.INFO);
+        .setColor(getEmbedColor(guildId, 'INFO'));
 }
 
 export function stopped(guildId) {
     return new EmbedBuilder()
         .setTitle(t(guildId, 'stopped.title'))
         .setDescription(t(guildId, 'stopped.description'))
-        .setColor(COLORS.INFO);
+        .setColor(getEmbedColor(guildId, 'INFO'));
 }
 
 // ── Volume / Loop ────────────────────────────────────────────────────
@@ -224,21 +246,21 @@ export function volumeSet(guildId, percent) {
     return new EmbedBuilder()
         .setTitle(t(guildId, 'volume.title'))
         .setDescription(t(guildId, 'volume.description', { percent }))
-        .setColor(COLORS.SUCCESS);
+        .setColor(getEmbedColor(guildId, 'SUCCESS'));
 }
 
 export function loopOn(guildId) {
     return new EmbedBuilder()
         .setTitle(t(guildId, 'loop_on.title'))
         .setDescription(t(guildId, 'loop_on.description'))
-        .setColor(COLORS.SUCCESS);
+        .setColor(getEmbedColor(guildId, 'SUCCESS'));
 }
 
 export function loopOff(guildId) {
     return new EmbedBuilder()
         .setTitle(t(guildId, 'loop_off.title'))
         .setDescription(t(guildId, 'loop_off.description'))
-        .setColor(COLORS.SUCCESS);
+        .setColor(getEmbedColor(guildId, 'SUCCESS'));
 }
 
 // ── Vote skip ────────────────────────────────────────────────────────
@@ -247,14 +269,14 @@ export function voteSkipRegistered(guildId, currentVotes, requiredVotes) {
     return new EmbedBuilder()
         .setTitle(t(guildId, 'vote_skip.title'))
         .setDescription(t(guildId, 'vote_skip.description', { current: currentVotes, required: requiredVotes }))
-        .setColor(COLORS.INFO);
+        .setColor(getEmbedColor(guildId, 'INFO'));
 }
 
 export function voteSkipPassed(guildId, title) {
     return new EmbedBuilder()
         .setTitle(t(guildId, 'vote_skip_passed.title'))
         .setDescription(t(guildId, 'vote_skip_passed.description', { title }))
-        .setColor(COLORS.SUCCESS);
+        .setColor(getEmbedColor(guildId, 'SUCCESS'));
 }
 
 // ── Playlist embeds ──────────────────────────────────────────────────
@@ -263,7 +285,7 @@ export function playlistAdded(guildId, name, url) {
     return new EmbedBuilder()
         .setTitle(t(guildId, 'playlist_added.title'))
         .setDescription(t(guildId, 'playlist_added.description', { name, url }))
-        .setColor(COLORS.SUCCESS);
+        .setColor(getEmbedColor(guildId, 'SUCCESS'));
 }
 
 /**
@@ -274,7 +296,7 @@ export function playlistAdded(guildId, name, url) {
 export function playlistList(guildId, playlists) {
     const embed = new EmbedBuilder()
         .setTitle(t(guildId, 'playlist_list.title'))
-        .setColor(COLORS.INFO);
+        .setColor(getEmbedColor(guildId, 'INFO'));
 
     if (!playlists || playlists.length === 0) {
         embed.setDescription(t(guildId, 'playlist_list.empty'));
@@ -291,7 +313,7 @@ export function playlistList(guildId, playlists) {
 export function helpEmbed(guildId) {
     return new EmbedBuilder()
         .setTitle(t(guildId, 'help.title'))
-        .setColor(COLORS.INFO)
+        .setColor(getEmbedColor(guildId, 'INFO'))
         .setDescription(t(guildId, 'help.description'))
         .addFields(
             { name: t(guildId, 'help.playback.name'),   value: t(guildId, 'help.playback.value'), inline: false },
@@ -302,7 +324,84 @@ export function helpEmbed(guildId) {
             { name: t(guildId, 'help.playlists.name'),   value: t(guildId, 'help.playlists.value'), inline: false },
             { name: t(guildId, 'help.connection.name'),  value: t(guildId, 'help.connection.value'), inline: false },
             { name: t(guildId, 'help.utility.name'),     value: t(guildId, 'help.utility.value'), inline: false },
+            { name: t(guildId, 'help.settings.name'),    value: t(guildId, 'help.settings.value'), inline: false },
         );
+}
+
+// ── Settings view embed ──────────────────────────────────────────────
+
+/**
+ * Build a settings overview embed showing all current guild settings.
+ * @param {string} guildId
+ * @param {Record<string, *>} settings - Merged settings from getGuildSettings()
+ * @param {import('discord.js').Guild} guild - Guild object for resolving role/channel names
+ */
+export function settingsView(guildId, settings, guild) {
+    const embed = new EmbedBuilder()
+        .setTitle(t(guildId, 'settings.title'))
+        .setColor(getEmbedColor(guildId, 'INFO'))
+        .setFooter({ text: t(guildId, 'settings.footer') });
+
+    // Format timeout display
+    const timeoutMins = Math.floor(settings.inactivity_timeout / 60);
+    const timeoutSecs = settings.inactivity_timeout % 60;
+    const timeoutDisplay = timeoutSecs > 0 ? `${timeoutMins}m ${timeoutSecs}s` : `${timeoutMins}m`;
+
+    // Format max song duration
+    const durationDisplay = settings.max_song_duration === 0
+        ? t(guildId, 'settings.value.unlimited')
+        : formatDuration(settings.max_song_duration);
+
+    // Audio section
+    const audioLines = [
+        `• ${t(guildId, 'settings.default_volume.name')}: ${settings.default_volume}%`,
+        `• ${t(guildId, 'settings.max_queue_size.name')}: ${settings.max_queue_size}`,
+        `• ${t(guildId, 'settings.inactivity_timeout.name')}: ${timeoutDisplay}`,
+        `• ${t(guildId, 'settings.max_song_duration.name')}: ${durationDisplay}`,
+    ];
+
+    // DJ Role display
+    let djRoleDisplay = t(guildId, 'settings.value.none');
+    if (settings.dj_role) {
+        const role = guild?.roles?.cache?.get(settings.dj_role);
+        djRoleDisplay = role ? `@${role.name}` : settings.dj_role;
+    }
+
+    // Text channel display
+    let textChannelDisplay = t(guildId, 'settings.value.all_channels');
+    if (settings.restricted_text_channel) {
+        const ch = guild?.channels?.cache?.get(settings.restricted_text_channel);
+        textChannelDisplay = ch ? `#${ch.name}` : settings.restricted_text_channel;
+    }
+
+    // Voice channel display
+    let voiceChannelDisplay = t(guildId, 'settings.value.all_channels');
+    if (settings.restricted_voice_channel) {
+        const ch = guild?.channels?.cache?.get(settings.restricted_voice_channel);
+        voiceChannelDisplay = ch ? `🔊 ${ch.name}` : settings.restricted_voice_channel;
+    }
+
+    // Moderation section
+    const modLines = [
+        `• ${t(guildId, 'settings.vote_skip_threshold.name')}: ${settings.vote_skip_threshold}%`,
+        `• ${t(guildId, 'settings.dj_role.name')}: ${djRoleDisplay}`,
+        `• ${t(guildId, 'settings.restricted_text_channel.name')}: ${textChannelDisplay}`,
+        `• ${t(guildId, 'settings.restricted_voice_channel.name')}: ${voiceChannelDisplay}`,
+    ];
+
+    // Display section
+    const colorSquare = '■';
+    const displayLines = [
+        `• ${t(guildId, 'settings.embed_color.name')}: ${settings.embed_color} ${colorSquare}`,
+    ];
+
+    embed.addFields(
+        { name: t(guildId, 'settings.audio.title'), value: audioLines.join('\n'), inline: false },
+        { name: t(guildId, 'settings.moderation.title'), value: modLines.join('\n'), inline: false },
+        { name: t(guildId, 'settings.display.title'), value: displayLines.join('\n'), inline: false },
+    );
+
+    return embed;
 }
 
 // ── Utility embeds ───────────────────────────────────────────────────
@@ -311,13 +410,14 @@ export function messagesCleared(guildId, count) {
     return new EmbedBuilder()
         .setTitle(t(guildId, 'cleared.title'))
         .setDescription(tp(guildId, 'cleared.description', count))
-        .setColor(COLORS.SUCCESS);
+        .setColor(getEmbedColor(guildId, 'SUCCESS'));
 }
 
 // ── Default export (all functions) ───────────────────────────────────
 
 export default {
     formatDuration,
+    getEmbedColor,
     error,
     success,
     info,
@@ -340,5 +440,6 @@ export default {
     playlistAdded,
     playlistList,
     helpEmbed,
+    settingsView,
     messagesCleared,
 };

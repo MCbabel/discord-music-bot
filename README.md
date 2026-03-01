@@ -3,7 +3,7 @@
 A feature-rich Discord music bot built with **discord.js v14** and **Node.js**. Supports 9 streaming services including YouTube, Spotify, SoundCloud, Bandcamp, Apple Music, Deezer, and Tidal — plus lyrics fetching via Genius, custom playlists, queue management, and more — all through modern slash commands.
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-2.1.0-green" alt="Version" />
+  <img src="https://img.shields.io/badge/version-2.2.0-green" alt="Version" />
   <img src="https://img.shields.io/badge/license-MIT-blue" alt="License" />
   <img src="https://img.shields.io/badge/node-18%2B-brightgreen?logo=node.js" alt="Node" />
   <img src="https://img.shields.io/badge/discord.js-v14-5865F2?logo=discord&logoColor=white" alt="discord.js" />
@@ -113,7 +113,26 @@ A feature-rich Discord music bot built with **discord.js v14** and **Node.js**. 
 | Command | Description |
 |---|---|
 | `/clear <number>` | Delete recent messages (1–100, requires Manage Messages) |
+| `/settings` | Manage server settings (audio, moderation, display) |
 | `/help` | Show all available commands |
+
+## ⚙️ Server Settings
+
+The bot supports **9 customizable per-server settings** across three categories: **Audio**, **Moderation**, and **Display**. Server admins can fine-tune the bot's behavior using `/settings`.
+
+| Setting | Default | Range |
+|---------|---------|-------|
+| Default Volume | 50% | 1-100 |
+| Max Queue Size | 100 | 10-500 |
+| Inactivity Timeout | 3 min | 30-600s |
+| Max Song Duration | Unlimited | 0-3600s |
+| Vote Skip Threshold | 50% | 1-100 |
+| DJ Role | None | Any role |
+| Text Channel | Any | Any channel |
+| Voice Channel | Any | Any channel |
+| Embed Color | #8b5cf6 | Any hex |
+
+Use `/settings view` to see current settings, or `/settings audio`, `/settings moderation`, `/settings display` to configure specific categories. Use `/settings reset` to restore defaults. Requires the **Manage Guild** permission.
 
 ## Prerequisites
 
@@ -261,13 +280,14 @@ src/
 │   ├── deezer.js         # Deezer → YouTube bridge (free API)
 │   └── tidal.js          # Tidal → YouTube bridge (free API)
 ├── commands/
-│   └── index.js          # All 18 slash command definitions & handlers
+│   └── index.js          # All 20 slash command definitions & handlers
 ├── i18n/
 │   ├── index.js          # i18n engine (EN, DE, ES)
 │   └── locales/          # Locale JSON files
 └── services/
     ├── lyrics.js         # Genius lyrics fetching
-    └── playlist.js       # Playlist persistence (JSON file storage)
+    ├── playlist.js       # Playlist persistence (JSON file storage)
+    └── settings.js       # Per-guild settings management
 ```
 
 ## Contributing
@@ -286,7 +306,7 @@ Contributions are welcome! Fork this repository and submit a pull request with y
 - [x] Song search functionality
 - [x] Now playing message with song progress
 - [x] Integration with more streaming services (SoundCloud, Bandcamp, Apple Music, Deezer, Tidal, Direct URLs, Radio)
-- [ ] Customizable bot settings
+- [x] Customizable bot settings
 - [ ] Song crossfade: Smoothly transition between songs with a configurable crossfade duration.
 - [ ] DJ Mode: Allow certain users to have elevated control over the bot, including song reordering and queue management.
 - [ ] Genre and Mood Playlists: Generate playlists based on specific genres or moods using AI recommendations.
