@@ -238,7 +238,10 @@ class GuildPlayer {
 
                 if (this.textChannel) {
                     try {
-                        await this.textChannel.send({ embeds: [messages.info(this.guildId, t(this.guildId, 'player.queue_finished'))] });
+                        const timeoutSec = getSetting(this.guildId, 'inactivity_timeout');
+                        const timeoutMin = Math.round(timeoutSec / 60);
+                        const timeoutDisplay = timeoutMin >= 1 ? `${timeoutMin} min` : `${timeoutSec}s`;
+                        await this.textChannel.send({ embeds: [messages.info(this.guildId, t(this.guildId, 'player.queue_finished', { timeout: timeoutDisplay }))] });
                     } catch { /* channel might not exist anymore */ }
                 }
             }

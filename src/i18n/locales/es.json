@@ -135,7 +135,7 @@
     "success.now_playing": "Reproduciendo **{title}**",
     "success.playlist_loaded": "Se cargaron **{loaded}/{total}** pistas de la playlist **{name}**.",
 
-    "player.queue_finished": "Cola terminada. Desconectando en 3 minutos si no hay actividad.",
+    "player.queue_finished": "Cola terminada. Desconectando en {timeout} si no hay actividad.",
     "player.button_not_same_channel": "Debes estar en el mismo canal de voz.",
 
     "language.title": "🌐 Idioma",

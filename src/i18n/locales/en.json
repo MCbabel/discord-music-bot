@@ -135,7 +135,7 @@
     "success.now_playing": "Now playing **{title}**",
     "success.playlist_loaded": "Loaded **{loaded}/{total}** tracks from playlist **{name}**.",
 
-    "player.queue_finished": "Queue finished. Disconnecting in 3 minutes if idle.",
+    "player.queue_finished": "Queue finished. Disconnecting in {timeout} if idle.",
     "player.button_not_same_channel": "You must be in the same voice channel.",
 
     "language.title": "🌐 Language",

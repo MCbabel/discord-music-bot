@@ -135,7 +135,7 @@
     "success.now_playing": "Spielt jetzt **{title}**",
     "success.playlist_loaded": "**{loaded}/{total}** Titel aus Playlist **{name}** geladen.",
 
-    "player.queue_finished": "Warteschlange beendet. Trenne in 3 Minuten bei Inaktivität.",
+    "player.queue_finished": "Warteschlange beendet. Trenne in {timeout} bei Inaktivität.",
     "player.button_not_same_channel": "Du musst im selben Sprachkanal sein.",
 
     "language.title": "🌐 Sprache",
