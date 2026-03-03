@@ -11,6 +11,7 @@
     "now_playing.field.title": "Titel",
     "now_playing.field.artist": "Künstler",
     "now_playing.field.duration": "Dauer",
+    "now_playing.live": "🔴 Live",
     "now_playing.unknown": "Unbekannt",
 
     "added_to_queue.title": "➕ Zur Warteschlange hinzugefügt",
@@ -165,6 +166,13 @@
     "settings.max_song_duration.set": "Max. Songdauer auf **{value} Sekunden** gesetzt.",
     "settings.max_song_duration.set_unlimited": "Max. Songdauer-Limit **entfernt**.",
 
+    "settings.crossfade_duration.name": "Überblendungsdauer",
+    "settings.crossfade_duration.description": "Sekunden der Überblendung zwischen Songs; 0 = deaktiviert (0-10)",
+    "settings.crossfade_duration.set": "Überblendungsdauer auf **{value} Sekunden** gesetzt.",
+    "settings.crossfade_duration.set_disabled": "Überblendung wurde **deaktiviert**.",
+    "settings.crossfade_duration.value": "{value}s",
+    "settings.crossfade_duration.off": "Aus",
+
     "settings.vote_skip_threshold.name": "Abstimmungsschwelle",
     "settings.vote_skip_threshold.description": "Prozent der Mitglieder zum Überspringen (1-100%)",
     "settings.vote_skip_threshold.set": "Abstimmungsschwelle auf **{value}%** gesetzt.",
@@ -188,6 +196,13 @@
     "settings.embed_color.description": "Benutzerdefinierte Farbe für Bot-Embeds (Hex, z.B. #8b5cf6)",
     "settings.embed_color.set": "Embed-Farbe auf **{value}** gesetzt.",
     "settings.embed_color.invalid": "Ungültige Farbe. Verwende Hex-Format: `#FF5733`.",
+
+    "settings.progress_bar.name": "Fortschrittsbalken",
+    "settings.progress_bar.description": "Live-Fortschrittsbalken in 'Wird gespielt' anzeigen",
+    "settings.progress_bar.on": "An",
+    "settings.progress_bar.off": "Aus",
+    "settings.progress_bar.enabled": "Fortschrittsbalken wurde **aktiviert**.",
+    "settings.progress_bar.disabled": "Fortschrittsbalken wurde **deaktiviert**.",
 
     "settings.reset.all": "Alle Einstellungen wurden auf **Standardwerte zurückgesetzt**.",
     "settings.reset.single": "**{setting}** wurde auf Standard zurückgesetzt.",

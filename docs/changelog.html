@@ -134,6 +134,44 @@ footer a:hover{color:var(--cyan);text-shadow:0 0 8px rgba(0,255,255,.4)}
   <div class="container">
     <div class="timeline">
 
+      <!-- v2.3.0 -->
+      <div class="version-block major reveal">
+        <div class="version-header">
+          <div class="version-tag"><span class="v-num">v2.3.0</span> <span class="version-date">— 2026-03-03</span></div>
+          <div class="version-subtitle">Song Crossfade</div>
+        </div>
+
+        <div class="change-card">
+          <div class="change-category cat-features"><span class="cat-icon">✨</span> New Features</div>
+          <ul class="change-list">
+            <li>Song crossfade with pre-buffering for gapless transitions</li>
+            <li>Configurable crossfade duration (0–10 seconds) via <code>/settings audio</code></li>
+            <li>Automatic pre-buffering of next track 8 seconds before crossfade</li>
+            <li>Smooth volume fade-out/fade-in using 50ms interval steps</li>
+            <li>Works with loop mode (pre-buffers same track)</li>
+          </ul>
+        </div>
+
+        <div class="change-card">
+          <div class="change-category cat-fixes"><span class="cat-icon">🔧</span> Improvements</div>
+          <ul class="change-list">
+            <li>Tracks with unknown duration skip crossfade automatically</li>
+            <li>Skip/stop cleanly cancel ongoing crossfades</li>
+            <li>Pre-buffered subprocess properly cleaned up on destroy</li>
+            <li>Fixed inactivity message showing actual timeout setting</li>
+          </ul>
+        </div>
+
+        <div class="change-card">
+          <div class="change-category cat-docs"><span class="cat-icon">📚</span> Documentation</div>
+          <ul class="change-list">
+            <li>New crossfade i18n keys in EN, DE, ES</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="version-divider"></div>
+
       <!-- v2.2.0 -->
       <div class="version-block major reveal">
         <div class="version-header">

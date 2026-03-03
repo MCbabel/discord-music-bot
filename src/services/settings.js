@@ -70,6 +70,18 @@ export const SETTINGS_SCHEMA = {
         default: '#8b5cf6',
         description: 'settings.embed_color.description',
     },
+    crossfade_duration: {
+        type: 'integer',
+        default: 0,       // 0 = disabled
+        min: 0,
+        max: 10,
+        description: 'settings.crossfade_duration.description',
+    },
+    progress_bar: {
+        type: 'boolean',
+        default: true,
+        description: 'settings.progress_bar.description',
+    },
 };
 
 // ── Validation ───────────────────────────────────────────────────────
@@ -120,6 +132,12 @@ function validate(key, value) {
         case 'color':
             if (typeof value !== 'string' || !HEX_COLOR_RE.test(value)) {
                 return { valid: false, error: `Setting '${key}' must be a hex color (e.g. #8b5cf6).` };
+            }
+            return { valid: true };
+
+        case 'boolean':
+            if (typeof value !== 'boolean') {
+                return { valid: false, error: `Setting '${key}' must be true or false.` };
             }
             return { valid: true };
 

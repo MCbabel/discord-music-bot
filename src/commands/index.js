@@ -744,6 +744,7 @@ const settings = {
             .addIntegerOption(opt => opt.setName('max_queue_size').setDescription('Max queue size (10-500)').setMinValue(10).setMaxValue(500).setRequired(false))
             .addIntegerOption(opt => opt.setName('inactivity_timeout').setDescription('Inactivity timeout in seconds (30-600)').setMinValue(30).setMaxValue(600).setRequired(false))
             .addIntegerOption(opt => opt.setName('max_song_duration').setDescription('Max song duration in seconds (0=unlimited, 60-3600)').setMinValue(0).setMaxValue(3600).setRequired(false))
+            .addIntegerOption(opt => opt.setName('crossfade_duration').setDescription('Crossfade duration in seconds (0=off, 1-10)').setMinValue(0).setMaxValue(10).setRequired(false))
         )
         .addSubcommand(sub => sub
             .setName('moderation')
@@ -757,6 +758,7 @@ const settings = {
             .setName('display')
             .setDescription('Configure display settings')
             .addStringOption(opt => opt.setName('embed_color').setDescription('Embed color as hex (e.g. #8b5cf6)').setRequired(false))
+            .addBooleanOption(opt => opt.setName('progress_bar').setDescription('Show live progress bar in Now Playing').setRequired(false))
         )
         .addSubcommand(sub => sub
             .setName('reset')
@@ -772,6 +774,8 @@ const settings = {
                     { name: 'Text Channel', value: 'restricted_text_channel' },
                     { name: 'Voice Channel', value: 'restricted_voice_channel' },
                     { name: 'Embed Color', value: 'embed_color' },
+                    { name: 'Progress Bar', value: 'progress_bar' },
+                    { name: 'Crossfade Duration', value: 'crossfade_duration' },
                 )
             )
         ),
@@ -803,6 +807,7 @@ const settings = {
                 const maxQueue = interaction.options.getInteger('max_queue_size');
                 const inactivity = interaction.options.getInteger('inactivity_timeout');
                 const maxDuration = interaction.options.getInteger('max_song_duration');
+                const crossfade = interaction.options.getInteger('crossfade_duration');
 
                 if (defaultVol !== null) {
                     setSetting(guildId, 'default_volume', defaultVol);
@@ -822,6 +827,14 @@ const settings = {
                         changes.push(t(guildId, 'settings.max_song_duration.set_unlimited'));
                     } else {
                         changes.push(t(guildId, 'settings.max_song_duration.set', { value: maxDuration }));
+                    }
+                }
+                if (crossfade !== null) {
+                    setSetting(guildId, 'crossfade_duration', crossfade);
+                    if (crossfade === 0) {
+                        changes.push(t(guildId, 'settings.crossfade_duration.set_disabled'));
+                    } else {
+                        changes.push(t(guildId, 'settings.crossfade_duration.set', { value: crossfade }));
                     }
                 }
 
@@ -876,27 +889,38 @@ const settings = {
 
             // ── display ──────────────────────────────────────────
             case 'display': {
+                const changes = [];
                 const embedColor = interaction.options.getString('embed_color');
+                const progressBar = interaction.options.getBoolean('progress_bar');
 
-                if (!embedColor) {
+                if (embedColor !== null) {
+                    // Validate hex color
+                    const hexRe = /^#[0-9A-Fa-f]{6}$/;
+                    if (!hexRe.test(embedColor)) {
+                        return interaction.reply({
+                            embeds: [messages.error(guildId, t(guildId, 'settings.embed_color.invalid'))],
+                            flags: MessageFlags.Ephemeral,
+                        });
+                    }
+                    setSetting(guildId, 'embed_color', embedColor.toLowerCase());
+                    changes.push(t(guildId, 'settings.embed_color.set', { value: embedColor }));
+                }
+
+                if (progressBar !== null) {
+                    setSetting(guildId, 'progress_bar', progressBar);
+                    const statusKey = progressBar ? 'settings.progress_bar.enabled' : 'settings.progress_bar.disabled';
+                    changes.push(t(guildId, statusKey));
+                }
+
+                if (changes.length === 0) {
                     return interaction.reply({
                         embeds: [messages.info(guildId, t(guildId, 'settings.no_changes'))],
                         flags: MessageFlags.Ephemeral,
                     });
                 }
 
-                // Validate hex color
-                const hexRe = /^#[0-9A-Fa-f]{6}$/;
-                if (!hexRe.test(embedColor)) {
-                    return interaction.reply({
-                        embeds: [messages.error(guildId, t(guildId, 'settings.embed_color.invalid'))],
-                        flags: MessageFlags.Ephemeral,
-                    });
-                }
-
-                setSetting(guildId, 'embed_color', embedColor.toLowerCase());
                 return interaction.reply({
-                    embeds: [messages.success(guildId, t(guildId, 'settings.embed_color.set', { value: embedColor }))],
+                    embeds: [messages.success(guildId, changes.join('\n'))],
                 });
             }
 

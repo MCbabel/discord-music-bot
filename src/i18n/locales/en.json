@@ -11,6 +11,7 @@
     "now_playing.field.title": "Title",
     "now_playing.field.artist": "Artist",
     "now_playing.field.duration": "Duration",
+    "now_playing.live": "🔴 Live",
     "now_playing.unknown": "Unknown",
 
     "added_to_queue.title": "➕ Added to Queue",
@@ -165,6 +166,13 @@
     "settings.max_song_duration.set": "Max song duration set to **{value} seconds**.",
     "settings.max_song_duration.set_unlimited": "Max song duration limit **removed**.",
 
+    "settings.crossfade_duration.name": "Crossfade Duration",
+    "settings.crossfade_duration.description": "Seconds of crossfade between songs; 0 = disabled (0-10)",
+    "settings.crossfade_duration.set": "Crossfade duration set to **{value} seconds**.",
+    "settings.crossfade_duration.set_disabled": "Crossfade has been **disabled**.",
+    "settings.crossfade_duration.value": "{value}s",
+    "settings.crossfade_duration.off": "Off",
+
     "settings.vote_skip_threshold.name": "Vote Skip Threshold",
     "settings.vote_skip_threshold.description": "Percentage of members needed to vote-skip (1-100%)",
     "settings.vote_skip_threshold.set": "Vote skip threshold set to **{value}%**.",
@@ -188,6 +196,13 @@
     "settings.embed_color.description": "Custom color for bot embeds (hex, e.g. #8b5cf6)",
     "settings.embed_color.set": "Embed color set to **{value}**.",
     "settings.embed_color.invalid": "Invalid color. Use hex format: `#FF5733`.",
+
+    "settings.progress_bar.name": "Progress Bar",
+    "settings.progress_bar.description": "Show live progress bar in Now Playing",
+    "settings.progress_bar.on": "On",
+    "settings.progress_bar.off": "Off",
+    "settings.progress_bar.enabled": "Progress bar has been **enabled**.",
+    "settings.progress_bar.disabled": "Progress bar has been **disabled**.",
 
     "settings.reset.all": "All settings have been **reset to defaults**.",
     "settings.reset.single": "**{setting}** has been reset to default.",

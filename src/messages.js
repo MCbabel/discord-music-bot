@@ -47,6 +47,29 @@ export function formatDuration(seconds) {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
 }
 
+/**
+ * Build a visual progress bar string with timestamps.
+ * @param {number} current - Current position in seconds
+ * @param {number} total - Total duration in seconds
+ * @param {number} [barLength=20] - Number of bar characters
+ * @returns {string} Progress bar with timestamps, e.g. "1:23 ▬▬▬▬▬🔘▬▬▬▬▬▬▬▬▬ 4:12"
+ */
+export function buildProgressBar(current, total, barLength = 20) {
+    if (!total || total <= 0) return '🔴 Live';
+
+    const progress = Math.min(Math.max(current / total, 0), 1);
+    const filledLength = Math.round(progress * (barLength - 1));
+
+    const filled = '▬'.repeat(filledLength);
+    const empty = '▬'.repeat(Math.max(0, barLength - filledLength - 1));
+    const bar = filled + '🔘' + empty;
+
+    const currentTime = formatDuration(current);
+    const totalTime = formatDuration(total);
+
+    return `${currentTime} ${bar} ${totalTime}`;
+}
+
 // ── Basic status embeds ──────────────────────────────────────────────
 
 /** Red error embed. */
@@ -84,11 +107,13 @@ export function warning(guildId, description) {
 // ── Playback embeds ──────────────────────────────────────────────────
 
 /**
- * Now-playing embed with track metadata.
+ * Now-playing embed with track metadata and progress bar.
  * @param {string} guildId
  * @param {{ title: string, artist: string, duration: number, thumbnailUrl?: string, url?: string }} track
+ * @param {number} [elapsed=0] - Elapsed playback time in seconds
+ * @param {boolean} [showProgress=true] - Whether to include the progress bar
  */
-export function nowPlaying(guildId, track) {
+export function nowPlaying(guildId, track, elapsed = 0, showProgress = true) {
     const unknown = t(guildId, 'now_playing.unknown');
     const sourceInfo = SourceInfo[track.source];
     const sourceDisplay = sourceInfo
@@ -104,6 +129,11 @@ export function nowPlaying(guildId, track) {
             { name: t(guildId, 'now_playing.field.duration'), value: formatDuration(track.duration), inline: true },
             { name: t(guildId, 'now_playing.source'), value: sourceDisplay, inline: true },
         );
+
+    // Only add progress bar field if enabled and track has a known duration
+    if (showProgress && track.duration > 0) {
+        embed.addFields({ name: '\u200b', value: buildProgressBar(elapsed, track.duration), inline: false });
+    }
 
     if (track.url) embed.setURL(track.url);
     if (track.thumbnailUrl) embed.setThumbnail(track.thumbnailUrl);
@@ -352,12 +382,18 @@ export function settingsView(guildId, settings, guild) {
         ? t(guildId, 'settings.value.unlimited')
         : formatDuration(settings.max_song_duration);
 
+    // Format crossfade duration
+    const crossfadeDisplay = settings.crossfade_duration === 0
+        ? t(guildId, 'settings.crossfade_duration.off')
+        : t(guildId, 'settings.crossfade_duration.value', { value: settings.crossfade_duration });
+
     // Audio section
     const audioLines = [
         `• ${t(guildId, 'settings.default_volume.name')}: ${settings.default_volume}%`,
         `• ${t(guildId, 'settings.max_queue_size.name')}: ${settings.max_queue_size}`,
         `• ${t(guildId, 'settings.inactivity_timeout.name')}: ${timeoutDisplay}`,
         `• ${t(guildId, 'settings.max_song_duration.name')}: ${durationDisplay}`,
+        `• ${t(guildId, 'settings.crossfade_duration.name')}: ${crossfadeDisplay}`,
     ];
 
     // DJ Role display
@@ -389,10 +425,16 @@ export function settingsView(guildId, settings, guild) {
         `• ${t(guildId, 'settings.restricted_voice_channel.name')}: ${voiceChannelDisplay}`,
     ];
 
+    // Format progress bar display
+    const progressDisplay = settings.progress_bar
+        ? t(guildId, 'settings.progress_bar.on')
+        : t(guildId, 'settings.progress_bar.off');
+
     // Display section
     const colorSquare = '■';
     const displayLines = [
         `• ${t(guildId, 'settings.embed_color.name')}: ${settings.embed_color} ${colorSquare}`,
+        `• ${t(guildId, 'settings.progress_bar.name')}: ${progressDisplay}`,
     ];
 
     embed.addFields(
@@ -417,6 +459,7 @@ export function messagesCleared(guildId, count) {
 
 export default {
     formatDuration,
+    buildProgressBar,
     getEmbedColor,
     error,
     success,

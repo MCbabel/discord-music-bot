@@ -10,6 +10,7 @@ import {
 } from '@discordjs/voice';
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, MessageFlags } from 'discord.js';
 import { createAudioStream } from './stream.js';
+import { fadeVolume } from './crossfade.js';
 import * as messages from '../messages.js';
 import { t } from '../i18n/index.js';
 import { getSetting } from '../services/settings.js';
@@ -81,6 +82,17 @@ class GuildPlayer {
         this.inactivityTimer = null;
         this._currentProcess = null; // yt-dlp subprocess reference for cleanup
         this._isLoopReplay = false; // Flag to suppress duplicate "Now Playing" on loop
+
+        // Progress bar updater interval
+        this._progressInterval = null;
+
+        // Crossfade state
+        this._preBufferedTrack = null;  // { track, stream, process } — next track pre-loaded
+        this._positionMonitor = null;   // setInterval for tracking playback position
+        this._isCrossfading = false;    // flag to prevent concurrent crossfades
+
+        // Manual stop flag — prevents "Queue finished" message when /stop is used
+        this._manualStop = false;
     }
 
     /**
@@ -200,6 +212,9 @@ class GuildPlayer {
             this.currentResource.volume?.setVolume(this.volume); // BUG-14: apply persisted volume
             this.audioPlayer.play(this.currentResource);
 
+            // Start position monitor for crossfade pre-buffering
+            this._startPositionMonitor();
+
             if (isLoopReplay) {
                 // Update existing "Now Playing" message with loop indicator instead of sending a new one
                 await this._updateNowPlayingLoop(track);
@@ -218,7 +233,20 @@ class GuildPlayer {
      * Addresses BUG-11 (clear votes), BUG-19 (async, non-blocking).
      */
     async _onTrackEnd() {
+        // If stop() was called manually (e.g. /stop), skip all track-end logic
+        if (this._manualStop) {
+            this._manualStop = false;
+            return;
+        }
+
         this.skipVotes.clear(); // BUG-11
+        this._stopPositionMonitor();
+
+        // If crossfade handled the transition, don't double-advance
+        if (this._isCrossfading) return;
+
+        // Clean up any unused pre-buffered track
+        this._discardPreBuffer();
 
         if (this.isLooping && this.currentTrack) {
             // Re-play the same track — keep existing "Now Playing" message
@@ -283,7 +311,8 @@ class GuildPlayer {
             this._nowPlayingCollector = null;
         }
 
-        const embed = messages.nowPlaying(this.guildId, track);
+        const showProgress = getSetting(this.guildId, 'progress_bar');
+        const embed = messages.nowPlaying(this.guildId, track, 0, showProgress);
         const row = this._buildNowPlayingButtons();
 
         try {
@@ -300,6 +329,9 @@ class GuildPlayer {
                     components: [row],
                 });
             }
+
+            // Start live progress bar updates
+            this._startProgressUpdater();
 
             // Capture reference to THIS specific message for the collector's end handler
             const thisMessage = this.nowPlayingMessage;
@@ -385,10 +417,12 @@ class GuildPlayer {
         }
 
         try {
-            const embed = messages.nowPlaying(this.guildId, track);
+            const showProgress = getSetting(this.guildId, 'progress_bar');
+            const embed = messages.nowPlaying(this.guildId, track, 0, showProgress);
             embed.setFooter({ text: '🔁 Looping' });
             const row = this._buildNowPlayingButtons();
             await this.nowPlayingMessage.edit({ embeds: [embed], components: [row] });
+            this._startProgressUpdater();
         } catch {
             // Message was deleted — send a fresh one
             await this._sendNowPlaying(track);
@@ -399,6 +433,7 @@ class GuildPlayer {
      * Disable buttons on the "Now Playing" message. (BUG-32 fix)
      */
     async _disableNowPlayingButtons() {
+        this._stopProgressUpdater();
         if (!this.nowPlayingMessage) return;
         try {
             const disabledRow = new ActionRowBuilder().addComponents(
@@ -413,24 +448,81 @@ class GuildPlayer {
         this.nowPlayingMessage = null;
     }
 
-    /** Pause the audio player. */
+    // ── Progress bar updater ─────────────────────────────────────────
+
+    /**
+     * Start an interval that periodically edits the Now Playing message
+     * to update the progress bar. Runs every 3 seconds.
+     * Note: 3s is aggressive for Discord rate limits (5 edits/5s/channel),
+     * but for a single bot message it should be within limits.
+     * The catch block handles rate-limit errors gracefully.
+     */
+    _startProgressUpdater() {
+        this._stopProgressUpdater();
+
+        const progressEnabled = getSetting(this.guildId, 'progress_bar');
+        if (!progressEnabled) return; // Progress bar disabled
+
+        this._progressInterval = setInterval(async () => {
+            if (!this.currentResource || !this.currentTrack || !this.nowPlayingMessage) {
+                this._stopProgressUpdater();
+                return;
+            }
+
+            const elapsed = Math.floor(this.currentResource.playbackDuration / 1000);
+            const embed = messages.nowPlaying(this.guildId, this.currentTrack, elapsed);
+
+            // Preserve loop footer if looping
+            if (this.isLooping) {
+                embed.setFooter({ text: '🔁 Looping' });
+            }
+
+            try {
+                await this.nowPlayingMessage.edit({
+                    embeds: [embed],
+                    components: [this._buildNowPlayingButtons()],
+                });
+            } catch {
+                // Message was deleted or unavailable
+                this._stopProgressUpdater();
+            }
+        }, 3_000);
+    }
+
+    /**
+     * Stop the progress bar update interval.
+     */
+    _stopProgressUpdater() {
+        if (this._progressInterval) {
+            clearInterval(this._progressInterval);
+            this._progressInterval = null;
+        }
+    }
+
+    /** Pause the audio player and freeze the progress bar. */
     pause() {
         if (this.audioPlayer) {
             this.audioPlayer.pause();
             this.isPaused = true;
+            this._stopProgressUpdater();
         }
     }
 
-    /** Resume the audio player. */
+    /** Resume the audio player and restart progress bar updates. */
     resume() {
         if (this.audioPlayer) {
             this.audioPlayer.unpause();
             this.isPaused = false;
+            this._startProgressUpdater();
         }
     }
 
     /** Skip the current track (triggers 'idle' event → _onTrackEnd). */
     skip() {
+        this._isCrossfading = false;
+        this._stopPositionMonitor();
+        this._stopProgressUpdater();
+        this._discardPreBuffer();
         if (this.audioPlayer) {
             this.audioPlayer.stop(); // Triggers 'idle' event → _onTrackEnd
         }
@@ -445,7 +537,12 @@ class GuildPlayer {
         this.isLooping = false;
         this.isPaused = false;
         this.skipVotes.clear();
+        this._isCrossfading = false;
+        this._stopPositionMonitor();
+        this._stopProgressUpdater();
+        this._discardPreBuffer();
         this._killCurrentProcess();
+        this._manualStop = true; // Suppress "Queue finished" from the Idle event
         if (this.audioPlayer) {
             this.audioPlayer.stop();
         }
@@ -457,6 +554,10 @@ class GuildPlayer {
      */
     setVolume(percent) {
         this.volume = percent / 100;
+        if (this._isCrossfading) {
+            // Don't directly set — let the fade handle it with new target
+            return;
+        }
         if (this.currentResource?.volume) {
             this.currentResource.volume.setVolume(this.volume);
         }
@@ -474,11 +575,174 @@ class GuildPlayer {
         }
     }
 
+    // ── Crossfade / Pre-buffer Methods ─────────────────────────────────
+
+    /**
+     * Discard any pre-buffered track and kill its subprocess.
+     */
+    _discardPreBuffer() {
+        if (this._preBufferedTrack) {
+            try { this._preBufferedTrack.process?.kill(); } catch { /* already exited */ }
+            this._preBufferedTrack = null;
+        }
+    }
+
+    /**
+     * Start monitoring playback position for crossfade triggers.
+     * Checks every 1 second whether the track is near its end.
+     */
+    _startPositionMonitor() {
+        this._stopPositionMonitor();
+
+        const crossfadeDuration = getSetting(this.guildId, 'crossfade_duration');
+        if (crossfadeDuration === 0) {
+            return; // Crossfade disabled
+        }
+        if (!this.currentTrack?.duration || this.currentTrack.duration === 0) {
+            return; // Unknown duration (live/radio)
+        }
+
+        const trackDurationMs = this.currentTrack.duration * 1000;
+        const preBufferThreshold = (crossfadeDuration + 8) * 1000; // Pre-buffer 8s before crossfade
+        const fadeThreshold = crossfadeDuration * 1000;
+
+        // For very short songs, skip crossfade entirely
+        if (trackDurationMs <= preBufferThreshold) {
+            return;
+        }
+
+        let preBuffered = false;
+        let fadeStarted = false;
+
+        this._positionMonitor = setInterval(() => {
+            if (!this.currentResource || this._isCrossfading) return;
+
+            // Check queue inside interval — queue may be empty when monitor starts
+            // but gets populated later as user adds songs
+            if (this.queue.length === 0 && !this.isLooping) return;
+
+            const elapsed = this.currentResource.playbackDuration;
+            const remaining = trackDurationMs - elapsed;
+
+            // Pre-buffer the next track
+            if (!preBuffered && remaining <= preBufferThreshold && remaining > fadeThreshold) {
+                preBuffered = true;
+                this._triggerPreBuffer();
+            }
+
+            // Start crossfade
+            if (!fadeStarted && remaining <= fadeThreshold && this._preBufferedTrack) {
+                fadeStarted = true;
+                this._triggerCrossfade();
+            }
+        }, 1000);
+    }
+
+    /**
+     * Stop the playback position monitor.
+     */
+    _stopPositionMonitor() {
+        if (this._positionMonitor) {
+            clearInterval(this._positionMonitor);
+            this._positionMonitor = null;
+        }
+    }
+
+    /**
+     * Pre-buffer the next track's audio stream in advance.
+     */
+    async _triggerPreBuffer() {
+        try {
+            const nextTrack = this.isLooping ? this.currentTrack : this.queue[0];
+            if (!nextTrack) return;
+
+            const { stream, process } = await createAudioStream(nextTrack);
+            this._preBufferedTrack = { track: nextTrack, stream, process };
+        } catch (err) {
+            console.error('[Crossfade] Pre-buffer failed:', err.message);
+            this._preBufferedTrack = null;
+        }
+    }
+
+    /**
+     * Execute the crossfade transition: fade out current → switch → fade in next.
+     */
+    async _triggerCrossfade() {
+        if (this._isCrossfading || !this._preBufferedTrack) return;
+        this._isCrossfading = true;
+        this._stopPositionMonitor();
+        this._stopProgressUpdater();
+
+        const crossfadeDuration = getSetting(this.guildId, 'crossfade_duration');
+        const fadeDurationMs = crossfadeDuration * 1000;
+        const currentVolume = this.volume;
+
+        try {
+            // Calculate actual remaining time to cap fade-out duration
+            const remainingMs = this.currentResource
+                ? Math.max(0, (this.currentTrack.duration * 1000) - this.currentResource.playbackDuration)
+                : 0;
+            // Cap fade-out to the lesser of half crossfade duration or remaining time minus 200ms buffer
+            const fadeOutMs = Math.max(500, Math.min(fadeDurationMs / 2, remainingMs - 200));
+            const fadeInMs = fadeDurationMs / 2;
+
+            // Step 1: Fade out current track (duration capped to remaining time)
+            await fadeVolume(this.currentResource, currentVolume, 0, fadeOutMs);
+
+            // Step 2: Stop current, switch to pre-buffered track
+            this._killCurrentProcess();
+
+            const { track, stream, process: proc } = this._preBufferedTrack;
+            this._preBufferedTrack = null;
+
+            // Remove from queue if not looping
+            if (!this.isLooping && this.queue.length > 0) {
+                this.queue.shift();
+            }
+
+            // Step 3: Create audio resource from pre-buffered stream and play
+            const resource = createAudioResource(stream, {
+                inputType: StreamType.Arbitrary,
+                inlineVolume: true,
+            });
+            // Start at fade-in floor (0.05) — matches the FADE_IN_FLOOR in crossfade.js
+            resource.volume.setVolume(0.05);
+
+            this.currentTrack = track;
+            this.currentResource = resource;
+            this._currentProcess = proc;
+            this.audioPlayer.play(resource);
+
+            // Step 4: Fade in new track (fromVol=0 will be clamped to FADE_IN_FLOOR by fadeVolume)
+            await fadeVolume(resource, 0, currentVolume, fadeInMs);
+
+            // Step 5: Send Now Playing and restart monitor for next crossfade
+            this._isLoopReplay = this.isLooping;
+            if (this._isLoopReplay) {
+                this._isLoopReplay = false;
+                await this._updateNowPlayingLoop(track);
+            } else {
+                await this._sendNowPlaying(track);
+            }
+            this._startPositionMonitor();
+
+        } catch (err) {
+            console.error('[Crossfade] Error:', err.message);
+            this._preBufferedTrack = null;
+        } finally {
+            this._isCrossfading = false;
+        }
+    }
+
     /**
      * Disconnect and clean up all state. (BUG-13 fix)
      */
     destroy() {
         this._clearInactivityTimer();
+        this._isCrossfading = false;
+        this._stopPositionMonitor();
+        this._stopProgressUpdater();
+        this._discardPreBuffer();
         this.stop();
         this._disableNowPlayingButtons();
         if (this.connection) {
@@ -500,6 +764,9 @@ class GuildPlayer {
         this.isLooping = false;
         this.isPaused = false;
         this.skipVotes.clear();
+        this._isCrossfading = false;
+        this._stopPositionMonitor();
+        this._discardPreBuffer();
     }
 
     /**

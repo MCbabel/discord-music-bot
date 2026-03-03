@@ -11,6 +11,7 @@
     "now_playing.field.title": "Título",
     "now_playing.field.artist": "Artista",
     "now_playing.field.duration": "Duración",
+    "now_playing.live": "🔴 En vivo",
     "now_playing.unknown": "Desconocido",
 
     "added_to_queue.title": "➕ Añadido a la Cola",
@@ -165,6 +166,13 @@
     "settings.max_song_duration.set": "Duración máxima establecida en **{value} segundos**.",
     "settings.max_song_duration.set_unlimited": "Límite de duración máxima **eliminado**.",
 
+    "settings.crossfade_duration.name": "Duración del Crossfade",
+    "settings.crossfade_duration.description": "Segundos de crossfade entre canciones; 0 = desactivado (0-10)",
+    "settings.crossfade_duration.set": "Duración del crossfade establecida en **{value} segundos**.",
+    "settings.crossfade_duration.set_disabled": "El crossfade ha sido **desactivado**.",
+    "settings.crossfade_duration.value": "{value}s",
+    "settings.crossfade_duration.off": "Desactivado",
+
     "settings.vote_skip_threshold.name": "Umbral de Votación",
     "settings.vote_skip_threshold.description": "Porcentaje de miembros necesarios para saltar (1-100%)",
     "settings.vote_skip_threshold.set": "Umbral de votación establecido en **{value}%**.",
@@ -188,6 +196,13 @@
     "settings.embed_color.description": "Color personalizado para embeds del bot (hex, ej. #8b5cf6)",
     "settings.embed_color.set": "Color de embed establecido en **{value}**.",
     "settings.embed_color.invalid": "Color inválido. Usa formato hex: `#FF5733`.",
+
+    "settings.progress_bar.name": "Barra de Progreso",
+    "settings.progress_bar.description": "Mostrar barra de progreso en vivo en Reproduciendo",
+    "settings.progress_bar.on": "Activada",
+    "settings.progress_bar.off": "Desactivada",
+    "settings.progress_bar.enabled": "La barra de progreso ha sido **activada**.",
+    "settings.progress_bar.disabled": "La barra de progreso ha sido **desactivada**.",
 
     "settings.reset.all": "Toda la configuración ha sido **restablecida a los valores predeterminados**.",
     "settings.reset.single": "**{setting}** ha sido restablecido al valor predeterminado.",

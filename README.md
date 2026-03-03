@@ -3,7 +3,7 @@
 A feature-rich Discord music bot built with **discord.js v14** and **Node.js**. Supports 9 streaming services including YouTube, Spotify, SoundCloud, Bandcamp, Apple Music, Deezer, and Tidal — plus lyrics fetching via Genius, custom playlists, queue management, and more — all through modern slash commands.
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-2.2.0-green" alt="Version" />
+  <img src="https://img.shields.io/badge/version-2.3.0-green" alt="Version" />
   <img src="https://img.shields.io/badge/license-MIT-blue" alt="License" />
   <img src="https://img.shields.io/badge/node-18%2B-brightgreen?logo=node.js" alt="Node" />
   <img src="https://img.shields.io/badge/discord.js-v14-5865F2?logo=discord&logoColor=white" alt="discord.js" />
@@ -44,6 +44,7 @@ A feature-rich Discord music bot built with **discord.js v14** and **Node.js**. 
 - 📻 **Radio & Direct URLs** — Stream internet radio (Icecast/Shoutcast) or direct audio files (.mp3, .wav, .ogg, .flac, .m4a)
 - � **Lyrics Fetching** — Retrieve song lyrics from the Genius API
 - 📋 **Queue Management** — View, skip, loop, and control the playback queue
+- 🔀 **Song Crossfade** — Smooth transitions between tracks with configurable crossfade duration and pre-buffering
 - 🔊 **Volume Control** — Adjust playback volume from 0–100%
 - 🗳️ **Vote Skip** — Democratic skip voting for shared listening sessions
 - 🎶 **Custom Playlists** — Save and play user-created playlists
@@ -118,7 +119,7 @@ A feature-rich Discord music bot built with **discord.js v14** and **Node.js**. 
 
 ## ⚙️ Server Settings
 
-The bot supports **9 customizable per-server settings** across three categories: **Audio**, **Moderation**, and **Display**. Server admins can fine-tune the bot's behavior using `/settings`.
+The bot supports **10 customizable per-server settings** across three categories: **Audio**, **Moderation**, and **Display**. Server admins can fine-tune the bot's behavior using `/settings`.
 
 | Setting | Default | Range |
 |---------|---------|-------|
@@ -126,6 +127,7 @@ The bot supports **9 customizable per-server settings** across three categories:
 | Max Queue Size | 100 | 10-500 |
 | Inactivity Timeout | 3 min | 30-600s |
 | Max Song Duration | Unlimited | 0-3600s |
+| Crossfade Duration | 0 (off) | 0-10s |
 | Vote Skip Threshold | 50% | 1-100 |
 | DJ Role | None | Any role |
 | Text Channel | Any | Any channel |
@@ -273,6 +275,7 @@ src/
 ├── audio/
 │   ├── player.js         # GuildPlayer — per-guild queue & playback management
 │   ├── resolver.js       # Unified URL/query resolver — auto-detects 9 services
+│   ├── crossfade.js      # Crossfade engine — pre-buffering & volume transitions
 │   ├── stream.js         # Stream creation for all source types
 │   ├── youtube.js        # yt-dlp integration — search, stream, info extraction
 │   ├── spotify.js        # Spotify → YouTube bridge (resolve track metadata)
@@ -307,7 +310,7 @@ Contributions are welcome! Fork this repository and submit a pull request with y
 - [x] Now playing message with song progress
 - [x] Integration with more streaming services (SoundCloud, Bandcamp, Apple Music, Deezer, Tidal, Direct URLs, Radio)
 - [x] Customizable bot settings
-- [ ] Song crossfade: Smoothly transition between songs with a configurable crossfade duration.
+- [x] Song crossfade: Smoothly transition between songs with a configurable crossfade duration.
 - [ ] DJ Mode: Allow certain users to have elevated control over the bot, including song reordering and queue management.
 - [ ] Genre and Mood Playlists: Generate playlists based on specific genres or moods using AI recommendations.
 - [ ] Scheduled Playlists: Schedule specific playlists to play at designated times (e.g., morning playlists or weekend vibes).
