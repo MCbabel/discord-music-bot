@@ -1,317 +1,629 @@
 <!DOCTYPE html>
-<html lang="en">
+<html class="dark" lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>MelodyBot — Discord Music Bot</title>
-<link rel="canonical" href="https://mcbabel.github.io/discord-music-bot/">
-<meta name="description" content="A feature-rich Discord music bot — YouTube, Spotify, lyrics, playlists & 20 slash commands. Retro vibes, modern sound.">
+<link rel="canonical" href="https://melody-bot.mcbabel.de/">
+<meta name="description" content="A feature-rich Discord music bot — YouTube, Spotify, lyrics, playlists & 20 slash commands. Open-source, self-hosted, modern.">
 <meta property="og:title" content="MelodyBot — Discord Music Bot">
 <meta property="og:description" content="A feature-rich Discord music bot — YouTube, Spotify, lyrics, playlists & 20 slash commands.">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://mcbabel.github.io/discord-music-bot/">
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<meta property="og:url" content="https://melody-bot.mcbabel.de/">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      colors: {
+        "surface": "#131313",
+        "surface-container-lowest": "#0e0e0e",
+        "surface-container-low": "#1b1b1b",
+        "surface-container": "#1f1f1f",
+        "surface-container-high": "#2a2a2a",
+        "surface-container-highest": "#353535",
+        "surface-variant": "#353535",
+        "surface-bright": "#393939",
+        "on-surface": "#e2e2e2",
+        "on-surface-variant": "#c2c6d8",
+        "on-background": "#e2e2e2",
+        "background": "#131313",
+        "primary": "#b3c5ff",
+        "primary-container": "#0064ff",
+        "on-primary": "#002a76",
+        "on-primary-container": "#f5f5ff",
+        "secondary": "#bec2ff",
+        "secondary-container": "#2532c4",
+        "on-secondary-container": "#acb3ff",
+        "tertiary": "#c3c7cb",
+        "tertiary-container": "#6d7175",
+        "outline": "#8c90a2",
+        "outline-variant": "#424656",
+        "error": "#ffb4ab",
+        "error-container": "#93000a",
+        "inverse-surface": "#e2e2e2",
+        "inverse-on-surface": "#303030",
+      },
+      fontFamily: {
+        "headline": ["Inter"],
+        "body": ["Inter"],
+        "label": ["Inter"],
+        "mono": ["JetBrains Mono"]
+      },
+      borderRadius: {
+        "DEFAULT": "0.125rem",
+        "lg": "0.25rem",
+        "xl": "0.5rem",
+        "2xl": "0.75rem",
+        "3xl": "1rem"
+      },
+      animation: {
+        'float': 'float 6s ease-in-out infinite',
+        'pulse-glow': 'pulse-glow 4s ease-in-out infinite',
+      },
+      keyframes: {
+        float: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-10px)' },
+        },
+        'pulse-glow': {
+          '0%, 100%': { boxShadow: '0 0 15px rgba(0, 100, 255, 0.2)' },
+          '50%': { boxShadow: '0 0 30px rgba(0, 100, 255, 0.4)' },
+        },
+      }
+    },
+  },
+}
+</script>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#0d0221;--surface:#130330;--card:rgba(13,2,33,.85);--pink:#ff2d95;--cyan:#0ff;--orange:#ff6b2b;--yellow:#ffd319;--purple:#b24bf3;--text:#e8dff5;--muted:#8b7fa8}
-html{scroll-behavior:smooth}
-body{font-family:'Rajdhani',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;line-height:1.6;font-weight:400}
-
-/* Scanline overlay */
-body::after{content:'';position:fixed;top:0;left:0;width:100%;height:100%;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.03) 2px,rgba(0,0,0,.03) 4px);pointer-events:none;z-index:9999}
-
-::-webkit-scrollbar{width:6px}
-::-webkit-scrollbar-track{background:var(--bg)}
-::-webkit-scrollbar-thumb{background:var(--pink);border-radius:3px}
-
-/* Nav */
-nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(16px);background:rgba(13,2,33,.7);border-bottom:1px solid rgba(255,45,149,.15);transition:all .3s}
-nav.scrolled{padding:.6rem 2rem;background:rgba(13,2,33,.95)}
-.nav-brand{display:flex;align-items:center;gap:.6rem;font-family:'Orbitron',sans-serif;font-weight:700;font-size:1.15rem;color:var(--pink);text-decoration:none;text-shadow:0 0 10px rgba(255,45,149,.5)}
-.nav-brand i{color:var(--cyan);text-shadow:0 0 10px rgba(0,255,255,.5)}
-.nav-links{display:flex;gap:2rem;list-style:none}
-.nav-links a{color:var(--muted);text-decoration:none;font-size:.9rem;font-weight:500;transition:all .3s;letter-spacing:.5px}
-.nav-links a:hover{color:var(--cyan);text-shadow:0 0 8px rgba(0,255,255,.4)}
-.nav-toggle{display:none;background:none;border:none;color:var(--text);font-size:1.3rem;cursor:pointer}
-
-section{position:relative;z-index:1}
-.container{max-width:1160px;margin:0 auto;padding:0 2rem}
-
-/* Hero */
-.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:6rem 2rem 4rem;position:relative;overflow:hidden}
-
-/* Sunset gradient */
-.hero-sunset{position:absolute;bottom:0;left:0;right:0;height:50%;background:linear-gradient(to top,rgba(255,211,25,.08) 0%,rgba(255,107,43,.1) 25%,rgba(255,45,149,.08) 50%,transparent 100%);pointer-events:none}
-
-/* Grid perspective */
-.hero-grid{position:absolute;bottom:0;left:0;right:0;height:45%;perspective:400px;overflow:hidden}
-.hero-grid-inner{position:absolute;bottom:0;left:-50%;right:-50%;height:200%;transform:rotateX(60deg);transform-origin:bottom;background-image:linear-gradient(var(--pink) 1px,transparent 1px),linear-gradient(90deg,var(--pink) 1px,transparent 1px);background-size:60px 60px;opacity:.12;animation:gridScroll 3s linear infinite}
-@keyframes gridScroll{0%{transform:rotateX(60deg) translateY(0)}100%{transform:rotateX(60deg) translateY(60px)}}
-
-.hero-content{position:relative;z-index:2}
-
-/* Equalizer */
-.equalizer{display:flex;align-items:end;gap:4px;height:50px;justify-content:center;margin-bottom:2rem}
-.eq-bar{width:6px;border-radius:3px;background:linear-gradient(to top,var(--pink),var(--cyan));animation:eqBounce 1s ease-in-out infinite}
-.eq-bar:nth-child(1){height:20px;animation-delay:0s}
-.eq-bar:nth-child(2){height:35px;animation-delay:.1s}
-.eq-bar:nth-child(3){height:25px;animation-delay:.2s}
-.eq-bar:nth-child(4){height:45px;animation-delay:.3s}
-.eq-bar:nth-child(5){height:30px;animation-delay:.4s}
-.eq-bar:nth-child(6){height:40px;animation-delay:.15s}
-.eq-bar:nth-child(7){height:20px;animation-delay:.25s}
-.eq-bar:nth-child(8){height:35px;animation-delay:.35s}
-.eq-bar:nth-child(9){height:28px;animation-delay:.45s}
-.eq-bar:nth-child(10){height:42px;animation-delay:.05s}
-.eq-bar:nth-child(11){height:18px;animation-delay:.2s}
-@keyframes eqBounce{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.25)}}
-
-/* Glitch effect */
-.glitch{position:relative;font-family:'Orbitron',sans-serif;font-size:clamp(2.5rem,7vw,5.5rem);font-weight:900;text-transform:uppercase;letter-spacing:4px;color:var(--text);margin-bottom:.8rem;cursor:default}
-.glitch:hover{animation:glitchAnim .3s linear infinite}
-.glitch::before,.glitch::after{content:attr(data-text);position:absolute;top:0;left:0;width:100%;overflow:hidden}
-.glitch:hover::before{left:2px;text-shadow:-2px 0 var(--pink);animation:glitch1 .4s infinite linear alternate-reverse;clip-path:inset(0 0 65% 0)}
-.glitch:hover::after{left:-2px;text-shadow:2px 0 var(--cyan);animation:glitch2 .4s infinite linear alternate-reverse;clip-path:inset(35% 0 0 0)}
-@keyframes glitch1{0%{clip-path:inset(20% 0 60% 0)}25%{clip-path:inset(10% 0 70% 0)}50%{clip-path:inset(40% 0 30% 0)}75%{clip-path:inset(5% 0 75% 0)}100%{clip-path:inset(30% 0 40% 0)}}
-@keyframes glitch2{0%{clip-path:inset(60% 0 5% 0)}25%{clip-path:inset(70% 0 10% 0)}50%{clip-path:inset(50% 0 20% 0)}75%{clip-path:inset(80% 0 0 0)}100%{clip-path:inset(55% 0 15% 0)}}
-@keyframes glitchAnim{0%{transform:translate(0)}20%{transform:translate(-2px,1px)}40%{transform:translate(1px,-1px)}60%{transform:translate(-1px,2px)}80%{transform:translate(2px,-1px)}100%{transform:translate(0)}}
-
-.hero-sub{font-size:clamp(1rem,2vw,1.25rem);color:var(--muted);max-width:580px;margin:0 auto 1.5rem;font-weight:400;letter-spacing:.5px}
-.hero-badges{display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap;margin-bottom:2rem}
-.hero-badges img{height:22px;border-radius:3px;opacity:.8;transition:opacity .3s}
-.hero-badges img:hover{opacity:1}
-.hero-cta{display:inline-flex;align-items:center;gap:.7rem;padding:.9rem 2.2rem;border-radius:4px;font-family:'Orbitron',sans-serif;font-size:.85rem;font-weight:600;text-decoration:none;color:var(--bg);background:linear-gradient(135deg,var(--pink),var(--orange));border:none;cursor:pointer;text-transform:uppercase;letter-spacing:2px;transition:all .3s;box-shadow:0 0 20px rgba(255,45,149,.4),inset 0 0 20px rgba(255,255,255,.1)}
-.hero-cta:hover{transform:translateY(-2px);box-shadow:0 0 40px rgba(255,45,149,.6),inset 0 0 20px rgba(255,255,255,.15)}
-
-/* Section Titles */
-.stitle{text-align:center;margin-bottom:3.5rem}
-.stitle h2{font-family:'Orbitron',sans-serif;font-size:clamp(1.5rem,3.5vw,2.2rem);font-weight:700;text-transform:uppercase;letter-spacing:3px;margin-bottom:.5rem;-webkit-text-stroke:1px var(--pink);color:transparent;text-shadow:0 0 15px rgba(255,45,149,.3)}
-.stitle .filled{-webkit-text-stroke:0;color:var(--text);text-shadow:0 0 20px rgba(0,255,255,.3)}
-.stitle p{color:var(--muted);max-width:480px;margin:0 auto;font-size:.95rem}
-
-/* Features */
-.features{padding:6rem 0}
-.feat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:1.5rem}
-.feat-card{background:var(--card);border:1px solid rgba(255,45,149,.12);border-radius:4px;padding:2rem;transition:all .4s;position:relative}
-.feat-card::before{content:'';position:absolute;inset:-1px;border-radius:4px;background:linear-gradient(135deg,var(--pink),var(--cyan));z-index:-1;opacity:0;transition:opacity .4s}
-.feat-card:hover::before{opacity:1}
-.feat-card:hover{background:rgba(13,2,33,.95);transform:translateY(-4px);box-shadow:0 0 30px rgba(255,45,149,.15)}
-.feat-icon{font-size:1.5rem;margin-bottom:1rem;display:inline-block}
-.feat-icon.pk{color:var(--pink);text-shadow:0 0 10px rgba(255,45,149,.5)}
-.feat-icon.cy{color:var(--cyan);text-shadow:0 0 10px rgba(0,255,255,.5)}
-.feat-icon.or{color:var(--orange);text-shadow:0 0 10px rgba(255,107,43,.5)}
-.feat-card h3{font-family:'Orbitron',sans-serif;font-size:.9rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:.4rem}
-.feat-card p{color:var(--muted);font-size:.88rem;line-height:1.7}
-
-/* Commands */
-.commands{padding:6rem 0}
-.cmd-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:.7rem}
-.cmd-item{display:flex;align-items:center;gap:.7rem;padding:.7rem 1rem;background:var(--card);border:1px solid rgba(255,45,149,.08);border-radius:3px;transition:all .3s}
-.cmd-item:hover{border-color:var(--pink);box-shadow:0 0 15px rgba(255,45,149,.1)}
-.cmd-name{font-family:'Orbitron',sans-serif;color:var(--cyan);font-size:.72rem;font-weight:600;letter-spacing:.5px;white-space:nowrap;text-shadow:0 0 6px rgba(0,255,255,.3)}
-.cmd-desc{color:var(--muted);font-size:.78rem}
-.cmd-line{width:1px;height:18px;background:rgba(255,45,149,.3);flex-shrink:0}
-
-/* Setup */
-.setup{padding:6rem 0}
-.steps-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem}
-.step-card{text-align:center;padding:2rem;background:var(--card);border:1px solid rgba(255,45,149,.12);border-radius:4px;transition:all .3s}
-.step-card:hover{border-color:var(--cyan);box-shadow:0 0 25px rgba(0,255,255,.1);transform:translateY(-3px)}
-.step-num{font-family:'Orbitron',sans-serif;font-size:2rem;font-weight:900;color:var(--pink);text-shadow:0 0 20px rgba(255,45,149,.4);margin-bottom:.8rem}
-.step-card h3{font-family:'Orbitron',sans-serif;font-size:.85rem;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:.5rem}
-.step-card p{color:var(--muted);font-size:.9rem}
-.step-card code{background:rgba(0,255,255,.08);border:1px solid rgba(0,255,255,.15);padding:.1rem .5rem;border-radius:2px;font-size:.8rem;color:var(--cyan)}
-.step-card a{color:var(--pink)}
-
-/* Footer */
-footer{border-top:1px solid rgba(255,45,149,.12);padding:2rem 0;position:relative;z-index:1}
-.footer-inner{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
-.footer-links{display:flex;gap:1.5rem;flex-wrap:wrap}
-footer a{color:var(--pink);text-decoration:none;display:inline-flex;align-items:center;gap:.4rem;font-size:.9rem;transition:all .3s;text-shadow:0 0 6px rgba(255,45,149,.3)}
-footer a:hover{color:var(--cyan);text-shadow:0 0 8px rgba(0,255,255,.4)}
-.footer-copy{color:var(--muted);font-size:.82rem}
-
-/* Reveal */
-.reveal{opacity:0;transform:translateY(25px);transition:all .7s cubic-bezier(.16,1,.3,1)}
-.reveal.visible{opacity:1;transform:translateY(0)}
-
-/* Neon line separator */
-.neon-sep{height:1px;background:linear-gradient(90deg,transparent,var(--pink),var(--cyan),transparent);margin:0 auto;max-width:300px;margin-top:3rem;opacity:.4}
-
-@media(max-width:768px){
-.nav-links{display:none;position:absolute;top:100%;left:0;right:0;background:rgba(13,2,33,.97);flex-direction:column;padding:1.5rem;gap:1rem;border-bottom:1px solid rgba(255,45,149,.15)}
-.nav-links.open{display:flex}
-.nav-toggle{display:block}
-.feat-grid,.cmd-grid,.steps-row{grid-template-columns:1fr}
-.glitch{letter-spacing:1px}
+body {
+  background-color: #131313;
+  color: #e2e2e2;
+  overflow-x: hidden;
+}
+.atmospheric-glow {
+  position: fixed;
+  top: -10%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100vw;
+  height: 70vh;
+  background: radial-gradient(ellipse at center top, rgba(0, 100, 255, 0.12) 0%, rgba(19, 19, 19, 0) 65%);
+  z-index: -1;
+  pointer-events: none;
+}
+.glass-card {
+  background: rgba(53, 53, 53, 0.4);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(66, 70, 86, 0.15);
+  transition: background-color 0.4s ease, border-color 0.4s ease, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.glass-card:hover {
+  background: rgba(53, 53, 53, 0.6);
+  border-color: rgba(0, 100, 255, 0.3);
+  transform: scale(1.02);
+}
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+}
+.reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.revealed {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+}
+.staggered-item {
+  opacity: 0;
+  transform: translateX(-20px);
+  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.revealed .staggered-item {
+  opacity: 1;
+  transform: translateX(0);
+}
+#scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #0064ff, #bec2ff);
+  z-index: 100;
+  width: 0%;
+  transition: width 0.1s ease;
+}
+.parallax-hero-text {
+  transition: transform 0.1s ease-out;
+}
+.float-anim {
+  animation: float 6s ease-in-out infinite;
+}
+.float-anim-delayed {
+  animation: float 6s ease-in-out infinite 2s;
+}
+.terminal-flicker {
+  animation: flicker 2s infinite;
+}
+@keyframes flicker {
+  0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; }
+  20%, 24%, 55% { opacity: 0.8; }
+}
+.btn-hover-effect {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.btn-hover-effect::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.6s ease, height 0.6s ease;
+}
+.btn-hover-effect:hover::after {
+  width: 300%;
+  height: 300%;
+}
+.cmd-tag {
+  transition: all 0.3s ease;
+}
+.cmd-tag:hover {
+  background: rgba(0, 100, 255, 0.15);
+  border-color: rgba(0, 100, 255, 0.4);
+  color: #b3c5ff;
+}
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #131313; }
+::-webkit-scrollbar-thumb { background: #0064ff; border-radius: 3px; }
+/* Mobile menu */
+.mobile-menu {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.mobile-menu.open {
+  max-height: 400px;
 }
 </style>
 </head>
-<body>
+<body class="font-body selection:bg-primary-container selection:text-on-primary-container">
 
-<nav id="navbar">
-  <a href="./" class="nav-brand"><i class="fas fa-bolt"></i> MELODYBOT</a>
-  <ul class="nav-links" id="navLinks">
-    <li><a href="#features">Features</a></li>
-    <li><a href="#commands">Commands</a></li>
-    <li><a href="#setup">Setup</a></li>
-    <li><a href="./changelog.html">Changelog</a></li>
-    <li><a href="https://github.com/MCbabel/discord-music-bot" target="_blank">GitHub</a></li>
-  </ul>
-  <button class="nav-toggle" id="navToggle" aria-label="Menu"><i class="fas fa-bars"></i></button>
-</nav>
+<div id="scroll-progress"></div>
+<div class="atmospheric-glow"></div>
 
-<section class="hero" id="hero">
-  <div class="hero-sunset"></div>
-  <div class="hero-grid"><div class="hero-grid-inner"></div></div>
-  <div class="hero-content">
-    <div class="equalizer">
-      <div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div>
-      <div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div>
-      <div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div>
-      <div class="eq-bar"></div><div class="eq-bar"></div>
-    </div>
-    <h1 class="glitch" data-text="MelodyBot">MelodyBot</h1>
-    <p class="hero-sub">A feature-rich Discord music bot — YouTube, Spotify, lyrics, playlists & 20 slash commands. Retro vibes, modern sound.</p>
-    <div class="hero-badges">
-      <img src="https://img.shields.io/badge/discord.js-v14-5865F2?logo=discord&logoColor=white" alt="discord.js">
-      <img src="https://img.shields.io/badge/node-18%2B-brightgreen?logo=node.js" alt="Node">
-      <img src="https://img.shields.io/badge/languages-EN%20%7C%20DE%20%7C%20ES-blueviolet" alt="i18n">
-      <img src="https://img.shields.io/badge/license-MIT-blue" alt="License">
-    </div>
-    <a href="https://github.com/MCbabel/discord-music-bot" class="hero-cta" target="_blank"><i class="fab fa-github"></i> Get Started</a>
-  </div>
-</section>
-
-<section class="features" id="features">
-  <div class="container">
-    <div class="stitle reveal">
-      <h2><span class="filled">Powerful</span> Features</h2>
-      <p>Everything your server needs for the ultimate audio experience</p>
-    </div>
-    <div class="feat-grid">
-      <div class="feat-card reveal">
-        <div class="feat-icon pk"><i class="fas fa-play-circle"></i></div>
-        <h3>Music Playback</h3>
-        <p>Play any song from YouTube via URL or search query. Crystal-clear audio streaming with full queue management.</p>
-      </div>
-      <div class="feat-card reveal">
-        <div class="feat-icon cy"><i class="fab fa-spotify"></i></div>
-        <h3>Spotify Integration</h3>
-        <p>Paste a Spotify link and MelodyBot resolves it to YouTube for seamless playback. Two platforms, one bot.</p>
-      </div>
-      <div class="feat-card reveal">
-        <div class="feat-icon or"><i class="fas fa-microphone-alt"></i></div>
-        <h3>Lyrics Fetching</h3>
-        <p>Retrieve real-time lyrics for any playing track via the Genius API. Never miss a single word again.</p>
-      </div>
-      <div class="feat-card reveal">
-        <div class="feat-icon pk"><i class="fas fa-compact-disc"></i></div>
-        <h3>Custom Playlists</h3>
-        <p>Create, save, and replay your own playlists. Build the perfect collection for any mood or moment.</p>
-      </div>
-      <div class="feat-card reveal">
-        <div class="feat-icon cy"><i class="fas fa-globe"></i></div>
-        <h3>Multi-Language</h3>
-        <p>Full support for English, German, and Spanish. Everyone can use MelodyBot in their preferred language.</p>
-      </div>
-      <div class="feat-card reveal">
-        <div class="feat-icon or"><i class="fas fa-vote-yea"></i></div>
-        <h3>Vote Skip</h3>
-        <p>Democratic skip voting for shared listening. Fair and fun — no more single-person queue domination.</p>
-      </div>
-      <div class="feat-card reveal">
-        <div class="feat-icon pk"><i class="fas fa-random"></i></div>
-        <h3>Song Crossfade</h3>
-        <p>Smooth transitions between tracks with configurable crossfade duration and automatic pre-buffering. Gapless listening.</p>
+<!-- Navigation -->
+<header class="fixed top-0 w-full z-50 bg-[#131313]/80 backdrop-blur-xl border-b border-outline-variant/10">
+  <nav class="flex justify-between items-center max-w-7xl mx-auto px-6 md:px-8 py-4">
+    <div class="flex items-center gap-8">
+      <a class="text-xl font-bold tracking-tighter text-on-surface hover:text-primary transition-colors" href="./">MelodyBot</a>
+      <div class="hidden md:flex gap-6 items-center">
+        <a class="font-body tracking-tight text-sm font-semibold text-primary-container transition-colors duration-300" href="#features">Features</a>
+        <a class="font-body tracking-tight text-sm font-medium text-on-surface/60 hover:text-primary transition-colors duration-300" href="#commands">Commands</a>
+        <a class="font-body tracking-tight text-sm font-medium text-on-surface/60 hover:text-primary transition-colors duration-300" href="#setup">Setup</a>
+        <a class="font-body tracking-tight text-sm font-medium text-on-surface/60 hover:text-primary transition-colors duration-300" href="./changelog.html">Changelog</a>
+        <a class="font-body tracking-tight text-sm font-medium text-on-surface/60 hover:text-primary transition-colors duration-300" href="https://github.com/MCbabel/discord-music-bot" target="_blank">GitHub</a>
       </div>
     </div>
-    <div class="neon-sep"></div>
-  </div>
-</section>
-
-<section class="commands" id="commands">
-  <div class="container">
-    <div class="stitle reveal">
-      <h2>20 Slash <span class="filled">Commands</span></h2>
-      <p>Complete control through modern Discord slash commands</p>
-    </div>
-    <div class="cmd-grid">
-      <div class="cmd-item reveal"><span class="cmd-name">/play</span><span class="cmd-line"></span><span class="cmd-desc">Play by name, URL, or Spotify</span></div>
-      <div class="cmd-item reveal"><span class="cmd-name">/pause</span><span class="cmd-line"></span><span class="cmd-desc">Pause playback</span></div>
-      <div class="cmd-item reveal"><span class="cmd-name">/resume</span><span class="cmd-line"></span><span class="cmd-desc">Resume playback</span></div>
-      <div class="cmd-item reveal"><span class="cmd-name">/skip</span><span class="cmd-line"></span><span class="cmd-desc">Skip current track</span></div>
-      <div class="cmd-item reveal"><span class="cmd-name">/stop</span><span class="cmd-line"></span><span class="cmd-desc">Stop & clear queue</span></div>
-      <div class="cmd-item reveal"><span class="cmd-name">/queue</span><span class="cmd-line"></span><span class="cmd-desc">View the queue</span></div>
-      <div class="cmd-item reveal"><span class="cmd-name">/nowplaying</span><span class="cmd-line"></span><span class="cmd-desc">Now playing info</span></div>
-      <div class="cmd-item reveal"><span class="cmd-name">/volume</span><span class="cmd-line"></span><span class="cmd-desc">Set volume 0–100</span></div>
-      <div class="cmd-item reveal"><span class="cmd-name">/loop</span><span class="cmd-line"></span><span class="cmd-desc">Toggle loop</span></div>
-      <div class="cmd-item reveal"><span class="cmd-name">/vote_skip</span><span class="cmd-line"></span><span class="cmd-desc">Vote to skip</span></div>
-      <div class="cmd-item reveal"><span class="cmd-name">/lyrics</span><span class="cmd-line"></span><span class="cmd-desc">Fetch lyrics</span></div>
-      <div class="cmd-item reveal"><span class="cmd-name">/add_to_playlist</span><span class="cmd-line"></span><span class="cmd-desc">Add to playlist</span></div>
-      <div class="cmd-item reveal"><span class="cmd-name">/play_playlist</span><span class="cmd-line"></span><span class="cmd-desc">Play a playlist</span></div>
-      <div class="cmd-item reveal"><span class="cmd-name">/list_playlists</span><span class="cmd-line"></span><span class="cmd-desc">List playlists</span></div>
-      <div class="cmd-item reveal"><span class="cmd-name">/join</span><span class="cmd-line"></span><span class="cmd-desc">Join voice channel</span></div>
-      <div class="cmd-item reveal"><span class="cmd-name">/leave</span><span class="cmd-line"></span><span class="cmd-desc">Leave voice channel</span></div>
-      <div class="cmd-item reveal"><span class="cmd-name">/clear</span><span class="cmd-line"></span><span class="cmd-desc">Delete messages</span></div>
-      <div class="cmd-item reveal"><span class="cmd-name">/help</span><span class="cmd-line"></span><span class="cmd-desc">Show all commands</span></div>
-      <div class="cmd-item reveal"><span class="cmd-name">/language</span><span class="cmd-line"></span><span class="cmd-desc">Set language</span></div>
-      <div class="cmd-item reveal"><span class="cmd-name">/settings</span><span class="cmd-line"></span><span class="cmd-desc">Server settings</span></div>
-    </div>
-    <div class="neon-sep"></div>
-  </div>
-</section>
-
-<section class="setup" id="setup">
-  <div class="container">
-    <div class="stitle reveal">
-      <h2>Get <span class="filled">Started</span></h2>
-      <p>Three steps to bring MelodyBot to your server</p>
-    </div>
-    <div class="steps-row">
-      <div class="step-card reveal">
-        <div class="step-num">01</div>
-        <h3>Create Your Bot</h3>
-        <p>Visit the <a href="https://discord.com/developers/applications" target="_blank">Discord Developer Portal</a> and create a new application with a bot user.</p>
-      </div>
-      <div class="step-card reveal">
-        <div class="step-num">02</div>
-        <h3>Configure</h3>
-        <p>Clone the repo, run <code>npm install</code>, and set up your <code>.env</code> with Discord, Spotify & Genius API keys.</p>
-      </div>
-      <div class="step-card reveal">
-        <div class="step-num">03</div>
-        <h3>Run & Enjoy</h3>
-        <p>Launch with <code>npm start</code>, invite the bot, and blast music with <code>/play</code>!</p>
-      </div>
+    <a href="https://github.com/MCbabel/discord-music-bot" target="_blank" class="hidden md:inline-flex bg-primary-container text-on-primary-container px-5 py-2 rounded-xl text-sm font-semibold btn-hover-effect scale-95 hover:scale-100 active:scale-90 transition-all shadow-[0_0_20px_rgba(0,100,255,0.3)]">
+      Get Started
+    </a>
+    <button class="md:hidden text-on-surface active:scale-95 transition-transform" id="navToggle" aria-label="Menu">
+      <span class="material-symbols-outlined">menu</span>
+    </button>
+  </nav>
+  <!-- Mobile Menu -->
+  <div class="mobile-menu md:hidden bg-[#131313]/95 backdrop-blur-xl border-b border-outline-variant/10" id="mobileMenu">
+    <div class="flex flex-col px-6 py-4 gap-4">
+      <a class="text-sm font-medium text-on-surface/80 hover:text-primary transition-colors" href="#features">Features</a>
+      <a class="text-sm font-medium text-on-surface/80 hover:text-primary transition-colors" href="#commands">Commands</a>
+      <a class="text-sm font-medium text-on-surface/80 hover:text-primary transition-colors" href="#setup">Setup</a>
+      <a class="text-sm font-medium text-on-surface/80 hover:text-primary transition-colors" href="./changelog.html">Changelog</a>
+      <a class="text-sm font-medium text-on-surface/80 hover:text-primary transition-colors" href="https://github.com/MCbabel/discord-music-bot" target="_blank">GitHub</a>
+      <a href="https://github.com/MCbabel/discord-music-bot" target="_blank" class="bg-primary-container text-on-primary-container px-5 py-3 rounded-xl text-sm font-semibold text-center btn-hover-effect transition-all mt-2">
+        Get Started
+      </a>
     </div>
   </div>
-</section>
+</header>
 
-<footer>
-  <div class="container">
-    <div class="footer-inner">
-      <div class="footer-links">
-        <a href="https://github.com/MCbabel/discord-music-bot" target="_blank"><i class="fab fa-github"></i> GitHub Repository</a>
-        <a href="./changelog.html"><i class="fas fa-scroll"></i> Changelog</a>
+<main class="pt-32">
+
+  <!-- Hero Section -->
+  <section class="max-w-7xl mx-auto px-6 md:px-8 py-20 md:py-32 relative">
+    <div class="flex flex-col items-start max-w-4xl parallax-hero-text" id="hero-content">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-container-low border border-outline-variant/10 mb-8 reveal-on-scroll">
+        <span class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></span>
+        <span class="font-mono text-[10px] uppercase tracking-widest text-on-surface-variant">Version 2.3.0 Available</span>
       </div>
-      <span class="footer-copy">MelodyBot — MIT License — Synthwave Edition</span>
+
+      <h1 class="text-5xl md:text-7xl lg:text-8xl font-black tracking-tight leading-[0.9] text-on-surface mb-8 reveal-on-scroll" style="transition-delay: 100ms;">
+        Unleash the <br/><span class="text-transparent bg-clip-text bg-gradient-to-r from-primary-container to-secondary-container">Rhythm</span>
+      </h1>
+
+      <p class="text-lg md:text-xl lg:text-2xl text-on-surface-variant max-w-2xl leading-relaxed mb-8 reveal-on-scroll" style="transition-delay: 200ms;">
+        A feature-rich Discord music bot — YouTube, Spotify, lyrics, playlists & 20 slash commands. Open-source, self-hosted, modern sound.
+      </p>
+
+      <!-- Badges -->
+      <div class="flex gap-2 flex-wrap mb-10 reveal-on-scroll" style="transition-delay: 250ms;">
+        <img src="https://img.shields.io/badge/discord.js-v14-5865F2?logo=discord&logoColor=white" alt="discord.js" class="h-5 rounded opacity-80 hover:opacity-100 transition-opacity">
+        <img src="https://img.shields.io/badge/node-18%2B-brightgreen?logo=node.js" alt="Node" class="h-5 rounded opacity-80 hover:opacity-100 transition-opacity">
+        <img src="https://img.shields.io/badge/languages-EN%20%7C%20DE%20%7C%20ES-blueviolet" alt="i18n" class="h-5 rounded opacity-80 hover:opacity-100 transition-opacity">
+        <img src="https://img.shields.io/badge/license-GPL--2.0-blue" alt="License" class="h-5 rounded opacity-80 hover:opacity-100 transition-opacity">
+      </div>
+
+      <div class="flex flex-wrap gap-4 reveal-on-scroll" style="transition-delay: 300ms;">
+        <a href="https://github.com/MCbabel/discord-music-bot" target="_blank" class="bg-primary-container text-on-primary-container px-8 py-4 rounded-xl font-bold text-lg hover:brightness-110 btn-hover-effect transition-all flex items-center gap-2 group shadow-lg hover:shadow-primary-container/20">
+          Get Started
+          <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
+        </a>
+        <a href="./changelog.html" class="bg-surface-container-low border border-outline-variant/20 text-on-surface px-8 py-4 rounded-xl font-bold text-lg hover:bg-surface-container btn-hover-effect transition-all">
+          Changelog
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Bento Features -->
+  <section class="max-w-7xl mx-auto px-6 md:px-8 py-20" id="features">
+    <h2 class="font-mono text-[10px] uppercase tracking-[0.4em] text-primary-container mb-10 reveal-on-scroll">System.Features</h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+
+      <!-- Music Playback (large) -->
+      <div class="md:col-span-2 glass-card rounded-2xl p-8 md:p-10 flex flex-col justify-end min-h-[320px] md:min-h-[400px] relative overflow-hidden group reveal-on-scroll float-anim">
+        <div class="absolute top-0 right-0 w-full h-full opacity-20 group-hover:opacity-30 transition-opacity">
+          <div class="absolute inset-0 bg-gradient-to-br from-primary-container/40 to-transparent"></div>
+        </div>
+        <div class="relative z-10">
+          <span class="material-symbols-outlined text-4xl text-primary-container mb-6 group-hover:scale-110 transition-transform inline-block">play_circle</span>
+          <h3 class="text-2xl md:text-3xl font-bold mb-4">Music Playback</h3>
+          <p class="text-on-surface-variant text-base md:text-lg max-w-md">Play any song from YouTube via URL or search query. Crystal-clear audio streaming with full queue management and volume control.</p>
+        </div>
+      </div>
+
+      <!-- Spotify Integration -->
+      <div class="glass-card rounded-2xl p-6 md:p-8 flex flex-col justify-between reveal-on-scroll float-anim-delayed">
+        <span class="material-symbols-outlined text-3xl text-secondary mb-6 md:mb-8 block">music_note</span>
+        <div>
+          <h3 class="text-xl font-bold mb-2">Spotify Integration</h3>
+          <p class="text-on-surface-variant text-sm">Paste a Spotify link and MelodyBot resolves it to YouTube for seamless playback. Two platforms, one bot.</p>
+        </div>
+      </div>
+
+      <!-- Lyrics Fetching -->
+      <div class="glass-card rounded-2xl p-6 md:p-8 flex flex-col justify-between reveal-on-scroll float-anim">
+        <span class="material-symbols-outlined text-3xl text-primary mb-6 md:mb-8 block">mic</span>
+        <div>
+          <h3 class="text-xl font-bold mb-2">Lyrics Fetching</h3>
+          <p class="text-on-surface-variant text-sm">Retrieve real-time lyrics for any playing track via the Genius API. Never miss a single word again.</p>
+        </div>
+      </div>
+
+      <!-- Custom Playlists -->
+      <div class="glass-card rounded-2xl p-6 md:p-8 flex flex-col justify-between reveal-on-scroll float-anim-delayed">
+        <span class="material-symbols-outlined text-3xl text-secondary mb-6 md:mb-8 block">library_music</span>
+        <div>
+          <h3 class="text-xl font-bold mb-2">Custom Playlists</h3>
+          <p class="text-on-surface-variant text-sm">Create, save, and replay your own playlists. Build the perfect collection for any mood or moment.</p>
+        </div>
+      </div>
+
+      <!-- Multi-Language -->
+      <div class="glass-card rounded-2xl p-6 md:p-8 flex flex-col justify-between reveal-on-scroll float-anim">
+        <span class="material-symbols-outlined text-3xl text-primary mb-6 md:mb-8 block">translate</span>
+        <div>
+          <h3 class="text-xl font-bold mb-2">Multi-Language</h3>
+          <p class="text-on-surface-variant text-sm">Full support for English, German, and Spanish. Everyone can use MelodyBot in their preferred language.</p>
+        </div>
+      </div>
+
+      <!-- Song Crossfade (wide) -->
+      <div class="md:col-span-2 glass-card rounded-2xl p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 group reveal-on-scroll float-anim-delayed">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-xl bg-primary-container/20 flex items-center justify-center shrink-0">
+            <span class="material-symbols-outlined text-primary-container">shuffle</span>
+          </div>
+          <div>
+            <h3 class="text-xl md:text-2xl font-bold mb-1">Song Crossfade</h3>
+            <p class="text-on-surface-variant text-sm">Smooth transitions between tracks with configurable crossfade duration and automatic pre-buffering. Gapless listening.</p>
+          </div>
+        </div>
+        <div class="flex gap-2 shrink-0 flex-wrap">
+          <span class="px-3 py-1 bg-surface-container-highest rounded font-mono text-xs border border-outline-variant/10 text-on-surface-variant">0–10s</span>
+          <span class="px-3 py-1 bg-surface-container-highest rounded font-mono text-xs border border-outline-variant/10 text-on-surface-variant">pre-buffer</span>
+          <span class="px-3 py-1 bg-surface-container-highest rounded font-mono text-xs border border-outline-variant/10 text-on-surface-variant">gapless</span>
+        </div>
+      </div>
+
+      <!-- Vote Skip -->
+      <div class="glass-card rounded-2xl p-6 md:p-8 flex flex-col justify-between reveal-on-scroll float-anim">
+        <span class="material-symbols-outlined text-3xl text-primary-container mb-6 md:mb-8 block">how_to_vote</span>
+        <div>
+          <h3 class="text-xl font-bold mb-2">Vote Skip</h3>
+          <p class="text-on-surface-variant text-sm">Democratic skip voting for shared listening. Fair and fun — no more single-person queue domination.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Commands Section -->
+  <section class="max-w-7xl mx-auto px-6 md:px-8 py-20" id="commands">
+    <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-10 reveal-on-scroll">
+      <div>
+        <h2 class="font-mono text-[10px] uppercase tracking-[0.4em] text-primary-container mb-3">System.Commands</h2>
+        <h3 class="text-3xl md:text-4xl font-bold">20 Slash Commands</h3>
+        <p class="text-on-surface-variant mt-2 max-w-md">Complete control through modern Discord slash commands with auto-complete and interactive buttons.</p>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 reveal-on-scroll">
+      <div class="flex items-center gap-3 px-4 py-3 bg-surface-container-low rounded-xl border border-outline-variant/10 hover:border-primary-container/30 transition-all cmd-tag">
+        <span class="font-mono text-xs font-bold text-primary-container whitespace-nowrap">/play</span>
+        <span class="text-on-surface-variant text-xs">Play by name, URL, or Spotify</span>
+      </div>
+      <div class="flex items-center gap-3 px-4 py-3 bg-surface-container-low rounded-xl border border-outline-variant/10 hover:border-primary-container/30 transition-all cmd-tag">
+        <span class="font-mono text-xs font-bold text-primary-container whitespace-nowrap">/pause</span>
+        <span class="text-on-surface-variant text-xs">Pause playback</span>
+      </div>
+      <div class="flex items-center gap-3 px-4 py-3 bg-surface-container-low rounded-xl border border-outline-variant/10 hover:border-primary-container/30 transition-all cmd-tag">
+        <span class="font-mono text-xs font-bold text-primary-container whitespace-nowrap">/resume</span>
+        <span class="text-on-surface-variant text-xs">Resume playback</span>
+      </div>
+      <div class="flex items-center gap-3 px-4 py-3 bg-surface-container-low rounded-xl border border-outline-variant/10 hover:border-primary-container/30 transition-all cmd-tag">
+        <span class="font-mono text-xs font-bold text-primary-container whitespace-nowrap">/skip</span>
+        <span class="text-on-surface-variant text-xs">Skip current track</span>
+      </div>
+      <div class="flex items-center gap-3 px-4 py-3 bg-surface-container-low rounded-xl border border-outline-variant/10 hover:border-primary-container/30 transition-all cmd-tag">
+        <span class="font-mono text-xs font-bold text-primary-container whitespace-nowrap">/stop</span>
+        <span class="text-on-surface-variant text-xs">Stop & clear queue</span>
+      </div>
+      <div class="flex items-center gap-3 px-4 py-3 bg-surface-container-low rounded-xl border border-outline-variant/10 hover:border-primary-container/30 transition-all cmd-tag">
+        <span class="font-mono text-xs font-bold text-primary-container whitespace-nowrap">/queue</span>
+        <span class="text-on-surface-variant text-xs">View the queue</span>
+      </div>
+      <div class="flex items-center gap-3 px-4 py-3 bg-surface-container-low rounded-xl border border-outline-variant/10 hover:border-primary-container/30 transition-all cmd-tag">
+        <span class="font-mono text-xs font-bold text-primary-container whitespace-nowrap">/nowplaying</span>
+        <span class="text-on-surface-variant text-xs">Now playing info</span>
+      </div>
+      <div class="flex items-center gap-3 px-4 py-3 bg-surface-container-low rounded-xl border border-outline-variant/10 hover:border-primary-container/30 transition-all cmd-tag">
+        <span class="font-mono text-xs font-bold text-primary-container whitespace-nowrap">/volume</span>
+        <span class="text-on-surface-variant text-xs">Set volume 0–100</span>
+      </div>
+      <div class="flex items-center gap-3 px-4 py-3 bg-surface-container-low rounded-xl border border-outline-variant/10 hover:border-primary-container/30 transition-all cmd-tag">
+        <span class="font-mono text-xs font-bold text-primary-container whitespace-nowrap">/loop</span>
+        <span class="text-on-surface-variant text-xs">Toggle loop</span>
+      </div>
+      <div class="flex items-center gap-3 px-4 py-3 bg-surface-container-low rounded-xl border border-outline-variant/10 hover:border-primary-container/30 transition-all cmd-tag">
+        <span class="font-mono text-xs font-bold text-primary-container whitespace-nowrap">/vote_skip</span>
+        <span class="text-on-surface-variant text-xs">Vote to skip</span>
+      </div>
+      <div class="flex items-center gap-3 px-4 py-3 bg-surface-container-low rounded-xl border border-outline-variant/10 hover:border-primary-container/30 transition-all cmd-tag">
+        <span class="font-mono text-xs font-bold text-primary-container whitespace-nowrap">/lyrics</span>
+        <span class="text-on-surface-variant text-xs">Fetch lyrics</span>
+      </div>
+      <div class="flex items-center gap-3 px-4 py-3 bg-surface-container-low rounded-xl border border-outline-variant/10 hover:border-primary-container/30 transition-all cmd-tag">
+        <span class="font-mono text-xs font-bold text-primary-container whitespace-nowrap">/add_to_playlist</span>
+        <span class="text-on-surface-variant text-xs">Add to playlist</span>
+      </div>
+      <div class="flex items-center gap-3 px-4 py-3 bg-surface-container-low rounded-xl border border-outline-variant/10 hover:border-primary-container/30 transition-all cmd-tag">
+        <span class="font-mono text-xs font-bold text-primary-container whitespace-nowrap">/play_playlist</span>
+        <span class="text-on-surface-variant text-xs">Play a playlist</span>
+      </div>
+      <div class="flex items-center gap-3 px-4 py-3 bg-surface-container-low rounded-xl border border-outline-variant/10 hover:border-primary-container/30 transition-all cmd-tag">
+        <span class="font-mono text-xs font-bold text-primary-container whitespace-nowrap">/list_playlists</span>
+        <span class="text-on-surface-variant text-xs">List playlists</span>
+      </div>
+      <div class="flex items-center gap-3 px-4 py-3 bg-surface-container-low rounded-xl border border-outline-variant/10 hover:border-primary-container/30 transition-all cmd-tag">
+        <span class="font-mono text-xs font-bold text-primary-container whitespace-nowrap">/join</span>
+        <span class="text-on-surface-variant text-xs">Join voice channel</span>
+      </div>
+      <div class="flex items-center gap-3 px-4 py-3 bg-surface-container-low rounded-xl border border-outline-variant/10 hover:border-primary-container/30 transition-all cmd-tag">
+        <span class="font-mono text-xs font-bold text-primary-container whitespace-nowrap">/leave</span>
+        <span class="text-on-surface-variant text-xs">Leave voice channel</span>
+      </div>
+      <div class="flex items-center gap-3 px-4 py-3 bg-surface-container-low rounded-xl border border-outline-variant/10 hover:border-primary-container/30 transition-all cmd-tag">
+        <span class="font-mono text-xs font-bold text-primary-container whitespace-nowrap">/clear</span>
+        <span class="text-on-surface-variant text-xs">Delete messages</span>
+      </div>
+      <div class="flex items-center gap-3 px-4 py-3 bg-surface-container-low rounded-xl border border-outline-variant/10 hover:border-primary-container/30 transition-all cmd-tag">
+        <span class="font-mono text-xs font-bold text-primary-container whitespace-nowrap">/help</span>
+        <span class="text-on-surface-variant text-xs">Show all commands</span>
+      </div>
+      <div class="flex items-center gap-3 px-4 py-3 bg-surface-container-low rounded-xl border border-outline-variant/10 hover:border-primary-container/30 transition-all cmd-tag">
+        <span class="font-mono text-xs font-bold text-primary-container whitespace-nowrap">/language</span>
+        <span class="text-on-surface-variant text-xs">Set language</span>
+      </div>
+      <div class="flex items-center gap-3 px-4 py-3 bg-surface-container-low rounded-xl border border-outline-variant/10 hover:border-primary-container/30 transition-all cmd-tag">
+        <span class="font-mono text-xs font-bold text-primary-container whitespace-nowrap">/settings</span>
+        <span class="text-on-surface-variant text-xs">Server settings</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Terminal Showcase -->
+  <section class="max-w-7xl mx-auto px-6 md:px-8 py-20 reveal-on-scroll">
+    <div class="flex flex-col md:flex-row gap-12 md:gap-16 items-center">
+      <div class="w-full md:w-1/2">
+        <h2 class="text-3xl md:text-4xl font-bold mb-6">Designed for Control</h2>
+        <p class="text-on-surface-variant text-lg mb-8">MelodyBot doesn't just play music; it gives you a professional-grade mixing desk inside Discord. Manage your queue with surgical precision.</p>
+        <ul class="space-y-4 staggered-list">
+          <li class="flex items-center gap-4 text-on-surface staggered-item" style="transition-delay: 100ms;">
+            <span class="material-symbols-outlined text-primary-container">check_circle</span>
+            <span>9 supported streaming services</span>
+          </li>
+          <li class="flex items-center gap-4 text-on-surface staggered-item" style="transition-delay: 200ms;">
+            <span class="material-symbols-outlined text-primary-container">check_circle</span>
+            <span>Gapless crossfade with pre-buffering</span>
+          </li>
+          <li class="flex items-center gap-4 text-on-surface staggered-item" style="transition-delay: 300ms;">
+            <span class="material-symbols-outlined text-primary-container">check_circle</span>
+            <span>Per-server settings & DJ role system</span>
+          </li>
+          <li class="flex items-center gap-4 text-on-surface staggered-item" style="transition-delay: 400ms;">
+            <span class="material-symbols-outlined text-primary-container">check_circle</span>
+            <span>Multi-platform sourcing (Spotify, SoundCloud, etc.)</span>
+          </li>
+        </ul>
+      </div>
+      <div class="w-full md:w-1/2">
+        <div class="bg-surface-container-lowest border border-outline-variant/15 rounded-2xl overflow-hidden shadow-2xl animate-pulse-glow group">
+          <div class="bg-surface-container-low px-4 py-2.5 flex items-center gap-2 border-b border-outline-variant/10">
+            <div class="w-2 h-2 rounded-full bg-error/40 group-hover:bg-error/80 transition-colors"></div>
+            <div class="w-2 h-2 rounded-full bg-secondary/40 group-hover:bg-secondary/80 transition-colors"></div>
+            <div class="w-2 h-2 rounded-full bg-primary/40 group-hover:bg-primary/80 transition-colors"></div>
+            <span class="ml-4 font-mono text-[10px] uppercase tracking-widest text-on-surface-variant">terminal — melodybot</span>
+          </div>
+          <div class="p-5 md:p-6 font-mono text-sm space-y-3">
+            <div class="flex gap-3 overflow-hidden">
+              <span class="text-primary-container whitespace-nowrap">/play</span>
+              <span class="text-on-surface-variant terminal-flicker">query: "Daft Punk - One More Time"</span>
+            </div>
+            <div class="pl-4 border-l border-outline-variant/20 text-on-surface-variant/60 italic text-xs animate-pulse">
+              Searching sources... Found on Spotify.
+            </div>
+            <div class="flex items-center gap-3 bg-primary-container/10 p-3 rounded-lg border border-primary-container/20 group-hover:bg-primary-container/20 transition-colors">
+              <span class="material-symbols-outlined text-primary-container animate-bounce">music_note</span>
+              <span class="text-primary-container font-bold text-xs md:text-sm">Now Playing: Daft Punk - One More Time</span>
+            </div>
+            <div class="flex gap-3 text-on-surface-variant/40">
+              <span>/queue</span>
+              <span class="ml-auto text-xs">showing next 3 tracks</span>
+            </div>
+            <div class="space-y-1 pl-4 opacity-80">
+              <div class="text-xs text-on-surface-variant/80 hover:text-on-surface transition-colors cursor-default">1. Stardust - Music Sounds Better With You</div>
+              <div class="text-xs text-on-surface-variant/80 hover:text-on-surface transition-colors cursor-default">2. Modjo - Lady (Hear Me Tonight)</div>
+              <div class="text-xs text-on-surface-variant/80 hover:text-on-surface transition-colors cursor-default">3. Bob Sinclar - Love Generation</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Setup Section -->
+  <section class="max-w-7xl mx-auto px-6 md:px-8 py-20" id="setup">
+    <div class="mb-12 reveal-on-scroll">
+      <h2 class="font-mono text-[10px] uppercase tracking-[0.4em] text-primary-container mb-3">System.Setup</h2>
+      <h3 class="text-3xl md:text-4xl font-bold">Get Started in 3 Steps</h3>
+      <p class="text-on-surface-variant mt-2 max-w-md">Three steps to bring MelodyBot to your server.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <!-- Step 1 -->
+      <div class="bg-surface-container-low rounded-2xl p-8 border border-outline-variant/10 hover:border-primary-container/20 transition-all group reveal-on-scroll">
+        <div class="text-5xl font-black text-primary-container/20 group-hover:text-primary-container/40 transition-colors mb-6 font-mono">01</div>
+        <h4 class="text-xl font-bold mb-3">Create Your Bot</h4>
+        <p class="text-on-surface-variant text-sm leading-relaxed">
+          Visit the <a href="https://discord.com/developers/applications" target="_blank" class="text-primary-container hover:text-primary transition-colors underline underline-offset-2">Discord Developer Portal</a> and create a new application with a bot user.
+        </p>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="bg-surface-container-low rounded-2xl p-8 border border-outline-variant/10 hover:border-primary-container/20 transition-all group reveal-on-scroll" style="transition-delay: 100ms;">
+        <div class="text-5xl font-black text-primary-container/20 group-hover:text-primary-container/40 transition-colors mb-6 font-mono">02</div>
+        <h4 class="text-xl font-bold mb-3">Configure</h4>
+        <p class="text-on-surface-variant text-sm leading-relaxed">
+          Clone the repo, run <span class="font-mono text-xs bg-surface-container-highest px-2 py-0.5 rounded border border-outline-variant/10 text-primary">npm install</span>, and set up your <span class="font-mono text-xs bg-surface-container-highest px-2 py-0.5 rounded border border-outline-variant/10 text-primary">.env</span> with Discord, Spotify & Genius API keys.
+        </p>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="bg-surface-container-low rounded-2xl p-8 border border-outline-variant/10 hover:border-primary-container/20 transition-all group reveal-on-scroll" style="transition-delay: 200ms;">
+        <div class="text-5xl font-black text-primary-container/20 group-hover:text-primary-container/40 transition-colors mb-6 font-mono">03</div>
+        <h4 class="text-xl font-bold mb-3">Run & Enjoy</h4>
+        <p class="text-on-surface-variant text-sm leading-relaxed">
+          Launch with <span class="font-mono text-xs bg-surface-container-highest px-2 py-0.5 rounded border border-outline-variant/10 text-primary">npm start</span>, invite the bot, and blast music with <span class="font-mono text-xs bg-surface-container-highest px-2 py-0.5 rounded border border-outline-variant/10 text-primary">/play</span>!
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="max-w-7xl mx-auto px-6 md:px-8 py-24 md:py-32 reveal-on-scroll">
+    <div class="relative rounded-2xl bg-surface-container-low p-10 md:p-16 lg:p-24 overflow-hidden text-center border border-outline-variant/10 shadow-2xl">
+      <div class="absolute -bottom-24 -left-24 w-96 h-96 bg-primary-container/10 rounded-full blur-[100px] animate-pulse"></div>
+      <div class="absolute -top-24 -right-24 w-96 h-96 bg-secondary-container/10 rounded-full blur-[100px] animate-pulse" style="animation-delay: 2s;"></div>
+
+      <h2 class="text-3xl md:text-4xl lg:text-6xl font-black mb-8 relative z-10 tracking-tight">Ready to Amplify your <br/>Discord Experience?</h2>
+
+      <div class="flex flex-col md:flex-row justify-center gap-4 relative z-10">
+        <a href="https://github.com/MCbabel/discord-music-bot" target="_blank" class="bg-primary-container text-on-primary-container px-8 md:px-10 py-4 md:py-5 rounded-xl font-bold text-lg md:text-xl hover:scale-105 active:scale-95 transition-all shadow-xl shadow-primary-container/20 btn-hover-effect inline-flex items-center justify-center gap-2">
+          <span class="material-symbols-outlined">rocket_launch</span>
+          Get Started
+        </a>
+        <a href="./changelog.html" class="inline-flex items-center justify-center px-8 md:px-10 py-4 md:py-5 rounded-xl font-bold text-lg md:text-xl border border-outline-variant/30 hover:bg-surface-container transition-all btn-hover-effect">
+          View Changelog
+        </a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- Footer -->
+<footer class="w-full border-t border-outline-variant/15 bg-surface mt-10 py-12 reveal-on-scroll">
+  <div class="flex flex-col md:flex-row justify-between items-center max-w-7xl mx-auto px-6 md:px-8 gap-8">
+    <div class="flex flex-col items-center md:items-start gap-4">
+      <span class="text-lg font-black text-on-surface">MelodyBot</span>
+      <p class="font-mono text-[12px] uppercase tracking-widest text-on-surface/40">GPL-2.0 License — Open Source</p>
+    </div>
+    <div class="flex flex-wrap justify-center gap-6 md:gap-8">
+      <a class="font-mono text-[12px] uppercase tracking-widest text-on-surface/40 hover:text-primary transition-colors" href="https://github.com/MCbabel/discord-music-bot" target="_blank">GitHub Repository</a>
+      <a class="font-mono text-[12px] uppercase tracking-widest text-on-surface/40 hover:text-primary transition-colors" href="./changelog.html">Changelog</a>
     </div>
   </div>
 </footer>
 
 <script>
-// Scroll reveal
-const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target)}})},{threshold:.1,rootMargin:'0px 0px -30px 0px'});
-document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+document.addEventListener('DOMContentLoaded', () => {
+  // Scroll Progress
+  const progressBar = document.getElementById('scroll-progress');
+  window.addEventListener('scroll', () => {
+    const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+    const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    const scrolled = (winScroll / height) * 100;
+    progressBar.style.width = scrolled + '%';
+  });
 
-// Nav scroll
-window.addEventListener('scroll',()=>{document.getElementById('navbar').classList.toggle('scrolled',window.scrollY>50)});
+  // Parallax
+  const heroContent = document.getElementById('hero-content');
+  window.addEventListener('scroll', () => {
+    const scrollPos = window.pageYOffset;
+    if (heroContent) heroContent.style.transform = 'translateY(' + (scrollPos * 0.15) + 'px)';
+  });
 
-// Mobile nav
-document.getElementById('navToggle').addEventListener('click',()=>{document.getElementById('navLinks').classList.toggle('open')});
-document.querySelectorAll('.nav-links a').forEach(a=>a.addEventListener('click',()=>{document.getElementById('navLinks').classList.remove('open')}));
+  // Reveal on Scroll
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('revealed');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
+  document.querySelectorAll('.reveal-on-scroll').forEach(el => observer.observe(el));
+
+  // Mobile Nav
+  const navToggle = document.getElementById('navToggle');
+  const mobileMenu = document.getElementById('mobileMenu');
+  navToggle.addEventListener('click', () => mobileMenu.classList.toggle('open'));
+  mobileMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => mobileMenu.classList.remove('open')));
+});
 </script>
+
 </body>
 </html>

@@ -1,395 +1,549 @@
 <!DOCTYPE html>
-<html lang="en">
+<html class="dark" lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Changelog — MelodyBot</title>
-<link rel="canonical" href="https://mcbabel.github.io/discord-music-bot/changelog.html">
+<link rel="canonical" href="https://melody-bot.mcbabel.de/changelog.html">
 <meta name="description" content="MelodyBot changelog — version history, new features, bug fixes, and breaking changes.">
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      colors: {
+        "surface": "#131313",
+        "surface-container-lowest": "#0e0e0e",
+        "surface-container-low": "#1b1b1b",
+        "surface-container": "#1f1f1f",
+        "surface-container-high": "#2a2a2a",
+        "surface-container-highest": "#353535",
+        "surface-variant": "#353535",
+        "surface-bright": "#393939",
+        "on-surface": "#e2e2e2",
+        "on-surface-variant": "#c2c6d8",
+        "on-background": "#e2e2e2",
+        "background": "#131313",
+        "primary": "#b3c5ff",
+        "primary-container": "#0064ff",
+        "on-primary": "#002a76",
+        "on-primary-container": "#f5f5ff",
+        "secondary": "#bec2ff",
+        "secondary-container": "#2532c4",
+        "on-secondary-container": "#acb3ff",
+        "tertiary": "#c3c7cb",
+        "tertiary-container": "#6d7175",
+        "outline": "#8c90a2",
+        "outline-variant": "#424656",
+        "error": "#ffb4ab",
+        "error-container": "#93000a",
+        "inverse-surface": "#e2e2e2",
+        "inverse-on-surface": "#303030",
+      },
+      fontFamily: {
+        "headline": ["Inter"],
+        "body": ["Inter"],
+        "label": ["Inter"],
+        "mono": ["JetBrains Mono"]
+      },
+      borderRadius: {
+        "DEFAULT": "0.125rem",
+        "lg": "0.25rem",
+        "xl": "0.5rem",
+        "2xl": "0.75rem",
+        "3xl": "1rem"
+      },
+    },
+  },
+}
+</script>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#0d0221;--surface:#130330;--card:rgba(13,2,33,.85);--pink:#ff2d95;--cyan:#0ff;--orange:#ff6b2b;--yellow:#ffd319;--purple:#b24bf3;--text:#e8dff5;--muted:#8b7fa8}
-html{scroll-behavior:smooth}
-body{font-family:'Rajdhani',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;line-height:1.6;font-weight:400}
-
-/* Scanline overlay */
-body::after{content:'';position:fixed;top:0;left:0;width:100%;height:100%;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.03) 2px,rgba(0,0,0,.03) 4px);pointer-events:none;z-index:9999}
-
-::-webkit-scrollbar{width:6px}
-::-webkit-scrollbar-track{background:var(--bg)}
-::-webkit-scrollbar-thumb{background:var(--pink);border-radius:3px}
-
-/* Nav */
-nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(16px);background:rgba(13,2,33,.7);border-bottom:1px solid rgba(255,45,149,.15);transition:all .3s}
-nav.scrolled{padding:.6rem 2rem;background:rgba(13,2,33,.95)}
-.nav-brand{display:flex;align-items:center;gap:.6rem;font-family:'Orbitron',sans-serif;font-weight:700;font-size:1.15rem;color:var(--pink);text-decoration:none;text-shadow:0 0 10px rgba(255,45,149,.5)}
-.nav-brand i{color:var(--cyan);text-shadow:0 0 10px rgba(0,255,255,.5)}
-.nav-links{display:flex;gap:2rem;list-style:none}
-.nav-links a{color:var(--muted);text-decoration:none;font-size:.9rem;font-weight:500;transition:all .3s;letter-spacing:.5px}
-.nav-links a:hover,.nav-links a.active{color:var(--cyan);text-shadow:0 0 8px rgba(0,255,255,.4)}
-.nav-toggle{display:none;background:none;border:none;color:var(--text);font-size:1.3rem;cursor:pointer}
-
-.container{max-width:1160px;margin:0 auto;padding:0 2rem}
-
-/* Hero header (shorter) */
-.page-hero{padding:8rem 2rem 4rem;position:relative;overflow:hidden;text-align:center}
-.hero-sunset{position:absolute;bottom:0;left:0;right:0;height:50%;background:linear-gradient(to top,rgba(255,211,25,.08) 0%,rgba(255,107,43,.1) 25%,rgba(255,45,149,.08) 50%,transparent 100%);pointer-events:none}
-.hero-grid{position:absolute;bottom:0;left:0;right:0;height:60%;perspective:400px;overflow:hidden}
-.hero-grid-inner{position:absolute;bottom:0;left:-50%;right:-50%;height:200%;transform:rotateX(60deg);transform-origin:bottom;background-image:linear-gradient(var(--pink) 1px,transparent 1px),linear-gradient(90deg,var(--pink) 1px,transparent 1px);background-size:60px 60px;opacity:.12;animation:gridScroll 3s linear infinite}
-@keyframes gridScroll{0%{transform:rotateX(60deg) translateY(0)}100%{transform:rotateX(60deg) translateY(60px)}}
-
-.page-hero-content{position:relative;z-index:2}
-.page-title{font-family:'Orbitron',sans-serif;font-size:clamp(2rem,5vw,3.5rem);font-weight:900;text-transform:uppercase;letter-spacing:4px;color:var(--text);text-shadow:0 0 15px rgba(255,45,149,.6),0 0 30px rgba(255,45,149,.3),0 0 60px rgba(0,255,255,.15);margin-bottom:.6rem}
-.page-subtitle{font-size:clamp(.95rem,1.8vw,1.15rem);color:var(--muted);max-width:500px;margin:0 auto;letter-spacing:.5px}
-
+body {
+  background-color: #131313;
+  color: #e2e2e2;
+  overflow-x: hidden;
+}
+.atmospheric-glow {
+  position: fixed;
+  top: -10%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100vw;
+  height: 70vh;
+  background: radial-gradient(ellipse at center top, rgba(0, 100, 255, 0.10) 0%, rgba(19, 19, 19, 0) 65%);
+  z-index: -1;
+  pointer-events: none;
+}
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+}
+.reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.revealed {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+}
+#scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #0064ff, #bec2ff);
+  z-index: 100;
+  width: 0%;
+  transition: width 0.1s ease;
+}
 /* Timeline */
-.changelog-section{padding:4rem 0 6rem;position:relative;z-index:1}
-
-.timeline{position:relative;max-width:900px;margin:0 auto}
-.timeline::before{content:'';position:absolute;left:24px;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,var(--pink),var(--cyan),var(--purple),transparent);opacity:.3}
-
-/* Version block */
-.version-block{position:relative;padding-left:64px;margin-bottom:3rem}
-.version-block:last-child{margin-bottom:0}
-
-/* Timeline dot */
-.version-block::before{content:'';position:absolute;left:17px;top:1.6rem;width:16px;height:16px;border-radius:50%;border:2px solid var(--pink);background:var(--bg);box-shadow:0 0 12px rgba(255,45,149,.5);z-index:2}
-.version-block.major::before{border-color:var(--cyan);box-shadow:0 0 16px rgba(0,255,255,.6);width:18px;height:18px;left:16px}
-
-/* Version heading */
-.version-header{margin-bottom:1.2rem}
-.version-tag{font-family:'Orbitron',sans-serif;font-size:clamp(1.2rem,2.5vw,1.6rem);font-weight:700;color:var(--text);text-shadow:0 0 10px rgba(0,255,255,.4);display:inline-block}
-.version-tag .v-num{color:var(--cyan)}
-.version-date{font-size:.85rem;color:var(--muted);margin-left:.5rem;letter-spacing:.5px}
-.version-subtitle{font-family:'Orbitron',sans-serif;font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:2px;color:var(--orange);text-shadow:0 0 8px rgba(255,107,43,.4);margin-top:.2rem}
-
-/* Change card */
-.change-card{background:var(--card);border:1px solid rgba(255,45,149,.1);border-radius:4px;padding:1.5rem 1.8rem;margin-bottom:.8rem;transition:all .3s}
-.change-card:hover{border-color:rgba(255,45,149,.25);box-shadow:0 0 20px rgba(255,45,149,.08)}
-
-.change-category{font-family:'Orbitron',sans-serif;font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:.8rem;display:flex;align-items:center;gap:.5rem}
-.change-category .cat-icon{font-size:.9rem}
-.cat-breaking{color:var(--pink);text-shadow:0 0 6px rgba(255,45,149,.4)}
-.cat-features{color:var(--cyan);text-shadow:0 0 6px rgba(0,255,255,.4)}
-.cat-fixes{color:var(--orange);text-shadow:0 0 6px rgba(255,107,43,.4)}
-.cat-docs{color:var(--purple);text-shadow:0 0 6px rgba(178,75,243,.4)}
-
-.change-list{list-style:none;padding:0}
-.change-list li{position:relative;padding-left:1.2rem;margin-bottom:.4rem;color:var(--muted);font-size:.9rem;line-height:1.7}
-.change-list li::before{content:'›';position:absolute;left:0;color:var(--pink);font-weight:700;font-size:1.1rem}
-.change-list li code{background:rgba(0,255,255,.08);border:1px solid rgba(0,255,255,.12);padding:.05rem .4rem;border-radius:2px;font-size:.8rem;color:var(--cyan)}
-
-/* Divider between major versions */
-.version-divider{height:1px;background:linear-gradient(90deg,transparent,var(--pink),var(--cyan),transparent);margin:2rem 0 2rem 64px;opacity:.2}
-
-/* Footer */
-footer{border-top:1px solid rgba(255,45,149,.12);padding:2rem 0;position:relative;z-index:1}
-.footer-inner{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
-.footer-links{display:flex;gap:1.5rem;flex-wrap:wrap}
-footer a{color:var(--pink);text-decoration:none;display:inline-flex;align-items:center;gap:.4rem;font-size:.9rem;transition:all .3s;text-shadow:0 0 6px rgba(255,45,149,.3)}
-footer a:hover{color:var(--cyan);text-shadow:0 0 8px rgba(0,255,255,.4)}
-.footer-copy{color:var(--muted);font-size:.82rem}
-
-/* Reveal */
-.reveal{opacity:0;transform:translateY(25px);transition:all .7s cubic-bezier(.16,1,.3,1)}
-.reveal.visible{opacity:1;transform:translateY(0)}
-
-@media(max-width:768px){
-.nav-links{display:none;position:absolute;top:100%;left:0;right:0;background:rgba(13,2,33,.97);flex-direction:column;padding:1.5rem;gap:1rem;border-bottom:1px solid rgba(255,45,149,.15)}
-.nav-links.open{display:flex}
-.nav-toggle{display:block}
-.timeline::before{left:16px}
-.version-block{padding-left:48px}
-.version-block::before{left:9px;width:14px;height:14px}
-.version-block.major::before{left:8px;width:16px;height:16px}
-.version-divider{margin-left:48px}
-.change-card{padding:1.2rem}
+.timeline-line {
+  position: absolute;
+  left: 22px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(to bottom, #0064ff, #2532c4, transparent);
+  opacity: 0.3;
+}
+.timeline-dot {
+  position: absolute;
+  left: 14px;
+  top: 1.6rem;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid #0064ff;
+  background: #131313;
+  box-shadow: 0 0 12px rgba(0, 100, 255, 0.5);
+  z-index: 2;
+}
+.timeline-dot.major {
+  width: 20px;
+  height: 20px;
+  left: 13px;
+  box-shadow: 0 0 16px rgba(0, 100, 255, 0.7);
+  background: #0064ff;
+}
+/* Category colors */
+.cat-breaking { color: #ffb4ab; }
+.cat-features { color: #0064ff; }
+.cat-fixes { color: #bec2ff; }
+.cat-docs { color: #c3c7cb; }
+.cat-initial { color: #0064ff; }
+/* Change list */
+.change-list::before {
+  content: '›';
+  position: absolute;
+  left: 0;
+  color: #0064ff;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #131313; }
+::-webkit-scrollbar-thumb { background: #0064ff; border-radius: 3px; }
+/* Mobile menu */
+.mobile-menu {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.mobile-menu.open {
+  max-height: 400px;
 }
 </style>
 </head>
-<body>
+<body class="font-body selection:bg-primary-container selection:text-on-primary-container">
 
-<nav id="navbar">
-  <a href="./" class="nav-brand"><i class="fas fa-bolt"></i> MELODYBOT</a>
-  <ul class="nav-links" id="navLinks">
-    <li><a href="./">Home</a></li>
-    <li><a href="./changelog.html" class="active">Changelog</a></li>
-    <li><a href="https://github.com/MCbabel/discord-music-bot" target="_blank">GitHub</a></li>
-  </ul>
-  <button class="nav-toggle" id="navToggle" aria-label="Menu"><i class="fas fa-bars"></i></button>
-</nav>
+<div id="scroll-progress"></div>
+<div class="atmospheric-glow"></div>
 
-<section class="page-hero">
-  <div class="hero-sunset"></div>
-  <div class="hero-grid"><div class="hero-grid-inner"></div></div>
-  <div class="page-hero-content">
-    <h1 class="page-title">Changelog</h1>
-    <p class="page-subtitle">Every update, feature, and fix — tracked through the synthwave timeline</p>
+<!-- Navigation -->
+<header class="fixed top-0 w-full z-50 bg-[#131313]/80 backdrop-blur-xl border-b border-outline-variant/10">
+  <nav class="flex justify-between items-center max-w-7xl mx-auto px-6 md:px-8 py-4">
+    <div class="flex items-center gap-8">
+      <a class="text-xl font-bold tracking-tighter text-on-surface hover:text-primary transition-colors" href="./">MelodyBot</a>
+      <div class="hidden md:flex gap-6 items-center">
+        <a class="font-body tracking-tight text-sm font-medium text-on-surface/60 hover:text-primary transition-colors duration-300" href="./#features">Features</a>
+        <a class="font-body tracking-tight text-sm font-medium text-on-surface/60 hover:text-primary transition-colors duration-300" href="./#commands">Commands</a>
+        <a class="font-body tracking-tight text-sm font-medium text-on-surface/60 hover:text-primary transition-colors duration-300" href="./#setup">Setup</a>
+        <a class="font-body tracking-tight text-sm font-semibold text-primary-container transition-colors duration-300" href="./changelog.html">Changelog</a>
+        <a class="font-body tracking-tight text-sm font-medium text-on-surface/60 hover:text-primary transition-colors duration-300" href="https://github.com/MCbabel/discord-music-bot" target="_blank">GitHub</a>
+      </div>
+    </div>
+    <a href="https://github.com/MCbabel/discord-music-bot" target="_blank" class="hidden md:inline-flex bg-primary-container text-on-primary-container px-5 py-2 rounded-xl text-sm font-semibold hover:scale-105 active:scale-95 transition-all shadow-[0_0_20px_rgba(0,100,255,0.3)]">
+      Get Started
+    </a>
+    <button class="md:hidden text-on-surface active:scale-95 transition-transform" id="navToggle" aria-label="Menu">
+      <span class="material-symbols-outlined">menu</span>
+    </button>
+  </nav>
+  <div class="mobile-menu md:hidden bg-[#131313]/95 backdrop-blur-xl border-b border-outline-variant/10" id="mobileMenu">
+    <div class="flex flex-col px-6 py-4 gap-4">
+      <a class="text-sm font-medium text-on-surface/80 hover:text-primary transition-colors" href="./#features">Features</a>
+      <a class="text-sm font-medium text-on-surface/80 hover:text-primary transition-colors" href="./#commands">Commands</a>
+      <a class="text-sm font-medium text-on-surface/80 hover:text-primary transition-colors" href="./#setup">Setup</a>
+      <a class="text-sm font-medium text-primary-container" href="./changelog.html">Changelog</a>
+      <a class="text-sm font-medium text-on-surface/80 hover:text-primary transition-colors" href="https://github.com/MCbabel/discord-music-bot" target="_blank">GitHub</a>
+    </div>
   </div>
-</section>
+</header>
 
-<section class="changelog-section">
-  <div class="container">
-    <div class="timeline">
+<main class="pt-32">
+
+  <!-- Page Hero -->
+  <section class="max-w-7xl mx-auto px-6 md:px-8 py-16 md:py-24 relative">
+    <div class="max-w-3xl">
+      <h2 class="font-mono text-[10px] uppercase tracking-[0.4em] text-primary-container mb-4 reveal-on-scroll">System.Changelog</h2>
+      <h1 class="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight text-on-surface mb-4 reveal-on-scroll" style="transition-delay: 100ms;">
+        Changelog
+      </h1>
+      <p class="text-lg md:text-xl text-on-surface-variant max-w-lg reveal-on-scroll" style="transition-delay: 200ms;">
+        Every update, feature, and fix — tracked through the version timeline.
+      </p>
+    </div>
+  </section>
+
+  <!-- Timeline -->
+  <section class="max-w-4xl mx-auto px-6 md:px-8 pb-24">
+    <div class="relative">
+      <div class="timeline-line"></div>
 
       <!-- v2.3.0 -->
-      <div class="version-block major reveal">
-        <div class="version-header">
-          <div class="version-tag"><span class="v-num">v2.3.0</span> <span class="version-date">— 2026-03-03</span></div>
-          <div class="version-subtitle">Song Crossfade</div>
+      <div class="relative pl-14 md:pl-16 mb-12 reveal-on-scroll">
+        <div class="timeline-dot major"></div>
+        <div class="mb-4">
+          <span class="font-mono text-lg md:text-xl font-bold text-primary-container">v2.3.0</span>
+          <span class="font-mono text-xs text-on-surface-variant/60 ml-2">— 2026-03-03</span>
+          <div class="font-mono text-[10px] uppercase tracking-[0.2em] text-secondary mt-1">Song Crossfade</div>
         </div>
 
-        <div class="change-card">
-          <div class="change-category cat-features"><span class="cat-icon">✨</span> New Features</div>
-          <ul class="change-list">
-            <li>Song crossfade with pre-buffering for gapless transitions</li>
-            <li>Configurable crossfade duration (0–10 seconds) via <code>/settings audio</code></li>
-            <li>Automatic pre-buffering of next track 8 seconds before crossfade</li>
-            <li>Smooth volume fade-out/fade-in using 50ms interval steps</li>
-            <li>Works with loop mode (pre-buffers same track)</li>
+        <div class="bg-surface-container-low rounded-2xl p-5 md:p-6 border border-outline-variant/10 mb-3 hover:border-primary-container/20 transition-all">
+          <div class="font-mono text-[11px] font-bold uppercase tracking-wider cat-features mb-3 flex items-center gap-2">
+            <span>✨</span> New Features
+          </div>
+          <ul class="space-y-1.5 text-on-surface-variant text-sm list-none">
+            <li class="relative pl-4 change-list">Song crossfade with pre-buffering for gapless transitions</li>
+            <li class="relative pl-4 change-list">Configurable crossfade duration (0–10 seconds) via <span class="font-mono text-xs bg-surface-container-highest px-1.5 py-0.5 rounded border border-outline-variant/10 text-primary">/settings audio</span></li>
+            <li class="relative pl-4 change-list">Automatic pre-buffering of next track 8 seconds before crossfade</li>
+            <li class="relative pl-4 change-list">Smooth volume fade-out/fade-in using 50ms interval steps</li>
+            <li class="relative pl-4 change-list">Works with loop mode (pre-buffers same track)</li>
           </ul>
         </div>
 
-        <div class="change-card">
-          <div class="change-category cat-fixes"><span class="cat-icon">🔧</span> Improvements</div>
-          <ul class="change-list">
-            <li>Tracks with unknown duration skip crossfade automatically</li>
-            <li>Skip/stop cleanly cancel ongoing crossfades</li>
-            <li>Pre-buffered subprocess properly cleaned up on destroy</li>
-            <li>Fixed inactivity message showing actual timeout setting</li>
+        <div class="bg-surface-container-low rounded-2xl p-5 md:p-6 border border-outline-variant/10 mb-3 hover:border-primary-container/20 transition-all">
+          <div class="font-mono text-[11px] font-bold uppercase tracking-wider cat-fixes mb-3 flex items-center gap-2">
+            <span>🔧</span> Improvements
+          </div>
+          <ul class="space-y-1.5 text-on-surface-variant text-sm list-none">
+            <li class="relative pl-4 change-list">Tracks with unknown duration skip crossfade automatically</li>
+            <li class="relative pl-4 change-list">Skip/stop cleanly cancel ongoing crossfades</li>
+            <li class="relative pl-4 change-list">Pre-buffered subprocess properly cleaned up on destroy</li>
+            <li class="relative pl-4 change-list">Fixed inactivity message showing actual timeout setting</li>
           </ul>
         </div>
 
-        <div class="change-card">
-          <div class="change-category cat-docs"><span class="cat-icon">📚</span> Documentation</div>
-          <ul class="change-list">
-            <li>New crossfade i18n keys in EN, DE, ES</li>
+        <div class="bg-surface-container-low rounded-2xl p-5 md:p-6 border border-outline-variant/10 hover:border-primary-container/20 transition-all">
+          <div class="font-mono text-[11px] font-bold uppercase tracking-wider cat-docs mb-3 flex items-center gap-2">
+            <span>📚</span> Documentation
+          </div>
+          <ul class="space-y-1.5 text-on-surface-variant text-sm list-none">
+            <li class="relative pl-4 change-list">New crossfade i18n keys in EN, DE, ES</li>
           </ul>
         </div>
       </div>
 
-      <div class="version-divider"></div>
+      <!-- Divider -->
+      <div class="ml-14 md:ml-16 h-px bg-gradient-to-r from-primary-container/20 via-secondary-container/20 to-transparent mb-12"></div>
 
       <!-- v2.2.0 -->
-      <div class="version-block major reveal">
-        <div class="version-header">
-          <div class="version-tag"><span class="v-num">v2.2.0</span> <span class="version-date">— 2026-03-01</span></div>
-          <div class="version-subtitle">Customizable Bot Settings</div>
+      <div class="relative pl-14 md:pl-16 mb-12 reveal-on-scroll">
+        <div class="timeline-dot major"></div>
+        <div class="mb-4">
+          <span class="font-mono text-lg md:text-xl font-bold text-primary-container">v2.2.0</span>
+          <span class="font-mono text-xs text-on-surface-variant/60 ml-2">— 2026-03-01</span>
+          <div class="font-mono text-[10px] uppercase tracking-[0.2em] text-secondary mt-1">Customizable Bot Settings</div>
         </div>
 
-        <div class="change-card">
-          <div class="change-category cat-features"><span class="cat-icon">✨</span> New Features</div>
-          <ul class="change-list">
-            <li><code>/settings</code> command with 5 subcommands (view, audio, moderation, display, reset)</li>
-            <li>9 per-server customizable settings</li>
-            <li>DJ role system — restrict music control to specific roles</li>
-            <li>Channel restrictions — limit bot to specific text/voice channels</li>
-            <li>Custom embed colors per server</li>
-            <li>Max song duration limit</li>
-            <li>Configurable vote skip threshold</li>
-            <li>Per-guild default volume, queue size, inactivity timeout</li>
+        <div class="bg-surface-container-low rounded-2xl p-5 md:p-6 border border-outline-variant/10 mb-3 hover:border-primary-container/20 transition-all">
+          <div class="font-mono text-[11px] font-bold uppercase tracking-wider cat-features mb-3 flex items-center gap-2">
+            <span>✨</span> New Features
+          </div>
+          <ul class="space-y-1.5 text-on-surface-variant text-sm list-none">
+            <li class="relative pl-4 change-list"><span class="font-mono text-xs bg-surface-container-highest px-1.5 py-0.5 rounded border border-outline-variant/10 text-primary">/settings</span> command with 5 subcommands (view, audio, moderation, display, reset)</li>
+            <li class="relative pl-4 change-list">9 per-server customizable settings</li>
+            <li class="relative pl-4 change-list">DJ role system — restrict music control to specific roles</li>
+            <li class="relative pl-4 change-list">Channel restrictions — limit bot to specific text/voice channels</li>
+            <li class="relative pl-4 change-list">Custom embed colors per server</li>
+            <li class="relative pl-4 change-list">Max song duration limit</li>
+            <li class="relative pl-4 change-list">Configurable vote skip threshold</li>
+            <li class="relative pl-4 change-list">Per-guild default volume, queue size, inactivity timeout</li>
           </ul>
         </div>
 
-        <div class="change-card">
-          <div class="change-category cat-fixes"><span class="cat-icon">🔧</span> Improvements</div>
-          <ul class="change-list">
-            <li>Settings persist in <code>guild-settings.json</code> alongside language preferences</li>
-            <li>ManageGuild permission required to change settings</li>
-            <li>Admins bypass DJ role restrictions</li>
-            <li>All settings have validation (range checks, hex color validation)</li>
+        <div class="bg-surface-container-low rounded-2xl p-5 md:p-6 border border-outline-variant/10 mb-3 hover:border-primary-container/20 transition-all">
+          <div class="font-mono text-[11px] font-bold uppercase tracking-wider cat-fixes mb-3 flex items-center gap-2">
+            <span>🔧</span> Improvements
+          </div>
+          <ul class="space-y-1.5 text-on-surface-variant text-sm list-none">
+            <li class="relative pl-4 change-list">Settings persist in <span class="font-mono text-xs bg-surface-container-highest px-1.5 py-0.5 rounded border border-outline-variant/10 text-primary">guild-settings.json</span> alongside language preferences</li>
+            <li class="relative pl-4 change-list">ManageGuild permission required to change settings</li>
+            <li class="relative pl-4 change-list">Admins bypass DJ role restrictions</li>
+            <li class="relative pl-4 change-list">All settings have validation (range checks, hex color validation)</li>
           </ul>
         </div>
 
-        <div class="change-card">
-          <div class="change-category cat-docs"><span class="cat-icon">📚</span> Documentation</div>
-          <ul class="change-list">
-            <li>~40 new i18n keys in all 3 languages (EN, DE, ES)</li>
+        <div class="bg-surface-container-low rounded-2xl p-5 md:p-6 border border-outline-variant/10 hover:border-primary-container/20 transition-all">
+          <div class="font-mono text-[11px] font-bold uppercase tracking-wider cat-docs mb-3 flex items-center gap-2">
+            <span>📚</span> Documentation
+          </div>
+          <ul class="space-y-1.5 text-on-surface-variant text-sm list-none">
+            <li class="relative pl-4 change-list">~40 new i18n keys in all 3 languages (EN, DE, ES)</li>
           </ul>
         </div>
       </div>
 
-      <div class="version-divider"></div>
+      <!-- Divider -->
+      <div class="ml-14 md:ml-16 h-px bg-gradient-to-r from-primary-container/20 via-secondary-container/20 to-transparent mb-12"></div>
 
       <!-- v2.1.0 -->
-      <div class="version-block major reveal">
-        <div class="version-header">
-          <div class="version-tag"><span class="v-num">v2.1.0</span> <span class="version-date">— 2026-02-27</span></div>
-          <div class="version-subtitle">Multi-Service Streaming</div>
+      <div class="relative pl-14 md:pl-16 mb-12 reveal-on-scroll">
+        <div class="timeline-dot major"></div>
+        <div class="mb-4">
+          <span class="font-mono text-lg md:text-xl font-bold text-primary-container">v2.1.0</span>
+          <span class="font-mono text-xs text-on-surface-variant/60 ml-2">— 2026-02-27</span>
+          <div class="font-mono text-[10px] uppercase tracking-[0.2em] text-secondary mt-1">Multi-Service Streaming</div>
         </div>
 
-        <div class="change-card">
-          <div class="change-category cat-features"><span class="cat-icon">✨</span> New Features</div>
-          <ul class="change-list">
-            <li>Unified URL resolver — automatic detection for 9 streaming services</li>
-            <li>SoundCloud support (direct streaming via <code>yt-dlp</code>)</li>
-            <li>Bandcamp support (direct streaming via <code>yt-dlp</code>)</li>
-            <li>Apple Music support (metadata bridge → YouTube)</li>
-            <li>Deezer support (metadata bridge → YouTube)</li>
-            <li>Tidal support (metadata bridge → YouTube)</li>
-            <li>Direct audio URL support (<code>.mp3</code>, <code>.wav</code>, <code>.ogg</code>, <code>.flac</code>, <code>.m4a</code>)</li>
-            <li>Internet radio stream support (Icecast/Shoutcast)</li>
-            <li>Source indicator in "Now Playing" embeds</li>
+        <div class="bg-surface-container-low rounded-2xl p-5 md:p-6 border border-outline-variant/10 mb-3 hover:border-primary-container/20 transition-all">
+          <div class="font-mono text-[11px] font-bold uppercase tracking-wider cat-features mb-3 flex items-center gap-2">
+            <span>✨</span> New Features
+          </div>
+          <ul class="space-y-1.5 text-on-surface-variant text-sm list-none">
+            <li class="relative pl-4 change-list">Unified URL resolver — automatic detection for 9 streaming services</li>
+            <li class="relative pl-4 change-list">SoundCloud support (direct streaming via <span class="font-mono text-xs bg-surface-container-highest px-1.5 py-0.5 rounded border border-outline-variant/10 text-primary">yt-dlp</span>)</li>
+            <li class="relative pl-4 change-list">Bandcamp support (direct streaming via <span class="font-mono text-xs bg-surface-container-highest px-1.5 py-0.5 rounded border border-outline-variant/10 text-primary">yt-dlp</span>)</li>
+            <li class="relative pl-4 change-list">Apple Music support (metadata bridge → YouTube)</li>
+            <li class="relative pl-4 change-list">Deezer support (metadata bridge → YouTube)</li>
+            <li class="relative pl-4 change-list">Tidal support (metadata bridge → YouTube)</li>
+            <li class="relative pl-4 change-list">Direct audio URL support (<span class="font-mono text-xs bg-surface-container-highest px-1.5 py-0.5 rounded border border-outline-variant/10 text-primary">.mp3</span>, <span class="font-mono text-xs bg-surface-container-highest px-1.5 py-0.5 rounded border border-outline-variant/10 text-primary">.wav</span>, <span class="font-mono text-xs bg-surface-container-highest px-1.5 py-0.5 rounded border border-outline-variant/10 text-primary">.ogg</span>, <span class="font-mono text-xs bg-surface-container-highest px-1.5 py-0.5 rounded border border-outline-variant/10 text-primary">.flac</span>, <span class="font-mono text-xs bg-surface-container-highest px-1.5 py-0.5 rounded border border-outline-variant/10 text-primary">.m4a</span>)</li>
+            <li class="relative pl-4 change-list">Internet radio stream support (Icecast/Shoutcast)</li>
+            <li class="relative pl-4 change-list">Source indicator in "Now Playing" embeds</li>
           </ul>
         </div>
 
-        <div class="change-card">
-          <div class="change-category cat-fixes"><span class="cat-icon">🔧</span> Improvements</div>
-          <ul class="change-list">
-            <li>Simplified <code>/play</code> command — single <code>resolveQuery()</code> replaces 12-line if/else chain</li>
-            <li>Service abstraction layer (<code>resolver.js</code> + <code>stream.js</code>)</li>
-            <li>All metadata bridge services use free public APIs (no extra API keys needed)</li>
+        <div class="bg-surface-container-low rounded-2xl p-5 md:p-6 border border-outline-variant/10 mb-3 hover:border-primary-container/20 transition-all">
+          <div class="font-mono text-[11px] font-bold uppercase tracking-wider cat-fixes mb-3 flex items-center gap-2">
+            <span>🔧</span> Improvements
+          </div>
+          <ul class="space-y-1.5 text-on-surface-variant text-sm list-none">
+            <li class="relative pl-4 change-list">Simplified <span class="font-mono text-xs bg-surface-container-highest px-1.5 py-0.5 rounded border border-outline-variant/10 text-primary">/play</span> command — single <span class="font-mono text-xs bg-surface-container-highest px-1.5 py-0.5 rounded border border-outline-variant/10 text-primary">resolveQuery()</span> replaces 12-line if/else chain</li>
+            <li class="relative pl-4 change-list">Service abstraction layer (<span class="font-mono text-xs bg-surface-container-highest px-1.5 py-0.5 rounded border border-outline-variant/10 text-primary">resolver.js</span> + <span class="font-mono text-xs bg-surface-container-highest px-1.5 py-0.5 rounded border border-outline-variant/10 text-primary">stream.js</span>)</li>
+            <li class="relative pl-4 change-list">All metadata bridge services use free public APIs (no extra API keys needed)</li>
           </ul>
         </div>
 
-        <div class="change-card">
-          <div class="change-category cat-docs"><span class="cat-icon">📚</span> Documentation</div>
-          <ul class="change-list">
-            <li>Updated README with supported services table</li>
-            <li>Added i18n keys for all new services in EN, DE, ES locales</li>
-            <li>Updated project structure in README</li>
+        <div class="bg-surface-container-low rounded-2xl p-5 md:p-6 border border-outline-variant/10 hover:border-primary-container/20 transition-all">
+          <div class="font-mono text-[11px] font-bold uppercase tracking-wider cat-docs mb-3 flex items-center gap-2">
+            <span>📚</span> Documentation
+          </div>
+          <ul class="space-y-1.5 text-on-surface-variant text-sm list-none">
+            <li class="relative pl-4 change-list">Updated README with supported services table</li>
+            <li class="relative pl-4 change-list">Added i18n keys for all new services in EN, DE, ES locales</li>
+            <li class="relative pl-4 change-list">Updated project structure in README</li>
           </ul>
         </div>
       </div>
 
-      <div class="version-divider"></div>
+      <!-- Divider -->
+      <div class="ml-14 md:ml-16 h-px bg-gradient-to-r from-primary-container/20 via-secondary-container/20 to-transparent mb-12"></div>
 
       <!-- v2.0.0 -->
-      <div class="version-block major reveal">
-        <div class="version-header">
-          <div class="version-tag"><span class="v-num">v2.0.0</span> <span class="version-date">— 2026-02-27</span></div>
-          <div class="version-subtitle">Complete Rewrite</div>
+      <div class="relative pl-14 md:pl-16 mb-12 reveal-on-scroll">
+        <div class="timeline-dot major"></div>
+        <div class="mb-4">
+          <span class="font-mono text-lg md:text-xl font-bold text-primary-container">v2.0.0</span>
+          <span class="font-mono text-xs text-on-surface-variant/60 ml-2">— 2026-02-27</span>
+          <div class="font-mono text-[10px] uppercase tracking-[0.2em] text-secondary mt-1">Complete Rewrite</div>
         </div>
 
-        <div class="change-card">
-          <div class="change-category cat-breaking"><span class="cat-icon">🔄</span> Breaking Changes</div>
-          <ul class="change-list">
-            <li>Complete rewrite from Python / <code>discord.py</code> to JavaScript / <code>discord.js v14</code></li>
-            <li>All text commands replaced with slash commands</li>
+        <div class="bg-surface-container-low rounded-2xl p-5 md:p-6 border border-outline-variant/10 mb-3 hover:border-error/20 transition-all">
+          <div class="font-mono text-[11px] font-bold uppercase tracking-wider cat-breaking mb-3 flex items-center gap-2">
+            <span>🔄</span> Breaking Changes
+          </div>
+          <ul class="space-y-1.5 text-on-surface-variant text-sm list-none">
+            <li class="relative pl-4 change-list">Complete rewrite from Python / <span class="font-mono text-xs bg-surface-container-highest px-1.5 py-0.5 rounded border border-outline-variant/10 text-primary">discord.py</span> to JavaScript / <span class="font-mono text-xs bg-surface-container-highest px-1.5 py-0.5 rounded border border-outline-variant/10 text-primary">discord.js v14</span></li>
+            <li class="relative pl-4 change-list">All text commands replaced with slash commands</li>
           </ul>
         </div>
 
-        <div class="change-card">
-          <div class="change-category cat-features"><span class="cat-icon">✨</span> New Features</div>
-          <ul class="change-list">
-            <li>19 slash commands (was 16 text commands)</li>
-            <li><code>yt-dlp</code> for YouTube audio (replaces <code>youtube_dl</code>)</li>
-            <li>Spotify track support via <code>spotify-web-api-node</code></li>
-            <li>Genius lyrics integration</li>
-            <li>Guild-scoped playlists with file persistence</li>
-            <li>Interactive "Now Playing" embeds with buttons (⏸️/▶️, ⏭️, 🔁)</li>
-            <li>Auto-disconnect after 3 minutes of inactivity</li>
-            <li>Volume control with inline audio processing</li>
-            <li>Democratic <code>/vote_skip</code> system</li>
-            <li>YouTube cookie authentication support (<code>cookies.txt</code>)</li>
-            <li><code>/language</code> command — per-server localization (EN 🇬🇧, DE 🇩🇪, ES 🇪🇸)</li>
-            <li><code>/queue</code> and <code>/nowplaying</code> commands</li>
-            <li><code>/join</code> and <code>/leave</code> commands</li>
-            <li>Command reset utility (<code>npm run reset</code>)</li>
-            <li><code>ffmpeg-static</code> bundled — no manual FFmpeg install needed</li>
+        <div class="bg-surface-container-low rounded-2xl p-5 md:p-6 border border-outline-variant/10 mb-3 hover:border-primary-container/20 transition-all">
+          <div class="font-mono text-[11px] font-bold uppercase tracking-wider cat-features mb-3 flex items-center gap-2">
+            <span>✨</span> New Features
+          </div>
+          <ul class="space-y-1.5 text-on-surface-variant text-sm list-none">
+            <li class="relative pl-4 change-list">19 slash commands (was 16 text commands)</li>
+            <li class="relative pl-4 change-list"><span class="font-mono text-xs bg-surface-container-highest px-1.5 py-0.5 rounded border border-outline-variant/10 text-primary">yt-dlp</span> for YouTube audio (replaces <span class="font-mono text-xs bg-surface-container-highest px-1.5 py-0.5 rounded border border-outline-variant/10 text-primary">youtube_dl</span>)</li>
+            <li class="relative pl-4 change-list">Spotify track support via <span class="font-mono text-xs bg-surface-container-highest px-1.5 py-0.5 rounded border border-outline-variant/10 text-primary">spotify-web-api-node</span></li>
+            <li class="relative pl-4 change-list">Genius lyrics integration</li>
+            <li class="relative pl-4 change-list">Guild-scoped playlists with file persistence</li>
+            <li class="relative pl-4 change-list">Interactive "Now Playing" embeds with buttons (⏸️/▶️, ⏭️, 🔁)</li>
+            <li class="relative pl-4 change-list">Auto-disconnect after 3 minutes of inactivity</li>
+            <li class="relative pl-4 change-list">Volume control with inline audio processing</li>
+            <li class="relative pl-4 change-list">Democratic <span class="font-mono text-xs bg-surface-container-highest px-1.5 py-0.5 rounded border border-outline-variant/10 text-primary">/vote_skip</span> system</li>
+            <li class="relative pl-4 change-list">YouTube cookie authentication support (<span class="font-mono text-xs bg-surface-container-highest px-1.5 py-0.5 rounded border border-outline-variant/10 text-primary">cookies.txt</span>)</li>
+            <li class="relative pl-4 change-list"><span class="font-mono text-xs bg-surface-container-highest px-1.5 py-0.5 rounded border border-outline-variant/10 text-primary">/language</span> command — per-server localization (EN 🇬🇧, DE 🇩🇪, ES 🇪🇸)</li>
+            <li class="relative pl-4 change-list"><span class="font-mono text-xs bg-surface-container-highest px-1.5 py-0.5 rounded border border-outline-variant/10 text-primary">/queue</span> and <span class="font-mono text-xs bg-surface-container-highest px-1.5 py-0.5 rounded border border-outline-variant/10 text-primary">/nowplaying</span> commands</li>
+            <li class="relative pl-4 change-list"><span class="font-mono text-xs bg-surface-container-highest px-1.5 py-0.5 rounded border border-outline-variant/10 text-primary">/join</span> and <span class="font-mono text-xs bg-surface-container-highest px-1.5 py-0.5 rounded border border-outline-variant/10 text-primary">/leave</span> commands</li>
+            <li class="relative pl-4 change-list">Command reset utility (<span class="font-mono text-xs bg-surface-container-highest px-1.5 py-0.5 rounded border border-outline-variant/10 text-primary">npm run reset</span>)</li>
+            <li class="relative pl-4 change-list"><span class="font-mono text-xs bg-surface-container-highest px-1.5 py-0.5 rounded border border-outline-variant/10 text-primary">ffmpeg-static</span> bundled — no manual FFmpeg install needed</li>
           </ul>
         </div>
 
-        <div class="change-card">
-          <div class="change-category cat-fixes"><span class="cat-icon">🐛</span> Bug Fixes</div>
-          <ul class="change-list">
-            <li>Fixed 39 bugs from the original Python codebase</li>
-            <li>Proper error handling for all commands (no more silent failures)</li>
-            <li>Skip votes clear on track change</li>
-            <li>Queue limit enforcement (max 100 tracks)</li>
-            <li>Playlist validation and size limits</li>
-            <li>Bot count excluded from vote skip threshold</li>
+        <div class="bg-surface-container-low rounded-2xl p-5 md:p-6 border border-outline-variant/10 mb-3 hover:border-primary-container/20 transition-all">
+          <div class="font-mono text-[11px] font-bold uppercase tracking-wider cat-fixes mb-3 flex items-center gap-2">
+            <span>🐛</span> Bug Fixes
+          </div>
+          <ul class="space-y-1.5 text-on-surface-variant text-sm list-none">
+            <li class="relative pl-4 change-list">Fixed 39 bugs from the original Python codebase</li>
+            <li class="relative pl-4 change-list">Proper error handling for all commands (no more silent failures)</li>
+            <li class="relative pl-4 change-list">Skip votes clear on track change</li>
+            <li class="relative pl-4 change-list">Queue limit enforcement (max 100 tracks)</li>
+            <li class="relative pl-4 change-list">Playlist validation and size limits</li>
+            <li class="relative pl-4 change-list">Bot count excluded from vote skip threshold</li>
           </ul>
         </div>
 
-        <div class="change-card">
-          <div class="change-category cat-docs"><span class="cat-icon">📚</span> Documentation</div>
-          <ul class="change-list">
-            <li>Complete README rewrite for JavaScript version</li>
-            <li>shields.io badges (version, license, platform, i18n, stars, downloads)</li>
-            <li><code>cookies.txt.example</code> template</li>
-            <li>Updated GitHub repo description and topics</li>
+        <div class="bg-surface-container-low rounded-2xl p-5 md:p-6 border border-outline-variant/10 hover:border-primary-container/20 transition-all">
+          <div class="font-mono text-[11px] font-bold uppercase tracking-wider cat-docs mb-3 flex items-center gap-2">
+            <span>📚</span> Documentation
+          </div>
+          <ul class="space-y-1.5 text-on-surface-variant text-sm list-none">
+            <li class="relative pl-4 change-list">Complete README rewrite for JavaScript version</li>
+            <li class="relative pl-4 change-list">shields.io badges (version, license, platform, i18n, stars, downloads)</li>
+            <li class="relative pl-4 change-list"><span class="font-mono text-xs bg-surface-container-highest px-1.5 py-0.5 rounded border border-outline-variant/10 text-primary">cookies.txt.example</span> template</li>
+            <li class="relative pl-4 change-list">Updated GitHub repo description and topics</li>
           </ul>
         </div>
       </div>
 
-      <div class="version-divider"></div>
+      <!-- Divider -->
+      <div class="ml-14 md:ml-16 h-px bg-gradient-to-r from-primary-container/20 via-secondary-container/20 to-transparent mb-12"></div>
 
       <!-- v1.4.1 -->
-      <div class="version-block reveal">
-        <div class="version-header">
-          <div class="version-tag"><span class="v-num">v1.4.1</span> <span class="version-date">— 2024</span></div>
-          <div class="version-subtitle">Last Python Release</div>
+      <div class="relative pl-14 md:pl-16 mb-12 reveal-on-scroll">
+        <div class="timeline-dot"></div>
+        <div class="mb-4">
+          <span class="font-mono text-lg md:text-xl font-bold text-primary-container">v1.4.1</span>
+          <span class="font-mono text-xs text-on-surface-variant/60 ml-2">— 2024</span>
+          <div class="font-mono text-[10px] uppercase tracking-[0.2em] text-secondary mt-1">Last Python Release</div>
         </div>
-        <div class="change-card">
-          <div class="change-category cat-fixes"><span class="cat-icon">🐛</span> Bug Fixes</div>
-          <ul class="change-list">
-            <li>Bug fixes and stability improvements</li>
-            <li>Final release before JavaScript rewrite</li>
+
+        <div class="bg-surface-container-low rounded-2xl p-5 md:p-6 border border-outline-variant/10 hover:border-primary-container/20 transition-all">
+          <div class="font-mono text-[11px] font-bold uppercase tracking-wider cat-fixes mb-3 flex items-center gap-2">
+            <span>🐛</span> Bug Fixes
+          </div>
+          <ul class="space-y-1.5 text-on-surface-variant text-sm list-none">
+            <li class="relative pl-4 change-list">Bug fixes and stability improvements</li>
+            <li class="relative pl-4 change-list">Final release before JavaScript rewrite</li>
           </ul>
         </div>
       </div>
 
       <!-- v1.4.0 -->
-      <div class="version-block reveal">
-        <div class="version-header">
-          <div class="version-tag"><span class="v-num">v1.4.0</span> <span class="version-date">— 2024</span></div>
+      <div class="relative pl-14 md:pl-16 mb-12 reveal-on-scroll">
+        <div class="timeline-dot"></div>
+        <div class="mb-4">
+          <span class="font-mono text-lg md:text-xl font-bold text-primary-container">v1.4.0</span>
+          <span class="font-mono text-xs text-on-surface-variant/60 ml-2">— 2024</span>
         </div>
-        <div class="change-card">
-          <div class="change-category cat-features"><span class="cat-icon">✨</span> New Features</div>
-          <ul class="change-list">
-            <li>Added Spotify support</li>
-            <li>Added Genius lyrics support</li>
-            <li>Custom playlists feature</li>
+
+        <div class="bg-surface-container-low rounded-2xl p-5 md:p-6 border border-outline-variant/10 hover:border-primary-container/20 transition-all">
+          <div class="font-mono text-[11px] font-bold uppercase tracking-wider cat-features mb-3 flex items-center gap-2">
+            <span>✨</span> New Features
+          </div>
+          <ul class="space-y-1.5 text-on-surface-variant text-sm list-none">
+            <li class="relative pl-4 change-list">Added Spotify support</li>
+            <li class="relative pl-4 change-list">Added Genius lyrics support</li>
+            <li class="relative pl-4 change-list">Custom playlists feature</li>
           </ul>
         </div>
       </div>
 
       <!-- v1.0.0 -->
-      <div class="version-block reveal">
-        <div class="version-header">
-          <div class="version-tag"><span class="v-num">v1.0.0</span> <span class="version-date">— 2024</span></div>
-          <div class="version-subtitle">Initial Release</div>
+      <div class="relative pl-14 md:pl-16 reveal-on-scroll">
+        <div class="timeline-dot"></div>
+        <div class="mb-4">
+          <span class="font-mono text-lg md:text-xl font-bold text-primary-container">v1.0.0</span>
+          <span class="font-mono text-xs text-on-surface-variant/60 ml-2">— 2024</span>
+          <div class="font-mono text-[10px] uppercase tracking-[0.2em] text-secondary mt-1">Initial Release</div>
         </div>
-        <div class="change-card">
-          <div class="change-category cat-features"><span class="cat-icon">🚀</span> Initial Features</div>
-          <ul class="change-list">
-            <li>Basic music playback with <code>discord.py</code></li>
-            <li>YouTube support via <code>youtube_dl</code></li>
-            <li>Queue management</li>
+
+        <div class="bg-surface-container-low rounded-2xl p-5 md:p-6 border border-outline-variant/10 hover:border-primary-container/20 transition-all">
+          <div class="font-mono text-[11px] font-bold uppercase tracking-wider cat-initial mb-3 flex items-center gap-2">
+            <span>🚀</span> Initial Features
+          </div>
+          <ul class="space-y-1.5 text-on-surface-variant text-sm list-none">
+            <li class="relative pl-4 change-list">Basic music playback with <span class="font-mono text-xs bg-surface-container-highest px-1.5 py-0.5 rounded border border-outline-variant/10 text-primary">discord.py</span></li>
+            <li class="relative pl-4 change-list">YouTube support via <span class="font-mono text-xs bg-surface-container-highest px-1.5 py-0.5 rounded border border-outline-variant/10 text-primary">youtube_dl</span></li>
+            <li class="relative pl-4 change-list">Queue management</li>
           </ul>
         </div>
       </div>
 
     </div>
-  </div>
-</section>
+  </section>
 
-<footer>
-  <div class="container">
-    <div class="footer-inner">
-      <div class="footer-links">
-        <a href="https://github.com/MCbabel/discord-music-bot" target="_blank"><i class="fab fa-github"></i> GitHub Repository</a>
-        <a href="./"><i class="fas fa-home"></i> Home</a>
-      </div>
-      <span class="footer-copy">MelodyBot — MIT License — Synthwave Edition</span>
+</main>
+
+<!-- Footer -->
+<footer class="w-full border-t border-outline-variant/15 bg-surface py-12 reveal-on-scroll">
+  <div class="flex flex-col md:flex-row justify-between items-center max-w-7xl mx-auto px-6 md:px-8 gap-8">
+    <div class="flex flex-col items-center md:items-start gap-4">
+      <span class="text-lg font-black text-on-surface">MelodyBot</span>
+      <p class="font-mono text-[12px] uppercase tracking-widest text-on-surface/40">GPL-2.0 License — Open Source</p>
+    </div>
+    <div class="flex flex-wrap justify-center gap-6 md:gap-8">
+      <a class="font-mono text-[12px] uppercase tracking-widest text-on-surface/40 hover:text-primary transition-colors" href="https://github.com/MCbabel/discord-music-bot" target="_blank">GitHub Repository</a>
+      <a class="font-mono text-[12px] uppercase tracking-widest text-on-surface/40 hover:text-primary transition-colors" href="./">Home</a>
     </div>
   </div>
 </footer>
 
 <script>
-// Scroll reveal
-const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target)}})},{threshold:.1,rootMargin:'0px 0px -30px 0px'});
-document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+document.addEventListener('DOMContentLoaded', () => {
+  // Scroll Progress
+  const progressBar = document.getElementById('scroll-progress');
+  window.addEventListener('scroll', () => {
+    const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+    const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    const scrolled = (winScroll / height) * 100;
+    progressBar.style.width = scrolled + '%';
+  });
 
-// Nav scroll
-window.addEventListener('scroll',()=>{document.getElementById('navbar').classList.toggle('scrolled',window.scrollY>50)});
+  // Reveal on Scroll
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('revealed');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -30px 0px' });
+  document.querySelectorAll('.reveal-on-scroll').forEach(el => observer.observe(el));
 
-// Mobile nav
-document.getElementById('navToggle').addEventListener('click',()=>{document.getElementById('navLinks').classList.toggle('open')});
-document.querySelectorAll('.nav-links a').forEach(a=>a.addEventListener('click',()=>{document.getElementById('navLinks').classList.remove('open')}));
+  // Mobile Nav
+  const navToggle = document.getElementById('navToggle');
+  const mobileMenu = document.getElementById('mobileMenu');
+  navToggle.addEventListener('click', () => mobileMenu.classList.toggle('open'));
+  mobileMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => mobileMenu.classList.remove('open')));
+});
 </script>
+
 </body>
 </html>
